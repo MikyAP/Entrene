@@ -426,6 +426,30 @@ function renderPost(){
   viewEl.querySelector('[data-done]').onclick=()=>{const dt=todayKey();data.days[dt]=data.days[dt]||{};if(data.days[dt].post)delete data.days[dt].post;else data.days[dt].post=true;queueSave();renderPost();};
   updateRestBar();
 }
+function buildReport(){
+  const days=Object.keys(data.days).sort();
+  if(!days.length)return 'Sin datos registrados todavía.';
+  let out='SEGUIMIENTO DE ENTRENAMIENTO\n'+'='.repeat(32)+'\n\n';
+  days.forEach(dt=>{
+    const d=data.days[dt];const sess=daySessions(dt);const hasPost=!!d.post,note=d.note;
+    if(!sess.length&&!hasPost&&!note)return;
+    const dd=new Date(dt+'T12:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    out+=dd.toUpperCase()+'\n'+'-'.repeat(dd.length)+'\n';
+    sess.forEach(sid=>{
+      if(sid==='POOL'){const p=d.POOL||{};const mm=getMeta(dt,'POOL');const bits=[];if(p.largos)bits.push(p.largos+' largos');if(mm.dur)bits.push(mm.dur+' min');if(mm.kcal)bits.push(mm.kcal+' kcal');if(mm.hr)bits.push(mm.hr+' ppm');
+        out+='Piscina: '+(bits.join(' · ')||'—')+'\n';
+      }else{const mm=getMeta(dt,sid);const mb=[];if(mm.dur)mb.push(mm.dur+' min');if(mm.kcal)mb.push(mm.kcal+' kcal');if(mm.hr)mb.push(mm.hr+' ppm');
+        out+=SESSIONS[sid].name+(mb.length?' ('+mb.join(' · ')+')':'')+'\n';
+        SESSIONS[sid].items.forEach(it=>{const r=(d[sid]||{})[it.id];if(filled(r)){const type=it.type||'weight';
+          const parts=r.sets.map(s=>type==='weight'?((s.a||'—')+'kg×'+(s.b||'—')):type==='time'?((s.a||'—')+'s'):((s.a||'—')+' reps'));
+          out+='  - '+it.name+': '+parts.join(', ')+'\n';}});
+      }});
+    if(hasPost)out+='Recuperación / estiramientos: hecho\n';
+    if(note)out+='Nota: '+note+'\n';
+    out+='\n';
+  });
+  return out.trim()+'\n';
+}
 function renderResumen(){
   const now=new Date();const ws=new Date(now);ws.setDate(now.getDate()-((now.getDay()+6)%7));ws.setHours(0,0,0,0);
   const mk=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
@@ -448,6 +472,11 @@ function renderResumen(){
       rows+=`<div class="sumrow"><span class="nm">${it.name}</span><span class="vl"><b>${last}</b>${bestTxt}</span></div>`;});
     h+=`<div class="sumsec"><h3><i style="background:${SCOL[sid]}"></i>${SESSIONS[sid].name}</h3>${metaLine(sid)}${rows}</div>`;});
   const pm=lastPool();if(pm)h+=`<div class="sumsec"><h3><i style="background:${SCOL.POOL}"></i>Piscina</h3>${metaLine('POOL',pm.largos)}</div>`;
+  h+=`<div class="backup"><h3>Exportar para compartir</h3>
+    <p>Texto legible con todos tus días (ejercicios, pesos, reps, tiempo, calorías y pulsaciones) para pasárselo a alguien.</p>
+    <textarea id="txtBox" readonly>${escapeHtml(buildReport())}</textarea>
+    <div class="bbtns"><button id="txtCopy">Copiar texto</button><button id="txtDl">Descargar .txt</button></div>
+    <div class="bmsg" id="txtmsg"></div></div>`;
   h+=`<div class="backup"><h3>Copia de seguridad</h3>
     <p>Guarda este texto en sitio seguro (notas, email…). Restáuralo aquí si cambias de móvil o se pierden los datos.</p>
     <textarea id="expBox" readonly>${escapeHtml(JSON.stringify(data))}</textarea>
@@ -455,12 +484,15 @@ function renderResumen(){
     <p>Pega aquí una copia para restaurar:</p><textarea id="impBox" placeholder='{"days":...}'></textarea>
     <div class="bbtns"><button id="impBtn">Restaurar copia</button></div><div class="bmsg" id="bmsg"></div></div>`;
   viewEl.innerHTML=h;
+  document.getElementById('txtCopy').onclick=async()=>{const t=document.getElementById('txtBox');try{await navigator.clipboard.writeText(t.value);tmsg('Copiado ✓');}catch(e){t.select();document.execCommand('copy');tmsg('Copiado ✓');}};
+  document.getElementById('txtDl').onclick=()=>{try{const b=new Blob([document.getElementById('txtBox').value],{type:'text/plain'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='mi-entreno.txt';a.click();URL.revokeObjectURL(u);tmsg('Descargando ✓');}catch(e){tmsg('No se pudo; usa Copiar',1);}};
   document.getElementById('copyBtn').onclick=async()=>{const t=document.getElementById('expBox');try{await navigator.clipboard.writeText(t.value);msg('Copiado ✓');}catch(e){t.select();document.execCommand('copy');msg('Copiado ✓');}};
   document.getElementById('dlBtn').onclick=()=>{try{const b=new Blob([document.getElementById('expBox').value],{type:'application/json'});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download='mi-entreno-backup.json';a.click();URL.revokeObjectURL(u);msg('Descargando ✓');}catch(e){msg('No se pudo; usa Copiar',1);}};
   document.getElementById('impBtn').onclick=()=>{const v=document.getElementById('impBox').value.trim();if(!v){msg('Pega una copia primero',1);return;}
     try{const o=JSON.parse(v);if(!o.days)throw 0;data=o;data.days=data.days||{};data.hidden=data.hidden||{};raw.set(K3,JSON.stringify(data));msg('Datos restaurados ✓');setTimeout(()=>renderResumen(),600);}catch(e){msg('Copia no válida',1);}};
 }
 function msg(t,err){const m=document.getElementById('bmsg');if(!m)return;m.textContent=t;m.className='bmsg'+(err?' err':'');}
+function tmsg(t,err){const m=document.getElementById('txtmsg');if(!m)return;m.textContent=t;m.className='bmsg'+(err?' err':'');}
 function escapeHtml(s){return s.replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 /* ---- temporizador de descanso ---- */
