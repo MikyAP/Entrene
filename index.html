@@ -7,7 +7,7 @@
 <style>
   :root{--ink:#14161B;--panel:#1E222B;--panel2:#262C37;--line:#333B47;--text:#EEF1F4;--muted:#98A1AE;
     --work:#FF4D5E;--sec:#F49AA1;--rest:#39414D;--good:#35C67A;--star:#F5C542;
-    --A:#FF4D5E;--B:#FF9F3C;--C:#8A6BFF;--D:#2FBFA0;--P:#2C9AD0;--L:#6B7483;--r:14px;}
+    --A:#FF4D5E;--B:#FF9F3C;--C:#8A6BFF;--D:#2FBFA0;--P:#2C9AD0;--G:#C98A5B;--L:#6B7483;--r:14px;}
   *{box-sizing:border-box} html,body{margin:0}
   body{background:var(--ink);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%;padding:0 0 96px;line-height:1.4}
   .wrap{max-width:560px;margin:0 auto;padding:0 14px}
@@ -25,7 +25,7 @@
   .subtabs{display:flex;gap:7px;margin:12px 0 2px}
   .tab{flex:1;min-height:44px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:11px;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .08s ease}
   .tab:active{transform:scale(.97)} .tab.on{color:#fff;border-color:transparent}
-  .tab.on.a{background:var(--A)} .tab.on.b{background:var(--B)} .tab.on.c{background:var(--C)} .tab.on.d{background:var(--D);color:#062019} .tab.on.p{background:var(--P)}
+  .tab.on.a{background:var(--A)} .tab.on.b{background:var(--B)} .tab.on.c{background:var(--C)} .tab.on.d{background:var(--D);color:#062019} .tab.on.p{background:var(--P)} .tab.on.g{background:var(--G);color:#1a0f05}
   .sessname{font-size:14px;font-weight:700;margin:12px 2px 0}
   .sstats{display:flex;gap:8px;margin:10px 0 2px}
   .sf{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 8px 10px;text-align:center}
@@ -257,7 +257,11 @@ const SESSIONS={
    {id:'barbellcurl',opt:1,name:'Curl con barra',scheme:'2 × 10-12',rest:90,q:'curl de bíceps con barra',p:['biceps'],s:['forearms'],cue:'Codos fijos, sin balanceo.'},
    {id:'pushdown',opt:1,name:'Tríceps en polea (pushdown)',scheme:'2 × 10-15',rest:90,q:'extensión de tríceps en polea',p:['triceps'],s:[],cue:'Codos pegados al cuerpo, extiende del todo.'}
  ]},
- POOL:{name:'Piscina',pool:true}
+ POOL:{name:'Piscina',pool:true},
+ GRIP:{name:'Agarre · en casa',grip:true,items:[
+   {id:'gripR',name:'Gripper · mano derecha',scheme:'3 × 10-15',rest:60,wlabel:'Resist. (kg)',q:'hand grip ejercicio antebrazo',p:['forearms'],s:[],cue:'Cierra del todo, aprieta 1-2 s y abre despacio. Apunta los kg aproximados según el cuadradito (≈7 kg por cuadradito desde 10). Sube un cuadradito cuando hagas 3 × 15 con facilidad.'},
+   {id:'gripL',name:'Gripper · mano izquierda',scheme:'3 × 10-15',rest:60,wlabel:'Resist. (kg)',q:'hand grip ejercicio antebrazo',p:['forearms'],s:[],cue:'Mismo ajuste que la derecha para poder comparar. Si una mano va más floja, no fuerces la otra para igualar.'}
+ ]}
 };
 const EXIMG={
   chestpress:['chest-press-machine-start.webp','chest-press-machine-peak.webp'],
@@ -298,12 +302,12 @@ function demoHTML(it){
   return `<div class="demo-pair"><a class="demo-shot" href="${IMGBASE}${imgs[0]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[0]}" alt="${alt} — inicio"><span class="demo-cap">Inicio</span></a><a class="demo-shot" href="${IMGBASE}${imgs[1]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[1]}" alt="${alt} — final"><span class="demo-cap">Final</span></a></div>`;
 }
 
-const SKEYS=['A','B','C','D','POOL'];
+const SKEYS=['A','B','C','D','POOL','GRIP'];
 const LEGACY={PUSH:{name:'Empuje (plan anterior)'},PULL:{name:'Tirón (plan anterior)'},LEGS:{name:'Pierna (plan anterior)'}};
-const ALLS=['A','B','C','D','PUSH','PULL','LEGS'];
-const SNAME={A:'A',B:'B',C:'C',D:'D',POOL:'🏊'};
-const TABCLS={A:'a',B:'b',C:'c',D:'d',POOL:'p'};
-const SCOL={A:'var(--A)',B:'var(--B)',C:'var(--C)',D:'var(--D)',POOL:'var(--P)',PUSH:'var(--L)',PULL:'var(--L)',LEGS:'var(--L)'};
+const ALLS=['A','B','C','D','PUSH','PULL','LEGS','GRIP'];
+const SNAME={A:'A',B:'B',C:'C',D:'D',POOL:'🏊',GRIP:'✊'};
+const TABCLS={A:'a',B:'b',C:'c',D:'d',POOL:'p',GRIP:'g'};
+const SCOL={A:'var(--A)',B:'var(--B)',C:'var(--C)',D:'var(--D)',POOL:'var(--P)',GRIP:'var(--G)',PUSH:'var(--L)',PULL:'var(--L)',LEGS:'var(--L)'};
 const EX={};
 Object.values(SESSIONS).forEach(S=>(S.items||[]).forEach(it=>{if(!EX[it.id]||EX[it.id].opt)EX[it.id]=it;}));
 [{id:'dips',name:'Fondos de banco'},{id:'pullover',name:'Pullover en polea'},{id:'backext',name:'Hiperextensiones'},{id:'plank',name:'Plancha',type:'time'},{id:'crunch',name:'Crunch',type:'reps'}].forEach(e=>{if(!EX[e.id])EX[e.id]=e;});
@@ -485,10 +489,11 @@ function renderEntreno(){
   let h=`<div id="status">${statusHTML()}</div>`+dateBar();
   h+=`<div class="subtabs">`+SKEYS.map(k=>`<button class="tab ${TABCLS[k]} ${k===current?'on '+TABCLS[k]:''}" data-sess="${k}">${SNAME[k]}</button>`).join('')+`</div>`;
   h+=`<div class="sessname" style="color:${SCOL[current]}">${S.name}</div>`;
-  h+=sessStatsHTML(current);
+  if(!S.grip)h+=sessStatsHTML(current);
   if(S.pool){h+=poolHTML()+noteHTML();viewEl.innerHTML=h;bindEntreno();return;}
   h+=`<div class="legend"><span><span class="dot" style="background:var(--work)"></span>Principal</span><span><span class="dot" style="background:var(--sec)"></span>Secundario</span><span>⭐ Progresar sí o sí</span><span><b style="color:var(--star)">C</b> = calentamiento</span></div>`;
-  h+=protoHTML();
+  if(S.grip)h+=`<div class="opt-head"><b>Extra de agarre en casa.</b> 2-3 veces por semana, no a diario. Mejor tras un día de pierna o en descanso, no antes de un Torso. Si notas molestia en la parte interna del codo o en la muñeca, para unos días y vuelve con menos resistencia. No cuenta como sesión del plan.</div>`;
+  else h+=protoHTML();
   const main=S.items.filter(it=>!it.opt&&!isHidden(current,it.id));
   const opt=S.items.filter(it=>it.opt&&!isHidden(current,it.id));
   const hidden=S.items.filter(it=>isHidden(current,it.id));
@@ -500,7 +505,7 @@ function renderEntreno(){
     h+=`<div class="opt-head"><b>Bloque opcional de brazos.</b> No se activa por llegar a ninguna sesión ni fecha. Valóralo solo si bíceps o tríceps llevan 2-3 sesiones sin progresar, la técnica es buena, sueño y comida van bien, recuperas bien y no hay molestias en codos u hombros. Pasarías de 6 a 8 series directas. La decisión es tuya.<div class="armsig">${arms.length?'📊 Señal: '+arms.map(a=>a.name+' ('+a.sid+')').join(', ')+' sin progresar en sus 3 últimas sesiones.':'📊 Ahora mismo no hay señal de estancamiento en brazos.'}</div></div>`;
     opt.forEach(it=>{h+=exHTML(it);});
   }
-  h+=finishHTML();
+  if(PLAN.includes(current))h+=finishHTML();
   if(hidden.length){h+=`<div class="hidden-sec"><h4>Ocultos (${hidden.length})</h4>`+hidden.map(it=>`<div class="hidden-row"><span>${it.name}</span><button data-show="${it.id}">Mostrar</button></div>`).join('')+`</div>`;}
   h+=noteHTML();
   h+=`<div class="save-note">Editas el día de arriba. <b>Se guarda solo.</b></div>`;
@@ -513,7 +518,7 @@ function exHTML(it){
   const badges=it.p.map(k=>`<span class="bdg p">${LBL[k]}</span>`).join('')+it.s.map(k=>`<span class="bdg s">${LBL[k]}</span>`).join('');
   const cls=type==='weight'?'':' '+type;
   let head;
-  if(type==='weight')head=`<div class="set-head"><span></span><span>Peso (kg)</span><span>Reps</span><span>RIR</span></div>`;
+  if(type==='weight')head=`<div class="set-head"><span></span><span>${it.wlabel||'Peso (kg)'}</span><span>Reps</span><span>RIR</span></div>`;
   else if(type==='reps')head=`<div class="set-head reps"><span></span><span>Reps</span><span>RIR</span></div>`;
   else head=`<div class="set-head time"><span></span><span>Segundos</span></div>`;
   let rows='',wn=0;
@@ -714,7 +719,7 @@ function renderResumen(){
     <div class="stat"><div class="big">${monthMin}</div><div class="lbl">min este mes</div></div>
     <div class="stat"><div class="big">${monthKcal}</div><div class="lbl">kcal este mes</div></div></div>`;
   h=planSummaryHTML()+h;
-  ['A','B','C','D'].forEach(sid=>{let rows='';
+  ['A','B','C','D','GRIP'].forEach(sid=>{let rows='';
     SESSIONS[sid].items.forEach(it=>{if(it.opt)return;const type=it.type||'weight';const {last,fromLegacy,best}=lastAndBest(sid,it.id,type);
       const lastTxt=last?fmtWork(last,type,false)+(fromLegacy?' (plan antiguo)':''):'—';const bestTxt=best>0?` · máx histórico ${best}kg`:'';
       rows+=`<div class="sumrow"><span class="nm">${it.star?'⭐ ':''}${it.name}</span><span class="vl"><b>${esc(lastTxt)}</b>${bestTxt}</span></div>`;});
