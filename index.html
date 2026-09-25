@@ -218,7 +218,7 @@ const LBL={traps:'Trapecio',delts:'Hombros',chest:'Pecho',biceps:'Bíceps',trice
 
 /* ===== PLAN (los 'id' conservan el historial aunque cambie el día) ===== */
 const LATRAISE={id:'latraise',name:'Elevaciones laterales',scheme:'3 × 12-20',rest:75,q:'elevaciones laterales con mancuernas',p:['delts'],s:[],cue:'Sube hasta la altura del hombro y baja lento. Peso ligero, sin impulso.'};
-const CABLECRUNCH={id:'cablecrunch',name:'Crunch en polea',scheme:'2 × 10-15',rest:75,q:'crunch en polea de rodillas',p:['abs'],s:['obliques'],cue:'De rodillas frente a la polea alta, cuerda junto a la cabeza. Enrolla el tronco llevando los codos a los muslos: que trabaje el abdomen, no los brazos.'};
+const CABLECRUNCH={id:'wcrunch',name:'Crunch con peso (tumbado)',scheme:'2 × 10-15',rest:75,q:'crunch con disco en el pecho',p:['abs'],s:['obliques'],cue:'Tumbado boca arriba, rodillas flexionadas, disco o mancuerna abrazado sobre el pecho. Enrolla el tronco despegando los omóplatos del suelo, aprieta 1 s arriba y baja despacio. No tires del cuello ni subas de golpe. Apunta el peso del disco o mancuerna.'};
 const SESSIONS={
  A:{name:'Torso 1 · pecho y espalda',items:[
    {id:'chestpress',star:1,name:'Press de pecho en máquina',scheme:'3-4 × 6-10',rest:150,q:'press de pecho en máquina',p:['chest'],s:['delts','triceps'],cue:'Baja controlando hasta notar el pecho y sube sin dar tirón.'},
@@ -241,7 +241,7 @@ const SESSIONS={
    {id:'shoulderpress',star:1,name:'Press de hombro en máquina',scheme:'3-4 × 6-10',rest:150,q:'press militar en máquina',p:['delts'],s:['triceps'],cue:'Sube sin encoger el cuello, hombros hacia abajo.'},
    {id:'neutralpulldown',star:1,name:'Jalón agarre neutro o estrecho',scheme:'3 × 8-12',rest:150,q:'jalón al pecho agarre neutro estrecho',p:['lats'],s:['biceps','upperback'],cue:'Palmas enfrentadas. Lleva el agarre al pecho bajando los codos pegados al cuerpo.'},
    {id:'row',name:'Remo con mancuerna a una mano',scheme:'3 × 8-12 / lado',rest:105,q:'remo con mancuerna a una mano en banco',p:['lats','upperback'],s:['biceps'],cue:'Rodilla y mano en el banco, espalda recta. Codo hacia atrás, sin girar el tronco.'},
-   {id:'pecdeck',name:'Aperturas en máquina',scheme:'3 × 10-15',rest:105,q:'aperturas en máquina pec deck',p:['chest'],s:['delts'],cue:'Junta las manos por delante apretando el pecho, sin encoger hombros. Busca un peso que te deje hacer las 3 series.'},
+   {id:'dbfly',name:'Aperturas con mancuernas en banco',scheme:'3 × 10-15',rest:105,q:'aperturas con mancuernas en banco plano',p:['chest'],s:['delts'],cue:'Tumbado en banco plano, mancuernas arriba con las palmas enfrentadas. Codos ligeramente flexionados y fijos: abre en arco hasta notar el estiramiento del pecho (sin bajar más allá de la línea del hombro) y sube juntando las manos. Peso moderado. Apunta el peso de cada mancuerna.'},
    {id:'hammercurl',name:'Curl martillo',scheme:'3 × 10-15',rest:105,q:'curl martillo con mancuernas',p:['biceps'],s:['forearms'],cue:'Agarre neutro (pulgares arriba), sin balanceo.'},
    {id:'ohtriceps',name:'Tríceps sobre la cabeza (mancuerna o polea)',scheme:'3 × 10-15',rest:105,q:'extensión de tríceps sobre la cabeza',p:['triceps'],s:[],cue:'Con mancuerna (sujeta con las dos manos) o con polea y cuerda de espaldas a la máquina. Codos arriba y quietos; extiende del todo y deja que el tríceps se estire al bajar.'},
    LATRAISE,
@@ -272,7 +272,7 @@ const EXIMG={
   barbellcurl:['barbell-curl-start.webp','barbell-curl-peak.webp'],
   pushdown:['tricep-pushdown-start.webp','tricep-pushdown-peak.webp'],
   latraise:['lateral-raise-start.webp','lateral-raise-peak.webp'],
-  cablecrunch:['cable-crunch-start.webp','cable-crunch-peak.webp'],
+  wcrunch:['crunches-start.webp','crunches-peak.webp'],
   squat:['dumbbell-front-squat-start.webp','dumbbell-front-squat-peak.webp'],
   rdl:['romanian-deadlift-start.webp','romanian-deadlift-peak.webp'],
   legext:['leg-extension-start.webp','leg-extension-peak.webp'],
@@ -283,6 +283,7 @@ const EXIMG={
   neutralpulldown:['v-bar-lat-pulldown-start.webp','v-bar-lat-pulldown-peak.webp'],
   row:['single-arm-db-row-start.webp','single-arm-db-row-peak.webp'],
   pecdeck:['pec-deck-start.webp','pec-deck-peak.webp'],
+  dbfly:['db-fly-start.webp','db-fly-peak.webp'],
   hammercurl:['hammer-curl-start.webp','hammer-curl-peak.webp'],
   ohtriceps:['overhead-tricep-extension-start.webp','overhead-tricep-extension-peak.webp'],
   hipthrust:['hip-thrust-start.webp','hip-thrust-peak.webp'],
@@ -293,8 +294,8 @@ const EXIMG={
 };
 const IMGBASE='https://exercise-dataset.com/images/flat/';
 const IMGALT={
-  chestpress:'Press de pecho en máquina',seatedrow:'Remo sentado en polea',incline:'Press inclinado con mancuernas',pulldown:'Jalón al pecho',barbellcurl:'Curl con barra',pushdown:'Tríceps en polea',latraise:'Elevaciones laterales',cablecrunch:'Crunch en polea',
-  squat:'Sentadilla con mancuernas',rdl:'Peso muerto rumano',legext:'Extensión de cuádriceps',legcurl:'Curl femoral',calf:'Gemelos',legraise:'Elevación de piernas',shoulderpress:'Press de hombro en máquina',neutralpulldown:'Jalón con agarre neutro',row:'Remo con mancuerna a una mano',pecdeck:'Aperturas en máquina',hammercurl:'Curl martillo',ohtriceps:'Extensión de tríceps por encima de la cabeza',hipthrust:'Hip thrust',legpress:'Prensa de piernas',lunge:'Zancadas',facepull:'Face pull en polea',sideplank:'Plancha lateral'
+  chestpress:'Press de pecho en máquina',seatedrow:'Remo sentado en polea',incline:'Press inclinado con mancuernas',pulldown:'Jalón al pecho',barbellcurl:'Curl con barra',pushdown:'Tríceps en polea',latraise:'Elevaciones laterales',wcrunch:'Crunch con peso (tumbado)',
+  squat:'Sentadilla con mancuernas',rdl:'Peso muerto rumano',legext:'Extensión de cuádriceps',legcurl:'Curl femoral',calf:'Gemelos',legraise:'Elevación de piernas',shoulderpress:'Press de hombro en máquina',neutralpulldown:'Jalón con agarre neutro',row:'Remo con mancuerna a una mano',pecdeck:'Aperturas en máquina',dbfly:'Aperturas con mancuernas en banco',hammercurl:'Curl martillo',ohtriceps:'Extensión de tríceps por encima de la cabeza',hipthrust:'Hip thrust',legpress:'Prensa de piernas',lunge:'Zancadas',facepull:'Face pull en polea',sideplank:'Plancha lateral'
 };
 function demoHTML(it){
   const imgs=EXIMG[it.id]; if(!imgs)return '';
@@ -311,7 +312,7 @@ const TABCLS={A:'a',B:'b',C:'c',D:'d',POOL:'p',GRIP:'g'};
 const SCOL={A:'var(--A)',B:'var(--B)',C:'var(--C)',D:'var(--D)',POOL:'var(--P)',GRIP:'var(--G)',PUSH:'var(--L)',PULL:'var(--L)',LEGS:'var(--L)'};
 const EX={};
 Object.values(SESSIONS).forEach(S=>(S.items||[]).forEach(it=>{if(!EX[it.id]||EX[it.id].opt)EX[it.id]=it;}));
-[{id:'dips',name:'Fondos de banco'},{id:'pullover',name:'Pullover en polea'},{id:'backext',name:'Hiperextensiones'},{id:'plank',name:'Plancha',type:'time'},{id:'crunch',name:'Crunch',type:'reps'}].forEach(e=>{if(!EX[e.id])EX[e.id]=e;});
+[{id:'cablecrunch',name:'Crunch en polea'},{id:'cablefly',name:'Aperturas en polea'},{id:'pecdeck',name:'Aperturas en máquina'},{id:'dips',name:'Fondos de banco'},{id:'pullover',name:'Pullover en polea'},{id:'backext',name:'Hiperextensiones'},{id:'plank',name:'Plancha',type:'time'},{id:'crunch',name:'Crunch',type:'reps'}].forEach(e=>{if(!EX[e.id])EX[e.id]=e;});
 function sessName(k){return (SESSIONS[k]&&SESSIONS[k].name)||(LEGACY[k]&&LEGACY[k].name)||k;}
 
 /* ===== ALMACENAMIENTO ===== */
@@ -341,6 +342,14 @@ function migratePlan(){ /* plan antiguo Empuje/Tirón/Pierna (A/B/C) -> etiqueta
   const nh={};Object.keys(data.hidden||{}).forEach(h=>{const [s,id]=h.split('|');nh[(map[s]||s)+'|'+id]=data.hidden[h];});data.hidden=nh;
   data.v=4;return true;
 }
+/* Ejercicios sustituidos: los registros hechos en sesiones del plan nuevo con el ejercicio antiguo
+   pasan a su sustituto (el plan antiguo PUSH/PULL/LEGS no se toca). Idempotente. */
+const RENAMED={pecdeck:'dbfly',cablefly:'dbfly',cablecrunch:'wcrunch'};
+function migrateIds(){let ch=false;
+  Object.keys(data.days).forEach(dt=>{const d=data.days[dt];['A','B','C','D'].forEach(sid=>{const s=d[sid];if(!s)return;
+    Object.keys(RENAMED).forEach(o=>{const n=RENAMED[o];if(s[o]&&!s[n]){s[n]=s[o];delete s[o];ch=true;}});});});
+  Object.keys(data.hidden||{}).forEach(h=>{const [sid,id]=h.split('|');if(['A','B','C','D'].includes(sid)&&RENAMED[id]){data.hidden[sid+'|'+RENAMED[id]]=data.hidden[h];delete data.hidden[h];ch=true;}});
+  return ch;}
 async function loadData(){
   let v=await raw.get(K3);
   if(v){try{data=JSON.parse(v);}catch(e){}}
@@ -349,7 +358,8 @@ async function loadData(){
     else{const v1=await raw.get(K1);if(v1){try{const o=JSON.parse(v1);data=migrateFlat({A:o.A,B:o.B,C:o.C},o.POOL||{});}catch(e){}}}}
   normalize();
   if(!data.v&&Object.keys(data.days).length===0)data.v=4;
-  if(migratePlan()||!v)await raw.set(K3,JSON.stringify(data));
+  const m1=migratePlan(),m2=migrateIds();
+  if(m1||m2||!v)await raw.set(K3,JSON.stringify(data));
 }
 let st=null;function queueSave(){clearTimeout(st);st=setTimeout(()=>raw.set(K3,JSON.stringify(data)),350);}
 function flush(){clearTimeout(st);raw.set(K3,JSON.stringify(data));}
@@ -754,7 +764,7 @@ function renderResumen(){
   document.getElementById('copyBtn').onclick=()=>copyFrom('expBox',msg);
   document.getElementById('dlBtn').onclick=()=>dlFrom('expBox','mi-entreno-backup.json','application/json',msg);
   document.getElementById('impBtn').onclick=()=>{const v=document.getElementById('impBox').value.trim();if(!v){msg('Pega una copia primero',1);return;}
-    try{const o=JSON.parse(v);if(!o.days)throw 0;data=o;normalize();migratePlan();raw.set(K3,JSON.stringify(data));msg('Datos restaurados ✓');setTimeout(()=>renderResumen(),600);}catch(e){msg('Copia no válida',1);}};
+    try{const o=JSON.parse(v);if(!o.days)throw 0;data=o;normalize();migratePlan();migrateIds();raw.set(K3,JSON.stringify(data));msg('Datos restaurados ✓');setTimeout(()=>renderResumen(),600);}catch(e){msg('Copia no válida',1);}};
 }
 function msg(t,err){const m=document.getElementById('bmsg');if(!m)return;m.textContent=t;m.className='bmsg'+(err?' err':'');}
 function tmsg(t,err){const m=document.getElementById('txtmsg');if(!m)return;m.textContent=t;m.className='bmsg'+(err?' err':'');}
