@@ -75,6 +75,15 @@
   .base{fill:#2A303A} .m{fill:var(--rest);transition:fill .15s ease}
   .ex-info{flex:1;min-width:0}
   .ex-name{font-size:16px;font-weight:700;margin:2px 0 4px;letter-spacing:-.01em}
+  .target{font-size:13px;color:var(--text);background:rgba(53,198,122,.08);border:1px solid rgba(53,198,122,.3);border-radius:9px;padding:7px 10px;margin-top:8px;line-height:1.45}
+  .target .why,.review-card .why{color:var(--muted);font-size:11.5px}
+  .advice div{font-size:12.5px;color:#FFC36B;margin:6px 2px 0;line-height:1.4}
+  .advice:empty{display:none}
+  .review-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0}
+  .review-card h3{margin:0 0 8px;font-size:15px}
+  .review-card ul{margin:4px 0 10px;padding-left:18px} .review-card li{font-size:13px;margin:5px 0;color:#D3D9E0;line-height:1.45}
+  .rc-ok{color:var(--good);font-weight:700;font-size:13px;margin-top:6px} .rc-fix{color:#FFC36B;font-weight:700;font-size:13px;margin-top:6px}
+  .rc-note{font-size:11.5px;color:var(--muted);margin:4px 0 0}
   .pr-badge{display:inline-block;font-size:12px;font-weight:700;color:var(--star);background:rgba(245,197,66,.12);border:1px solid rgba(245,197,66,.35);padding:1px 8px;border-radius:7px;margin:2px 0 0 6px;font-variant-numeric:tabular-nums}
   .star-badge{display:inline-block;font-size:11px;font-weight:800;color:#2a2000;background:var(--star);padding:1px 7px;border-radius:6px;margin:0 0 5px}
   .up-badge{display:inline-block;font-size:11px;font-weight:700;color:#0c1a12;background:var(--good);padding:1px 7px;border-radius:6px;margin-left:6px;vertical-align:1px}
@@ -410,6 +419,57 @@ function prOf(id,type,before){let best=null;
       else{if(!a)return;if(!best||a>best.a)best={a};}});});});
   if(!best)return '';
   return type==='weight'?`${best.a} kg × ${best.b}`:type==='time'?`${best.a} s`:`${best.a} reps`;}
+/* ===== AVISOS Y SUGERENCIAS (solo informan; nunca cambian nada) ===== */
+function rangeOf(it){const seg=(it.scheme.split('×')[1]||'');const n=(seg.match(/\d+/g)||[]).map(Number);if(!n.length)return null;return{lo:n[0],hi:n.length>1?n[1]:n[0]};}
+const INC={latraise:1,hammercurl:2,incline:2,row:2,dbfly:2,squat:2,lunge:2,rdl:2,ohtriceps:2,gripR:7,gripL:7};
+function incOf(id){return INC[id]||2.5;}
+function rirGoal(it){return curPhase===1?'RIR ~3':(it.star?'RIR 2-3':'RIR 1-2');}
+function numW(x){return parseFloat(String(x===undefined?'':x).replace(',','.'));}
+function repsOf(s,type){return parseInt(type==='weight'?s.b:s.a,10);}
+function rirOf(s){const v=parseInt(s.r,10);return isNaN(v)?null:v;}
+function maxW(rec){const w=workSets(rec).map(s=>numW(s.a)).filter(v=>!isNaN(v)&&v>0);return w.length?Math.max(...w):null;}
+function roundW(v){return Math.round(v*2)/2;}
+function analyze(it,type,rec){const r=rangeOf(it);const ws=workSets(rec).filter(s=>!isNaN(repsOf(s,type)));
+  const out={n:ws.length,low:false,high:false,fail:false,top:false};
+  if(!r||!ws.length||type==='time')return out;
+  const reps=ws.map(s=>repsOf(s,type)),rirs=ws.map(rirOf).filter(v=>v!==null);
+  out.top=ws.length>=defaultSets(it)&&reps.every(x=>x>=r.hi);
+  out.low=ws.length>=2&&(reps.every(x=>x>=r.hi+3)||(rirs.length===ws.length&&rirs.every(v=>v>=4)&&reps.every(x=>x>=r.lo)));
+  out.high=reps.some(x=>x<r.lo);
+  const min=rirs.length?Math.min(...rirs):null;const zeros=rirs.filter(v=>v===0).length;
+  out.fail=curPhase===1?(min!==null&&min<=1):(it.star?(min!==null&&min<=1):zeros>=2);
+  return out;}
+function adviceList(it,type,rec,prev){const a=analyze(it,type,rec);const r=rangeOf(it);const L=[];if(!a.n)return L;
+  if(a.low)L.push(type==='weight'?'↑ El peso se queda corto: la próxima vez sube claramente.':'↑ Te sobra: añade dificultad (más lento o con algo de peso).');
+  if(a.high)L.push(type==='weight'?`↓ Alguna serie no llegó a ${r.lo} repeticiones: baja un poco el peso.`:`↓ Alguna serie no llegó a ${r.lo}: hazlo más controlado.`);
+  if(a.fail&&!a.low)L.push(curPhase===1?'⚠ En calibración busca RIR ~3: para antes de llegar al fallo.':(it.star?'⚠ En los principales busca RIR 2-3, no el fallo.':'⚠ RIR 0 en varias series: guarda 1-2 repeticiones.'));
+  if(type==='weight'&&prev&&!a.low){const pw=maxW(prev.rec),tw=maxW(rec);if(pw&&tw&&tw-pw>=2&&tw>pw*1.3)L.push(`⚠ Subida grande respecto a la última vez (${pw} → ${tw} kg): mejor subidas pequeñas.`);}
+  return L;}
+function adviceInner(it,type,rec){return adviceList(it,type,rec,prevRecord(current,it.id,activeDate)).map(x=>`<div>${x}</div>`).join('');}
+function nextWeight(it,type,rec){const a=analyze(it,type,rec);const w=maxW(rec);if(!w)return null;const inc=incOf(it.id);
+  if(a.low)return{w:roundW(w+(inc>=5?1:2)*inc),why:'te sobró la última vez'};
+  if(a.high)return{w:roundW(Math.max(inc,w-inc)),why:'no llegaste al mínimo'};
+  if(a.top)return{w:roundW(w+inc),why:'hiciste todas en el tope'};
+  if(a.fail)return{w,why:'mismo peso, para 1-2 repeticiones antes del fallo'};
+  return{w,why:'mismo peso, intenta sumar repeticiones'};}
+function targetHTML(it,type,prev){const r=rangeOf(it);if(!r)return'';
+  const rng=`${r.lo}-${r.hi} ${type==='time'?'s':'reps'}`;const goal=type==='time'?'':` · ${rirGoal(it)}`;
+  if(type!=='weight'){if(!prev)return `🎯 Hoy: ${rng}${goal}.`;const a=analyze(it,type,prev.rec);return `🎯 Hoy: ${rng}${goal}${(a.low||a.top)?' · <span class="why">te sobró: añade dificultad</span>':''}.`;}
+  if(!prev)return `🎯 Hoy: elige un peso con el que llegues a ${rng}${goal}.`;
+  if(mixedWeights(prev.rec))return `🎯 Hoy: elige un peso fijo con el que llegues a ${rng}${goal} <span class="why">(la última vez cambiaste de peso entre series)</span>`;
+  const nw=nextWeight(it,type,prev.rec);if(!nw)return `🎯 Hoy: ${rng}${goal}.`;
+  return `🎯 Hoy: ~${nw.w} kg · ${rng}${goal} <span class="why">(${nw.why}${prev.legacy?', según el plan antiguo':''})</span>`;}
+function reviewCardHTML(dt,sid){const S=SESSIONS[sid];const good=[],fix=[];
+  S.items.forEach(it=>{const type=it.type||'weight';const rec=((data.days[dt]||{})[sid]||{})[it.id];
+    if(!workFilled(rec)){if(!it.opt)fix.push(`<li><b>${it.name}</b>: sin registrar.</li>`);return;}
+    const prev=prevRecord(sid,it.id,dt);const adv=adviceList(it,type,rec,prev);const mixed=type==='weight'&&mixedWeights(rec);if(mixed)adv.push('⚠ Pesos distintos entre series.');
+    let nxt;
+    if(type==='weight'){if(mixed)nxt='próxima: elige un peso fijo';else{const nw=nextWeight(it,type,rec);nxt=nw?`próxima: ~${nw.w} kg`:'';}}
+    else if(type==='time')nxt='próxima: suma segundos si te sobró';
+    else{const a=analyze(it,type,rec);nxt=(a.low||a.top)?'próxima: añade dificultad':'próxima: suma repeticiones';}
+    if(adv.length)fix.push(`<li><b>${it.name}</b>: ${adv.map(x=>x.replace(/^\S+ /,'')).join(' ')} <span class="why">· ${nxt}</span></li>`);
+    else good.push(`<li><b>${it.name}</b> <span class="why">· ${nxt}</span></li>`);});
+  return `<div class="review-card"><h3>📋 Resumen de la sesión</h3>${good.length?`<div class="rc-ok">✓ Bien calibrado</div><ul>${good.join('')}</ul>`:''}${fix.length?`<div class="rc-fix">⚠ A ajustar</div><ul>${fix.join('')}</ul>`:''}<p class="rc-note">Sugerencias orientativas según tus registros: tú decides. Lo que manda es la tendencia de varias sesiones.</p></div>`;}
 function mixedWeights(rec){const ws=workSets(rec).map(s=>parseFloat(String(s.a||'').replace(',','.'))).filter(v=>!isNaN(v));return new Set(ws).size>1;}
 function isHidden(sid,id){return !!data.hidden[sid+'|'+id];}
 function lastMeta(sid){const ds=Object.keys(data.days).sort();let out=null;ds.forEach(dt=>{const mm=(data.days[dt].meta||{})[sid];if(mm&&(mm.dur||mm.kcal||mm.hr))out={dur:mm.dur,kcal:mm.kcal,hr:mm.hr,date:dt};});return out;}
@@ -525,7 +585,7 @@ function renderEntreno(){
     h+=`<div class="opt-head"><b>Bloque opcional de brazos.</b> No se activa por llegar a ninguna sesión ni fecha. Valóralo solo si bíceps o tríceps llevan 2-3 sesiones sin progresar, la técnica es buena, sueño y comida van bien, recuperas bien y no hay molestias en codos u hombros. Pasarías de 6 a 8 series directas. La decisión es tuya.<div class="armsig">${arms.length?'📊 Señal: '+arms.map(a=>a.name+' ('+a.sid+')').join(', ')+' sin progresar en sus 3 últimas sesiones.':'📊 Ahora mismo no hay señal de estancamiento en brazos.'}</div></div>`;
     opt.forEach(it=>{h+=exHTML(it);});
   }
-  if(PLAN.includes(current))h+=finishHTML();
+  if(PLAN.includes(current)){h+=finishHTML();if(sessionDone(activeDate,current))h+=reviewCardHTML(activeDate,current);}
   if(hidden.length){h+=`<div class="hidden-sec"><h4>Ocultos (${hidden.length})</h4>`+hidden.map(it=>`<div class="hidden-row"><span>${it.name}</span><button data-show="${it.id}">Mostrar</button></div>`).join('')+`</div>`;}
   h+=noteHTML();
   h+=`<div class="save-note">Editas el día de arriba. <b>Se guarda solo.</b></div>`;
@@ -575,8 +635,10 @@ function exHTML(it){
     ${demoHTML(it)}
     <div class="ex-mus">${FIGS}<div class="badges">${badges}</div></div>
     <div class="last">${lastLine}</div>
+    <div class="target">${targetHTML(it,type,prev)}</div>
     <div class="wwarn cue warn${mixed?'':' hide'}">⚠ Has utilizado pesos diferentes entre series. Comprueba que no sea un ajuste accidental.</div>
     <div class="sets">${head}${rows}</div>
+    <div class="advice">${adviceList(it,type,rec,prev).map(x=>`<div>${x}</div>`).join('')}</div>
     <div class="setctl"><button data-act="del">− Serie</button><button data-act="add">＋ Serie</button><button data-act="hide">Ocultar</button></div>
     ${recRow}
     <div class="cue${it.warn?' warn':''}">${it.cue}</div></div>`;
@@ -591,6 +653,7 @@ function readCard(card){const id=card.dataset.id;const rec=ensureRec(activeDate,
   card.querySelectorAll('.set').forEach(row=>{const o={};row.querySelectorAll('input').forEach(inp=>{if(inp.value!=='')o[inp.dataset.f]=inp.value;});if(row.dataset.w==='1')o.w=1;sets.push(o);});
   rec.sets=sets;queueSave();
   const ww=card.querySelector('.wwarn');if(ww)ww.classList.toggle('hide',!(card.dataset.type==='weight'&&mixedWeights(rec)));
+  const itd=((SESSIONS[current]||{}).items||[]).find(x=>x.id===id);const adv=card.querySelector('.advice');if(itd&&adv)adv.innerHTML=adviceInner(itd,card.dataset.type,rec);
   updStatus();
   const fb=document.querySelector('.finish');if(fb&&fb.disabled&&sessionHasWork(activeDate,current)){const tmp=document.createElement('div');tmp.innerHTML=finishHTML();const sub=fb.nextElementSibling;if(sub&&sub.classList.contains('finish-sub'))sub.remove();fb.replaceWith(...tmp.childNodes);
     document.querySelectorAll('[data-finish]').forEach(b=>b.onclick=()=>{flush();setDone(activeDate,current,b.dataset.finish==='1');renderEntreno();});}}
