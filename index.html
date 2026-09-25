@@ -75,6 +75,7 @@
   .base{fill:#2A303A} .m{fill:var(--rest);transition:fill .15s ease}
   .ex-info{flex:1;min-width:0}
   .ex-name{font-size:16px;font-weight:700;margin:2px 0 4px;letter-spacing:-.01em}
+  .pr-badge{display:inline-block;font-size:12px;font-weight:700;color:var(--star);background:rgba(245,197,66,.12);border:1px solid rgba(245,197,66,.35);padding:1px 8px;border-radius:7px;margin:2px 0 0 6px;font-variant-numeric:tabular-nums}
   .star-badge{display:inline-block;font-size:11px;font-weight:800;color:#2a2000;background:var(--star);padding:1px 7px;border-radius:6px;margin:0 0 5px}
   .up-badge{display:inline-block;font-size:11px;font-weight:700;color:#0c1a12;background:var(--good);padding:1px 7px;border-radius:6px;margin-left:6px;vertical-align:1px}
   .scheme{display:inline-block;font-variant-numeric:tabular-nums;font-weight:700;font-size:13px;color:var(--work);background:rgba(255,77,94,.12);padding:2px 8px;border-radius:7px}
@@ -229,7 +230,7 @@ const SESSIONS={
    LATRAISE, CABLECRUNCH
  ]},
  B:{name:'Pierna 1 · cuádriceps',items:[
-   {id:'squat',star:1,name:'Hack squat (sentadilla hack)',scheme:'3-4 × 6-10',rest:150,q:'sentadilla hack en máquina técnica',p:['quads','glutes'],s:['hamstrings'],cue:'Espalda pegada al respaldo, baja controlado hasta al menos paralelo y empuja con todo el pie.'},
+   {id:'squat',star:1,name:'Sentadilla con mancuernas',scheme:'3-4 × 6-10',rest:150,q:'sentadilla con mancuernas',p:['quads','glutes'],s:['hamstrings'],cue:'Una mancuerna en cada mano (a los lados o sobre los hombros: elige una forma y repítela siempre). Pies al ancho de hombros, pecho arriba, baja hasta al menos paralelo y sube empujando con todo el pie. Apunta el peso de cada mancuerna.'},
    {id:'rdl',star:1,name:'Peso muerto rumano (barra o mancuernas)',scheme:'3 × 6-10',rest:150,q:'peso muerto rumano',p:['hamstrings','glutes'],s:['lowerback'],warn:1,cue:'Con barra o mancuernas, lo que tengas libre: apunta siempre el peso total. Bisagra de cadera y espalda RECTA siempre. Baja pegando el peso a las piernas hasta notar el estiramiento.'},
    {id:'legext',name:'Extensión de cuádriceps',scheme:'2-3 × 10-15',rest:105,q:'extensión de cuádriceps máquina',p:['quads'],s:[],cue:'Sube extendiendo, aprieta arriba y baja controlado.'},
    {id:'legcurl',name:'Curl femoral',scheme:'2-3 × 10-15',rest:105,q:'curl femoral tumbado máquina',p:['hamstrings'],s:[],cue:'Lleva el talón al glúteo sin despegar la cadera y baja lento.'},
@@ -272,7 +273,7 @@ const EXIMG={
   pushdown:['tricep-pushdown-start.webp','tricep-pushdown-peak.webp'],
   latraise:['lateral-raise-start.webp','lateral-raise-peak.webp'],
   cablecrunch:['cable-crunch-start.webp','cable-crunch-peak.webp'],
-  squat:['hack-squat-start.webp','hack-squat-peak.webp'],
+  squat:['dumbbell-front-squat-start.webp','dumbbell-front-squat-peak.webp'],
   rdl:['romanian-deadlift-start.webp','romanian-deadlift-peak.webp'],
   legext:['leg-extension-start.webp','leg-extension-peak.webp'],
   legcurl:['leg-curl-start.webp','leg-curl-peak.webp'],
@@ -293,7 +294,7 @@ const EXIMG={
 const IMGBASE='https://exercise-dataset.com/images/flat/';
 const IMGALT={
   chestpress:'Press de pecho en máquina',seatedrow:'Remo sentado en polea',incline:'Press inclinado con mancuernas',pulldown:'Jalón al pecho',barbellcurl:'Curl con barra',pushdown:'Tríceps en polea',latraise:'Elevaciones laterales',cablecrunch:'Crunch en polea',
-  squat:'Hack squat',rdl:'Peso muerto rumano',legext:'Extensión de cuádriceps',legcurl:'Curl femoral',calf:'Gemelos',legraise:'Elevación de piernas',shoulderpress:'Press de hombro en máquina',neutralpulldown:'Jalón con agarre neutro',row:'Remo con mancuerna a una mano',pecdeck:'Aperturas en máquina',hammercurl:'Curl martillo',ohtriceps:'Extensión de tríceps por encima de la cabeza',hipthrust:'Hip thrust',legpress:'Prensa de piernas',lunge:'Zancadas',facepull:'Face pull en polea',sideplank:'Plancha lateral'
+  squat:'Sentadilla con mancuernas',rdl:'Peso muerto rumano',legext:'Extensión de cuádriceps',legcurl:'Curl femoral',calf:'Gemelos',legraise:'Elevación de piernas',shoulderpress:'Press de hombro en máquina',neutralpulldown:'Jalón con agarre neutro',row:'Remo con mancuerna a una mano',pecdeck:'Aperturas en máquina',hammercurl:'Curl martillo',ohtriceps:'Extensión de tríceps por encima de la cabeza',hipthrust:'Hip thrust',legpress:'Prensa de piernas',lunge:'Zancadas',facepull:'Face pull en polea',sideplank:'Plancha lateral'
 };
 function demoHTML(it){
   const imgs=EXIMG[it.id]; if(!imgs)return '';
@@ -390,6 +391,15 @@ function needUp(it,type,prev){if(type==='time'||!prev||prev.legacy)return false;
   const f=type==='weight'?'b':'a';const rows=(prev.rec.sets||[]).filter(s=>!s.w);const planned=Math.max(defaultSets(it),rows.length);
   const done=rows.filter(s=>s[f]!==undefined&&s[f]!==''&&(type!=='weight'||(s.a!==undefined&&s.a!=='')));
   if(done.length<planned)return false;return done.every(s=>(parseInt(s[f],10)||0)>=top);}
+/* Mejor marca histórica del ejercicio (todas las sesiones, plan antiguo incluido), sin contar el día que estás viendo ni calentamientos.
+   Peso: la serie de más peso y, con ese peso, la de más repeticiones. */
+function prOf(id,type,before){let best=null;
+  Object.keys(data.days).filter(d=>d<before).forEach(dt=>{ALLS.forEach(k=>{const r=((data.days[dt]||{})[k]||{})[id];
+    workSets(r).forEach(x=>{const a=parseFloat(String(x.a||'').replace(',','.'))||0,b=parseInt(x.b,10)||0;
+      if(type==='weight'){if(!a||!b)return;if(!best||a>best.a||(a===best.a&&b>best.b))best={a,b};}
+      else{if(!a)return;if(!best||a>best.a)best={a};}});});});
+  if(!best)return '';
+  return type==='weight'?`${best.a} kg × ${best.b}`:type==='time'?`${best.a} s`:`${best.a} reps`;}
 function mixedWeights(rec){const ws=workSets(rec).map(s=>parseFloat(String(s.a||'').replace(',','.'))).filter(v=>!isNaN(v));return new Set(ws).size>1;}
 function isHidden(sid,id){return !!data.hidden[sid+'|'+id];}
 function lastMeta(sid){const ds=Object.keys(data.days).sort();let out=null;ds.forEach(dt=>{const mm=(data.days[dt].meta||{})[sid];if(mm&&(mm.dur||mm.kcal||mm.hr))out={dur:mm.dur,kcal:mm.kcal,hr:mm.hr,date:dt};});return out;}
@@ -551,7 +561,7 @@ function exHTML(it){
   const rirTag=type==='time'?'':`<span class="rtag">🎯 ${curPhase===1?'RIR ~3 (calibración)':(it.star?'RIR 2-3':'RIR 1-2')}</span>`;
   const recRow=`<div class="rec">${rirTag}<button class="rest-tag rtag" data-rest="${restSec}">⏱ Descanso ${restLbl}</button><a class="rtag demo" href="https://www.youtube.com/results?search_query=${encodeURIComponent((it.q||it.name)+' técnica')}" target="_blank" rel="noopener">▶ Cómo se hace</a></div>`;
   return `<div class="ex${it.star?' star':''}${up?' up':''}${it.opt?' opt':''}" data-p="${it.p.join(' ')}" data-s="${it.s.join(' ')}" data-id="${it.id}" data-type="${type}">
-    <div class="ex-head">${it.star?'<span class="star-badge">⭐ PRINCIPAL</span>':''}<div class="ex-name">${it.name}${up?'<span class="up-badge">↑ sube peso</span>':''}</div><span class="scheme">${it.scheme}</span></div>
+    <div class="ex-head">${it.star?'<span class="star-badge">⭐ PRINCIPAL</span>':''}<div class="ex-name">${it.name}${up?'<span class="up-badge">↑ sube peso</span>':''}</div><span class="scheme">${it.scheme}</span>${(()=>{const pr=prOf(it.id,type,activeDate);return pr?`<span class="pr-badge" title="Mejor marca">🏆 ${pr}</span>`:'';})()}</div>
     ${demoHTML(it)}
     <div class="ex-mus">${FIGS}<div class="badges">${badges}</div></div>
     <div class="last">${lastLine}</div>
