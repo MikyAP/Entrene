@@ -7,7 +7,7 @@
 <style>
   :root{--ink:#14161B;--panel:#1E222B;--panel2:#262C37;--line:#333B47;--text:#EEF1F4;--muted:#98A1AE;
     --work:#FF4D5E;--sec:#F49AA1;--rest:#39414D;--good:#35C67A;--star:#F5C542;
-    --A:#FF4D5E;--B:#FF9F3C;--C:#8A6BFF;--D:#2FBFA0;--P:#2C9AD0;--G:#C98A5B;--L:#6B7483;--r:14px;}
+    --A:#FF4D5E;--B:#FF9F3C;--C:#8A6BFF;--D:#2FBFA0;--P:#2C9AD0;--G:#C98A5B;--R:#7AC74F;--W:#C2A57C;--L:#6B7483;--r:14px;}
   *{box-sizing:border-box} html,body{margin:0}
   body{background:var(--ink);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%;padding:0 0 96px;line-height:1.4}
   .wrap{max-width:560px;margin:0 auto;padding:0 14px}
@@ -25,7 +25,7 @@
   .subtabs{display:flex;gap:7px;margin:12px 0 2px}
   .tab{flex:1;min-height:44px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:11px;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .08s ease}
   .tab:active{transform:scale(.97)} .tab.on{color:#fff;border-color:transparent}
-  .tab.on.a{background:var(--A)} .tab.on.b{background:var(--B)} .tab.on.c{background:var(--C)} .tab.on.d{background:var(--D);color:#062019} .tab.on.p{background:var(--P)} .tab.on.g{background:var(--G);color:#1a0f05}
+  .tab.on.a{background:var(--A)} .tab.on.b{background:var(--B)} .tab.on.c{background:var(--C)} .tab.on.d{background:var(--D);color:#062019} .tab.on.p{background:var(--P)} .tab.on.g{background:var(--G);color:#1a0f05} .tab.on.r{background:var(--R);color:#0f1a08} .tab.on.w{background:var(--W);color:#1a1206}
   .sessname{font-size:14px;font-weight:700;margin:12px 2px 0}
   .sstats{display:flex;gap:8px;margin:10px 0 2px}
   .sf{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 8px 10px;text-align:center}
@@ -259,7 +259,7 @@ const SESSIONS={
  ]},
  D:{name:'Pierna 2 · glúteo e isquios',items:[
    {id:'hipthrust',star:1,name:'Hip thrust',scheme:'3-4 × 8-12',rest:150,q:'hip thrust con barra',p:['glutes'],s:['hamstrings'],cue:'Empuja con los talones, aprieta el glúteo arriba, sin arquear la lumbar.'},
-   {id:'legpress',star:1,name:'Prensa de piernas',scheme:'3 × 8-12',rest:150,q:'prensa de piernas técnica',p:['quads','glutes'],s:['hamstrings'],cue:'Empuja con los talones. No bloquees de golpe las rodillas al estirar.'},
+   {id:'legpress',star:1,name:'Prensa de piernas',base:75.7,wlabel:'Discos (kg)',scheme:'3 × 8-12',rest:150,q:'prensa de piernas técnica',p:['quads','glutes'],s:['hamstrings'],cue:'La máquina vacía ya pesa 75,7 kg (starting resistance): apunta SOLO los discos que cargues. Empuja con los talones. No bloquees de golpe las rodillas al estirar.'},
    {id:'lunge',name:'Zancadas',scheme:'2 × 8-12 / pierna',rest:105,q:'zancadas con mancuernas',p:['quads','glutes'],s:['hamstrings'],cue:'Paso largo, rodilla de atrás hacia el suelo, tronco recto.'},
    {id:'legcurl',name:'Curl femoral',scheme:'3 × 10-15',rest:105,q:'curl femoral tumbado máquina',p:['hamstrings'],s:[],cue:'Lleva el talón al glúteo sin despegar la cadera y baja lento.'},
    {id:'calf',name:'Gemelos',scheme:'3 × 12-20',rest:75,q:'elevación de gemelos de pie máquina',p:['calves'],s:[],cue:'Sube de puntillas al máximo, pausa arriba y baja notando el estiramiento.'},
@@ -268,6 +268,8 @@ const SESSIONS={
    {id:'pushdown',opt:1,name:'Tríceps en polea (pushdown)',scheme:'2 × 10-15',rest:90,q:'extensión de tríceps en polea',p:['triceps'],s:[],cue:'Codos pegados al cuerpo, extiende del todo.'}
  ]},
  POOL:{name:'Piscina',pool:true},
+ RUN:{name:'Correr',cardio:true},
+ WALK:{name:'Andar',cardio:true},
  GRIP:{name:'Agarre · en casa',grip:true,items:[
    {id:'gripR',name:'Gripper · mano derecha',scheme:'3 × 10-15',rest:60,wlabel:'Resist. (kg)',q:'hand grip ejercicio antebrazo',p:['forearms'],s:[],cue:'Cierra del todo, aprieta 1-2 s y abre despacio. Apunta los kg aproximados según el cuadradito (≈7 kg por cuadradito desde 10). Sube un cuadradito cuando hagas 3 × 15 con facilidad.'},
    {id:'gripL',name:'Gripper · mano izquierda',scheme:'3 × 10-15',rest:60,wlabel:'Resist. (kg)',q:'hand grip ejercicio antebrazo',p:['forearms'],s:[],cue:'Mismo ajuste que la derecha para poder comparar. Si una mano va más floja, no fuerces la otra para igualar.'}
@@ -313,15 +315,33 @@ function demoHTML(it){
   return `<div class="demo-pair"><a class="demo-shot" href="${IMGBASE}${imgs[0]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[0]}" alt="${alt} — inicio"><span class="demo-cap">Inicio</span></a><a class="demo-shot" href="${IMGBASE}${imgs[1]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[1]}" alt="${alt} — final"><span class="demo-cap">Final</span></a></div>`;
 }
 
-const SKEYS=['A','B','C','D','POOL','GRIP'];
+const SKEYS=['A','B','C','D','POOL','GRIP','RUN','WALK'];
 const LEGACY={PUSH:{name:'Empuje (plan anterior)'},PULL:{name:'Tirón (plan anterior)'},LEGS:{name:'Pierna (plan anterior)'}};
 const ALLS=['A','B','C','D','PUSH','PULL','LEGS','GRIP'];
-const SNAME={A:'A',B:'B',C:'C',D:'D',POOL:'🏊',GRIP:'✊'};
-const TABCLS={A:'a',B:'b',C:'c',D:'d',POOL:'p',GRIP:'g'};
-const SCOL={A:'var(--A)',B:'var(--B)',C:'var(--C)',D:'var(--D)',POOL:'var(--P)',GRIP:'var(--G)',PUSH:'var(--L)',PULL:'var(--L)',LEGS:'var(--L)'};
+const SNAME={A:'A',B:'B',C:'C',D:'D',POOL:'🏊',GRIP:'✊',RUN:'🏃',WALK:'🚶'};
+const TABCLS={A:'a',B:'b',C:'c',D:'d',POOL:'p',GRIP:'g',RUN:'r',WALK:'w'};
+const SCOL={A:'var(--A)',B:'var(--B)',C:'var(--C)',D:'var(--D)',POOL:'var(--P)',GRIP:'var(--G)',RUN:'var(--R)',WALK:'var(--W)',PUSH:'var(--L)',PULL:'var(--L)',LEGS:'var(--L)'};
 const EX={};
 Object.values(SESSIONS).forEach(S=>(S.items||[]).forEach(it=>{if(!EX[it.id]||EX[it.id].opt)EX[it.id]=it;}));
 [{id:'cablecrunch',name:'Crunch en polea'},{id:'cablefly',name:'Aperturas en polea'},{id:'pecdeck',name:'Aperturas en máquina'},{id:'dips',name:'Fondos de banco'},{id:'pullover',name:'Pullover en polea'},{id:'backext',name:'Hiperextensiones'},{id:'plank',name:'Plancha',type:'time'},{id:'crunch',name:'Crunch',type:'reps'}].forEach(e=>{if(!EX[e.id])EX[e.id]=e;});
+const CARDIO={
+ RUN:{icon:'🏃',name:'Correr',fields:[{k:'km',label:'Distancia (km)',fmt:v=>v+' km'},{k:'lastre',label:'Lastre (kg)',fmt:v=>'lastre '+v+' kg'}],tips:[
+   '<b>Ritmo suave:</b> que puedas hablar mientras corres.',
+   '<b>Si vuelves a correr:</b> alterna 3-4 min corriendo y 1-2 andando, aunque te veas capaz de más.',
+   '1-2 veces por semana, lejos de los días de pierna (ni el mismo día ni la víspera de B o D).',
+   'Mejor en lugar de un nado que además de todo.',
+   '<b>Con chaleco:</b> solo trote muy suave, poco peso, tramos cortos y mejor en tierra o césped. Si notas rodillas o tobillos, fuera lastre.']},
+ WALK:{icon:'🚶',name:'Andar',fields:[{k:'km',label:'Distancia (km)',fmt:v=>v+' km'},{k:'lastre',label:'Lastre (kg)',fmt:v=>'lastre '+v+' kg'}],tips:[
+   '<b>Con chaleco:</b> empieza con poco peso y súbelo poco a poco, como en las pesas.',
+   'Espalda recta y paso normal: si te hace encorvarte, sobra peso.',
+   'Con lastre carga las piernas: mejor no la víspera de B o D.']}};
+function cardioBits(dt,k){const c=(data.days[dt]||{})[k]||{};const mm=getMeta(dt,k);const b=[];
+  CARDIO[k].fields.forEach(f=>{if(c[f.k])b.push(f.fmt(c[f.k]));});
+  if(mm.dur)b.push(mm.dur+' min');if(mm.kcal)b.push(mm.kcal+' kcal');if(mm.hr)b.push(mm.hr+' ppm');return b;}
+function cardioHTML(k){const C=CARDIO[k];const c=(data.days[activeDate]||{})[k]||{};
+  return `<div class="pool-card"><h3>${C.icon} ${C.name}</h3><ul class="pool-list">${C.tips.map(t=>`<li>${t}</li>`).join('')}</ul>`+
+   C.fields.map(f=>`<div class="pool-log">${f.label}: <input data-cf="${f.k}" inputmode="decimal" value="${esc(c[f.k]||'')}" aria-label="${f.label}" placeholder="—"></div>`).join('')+
+   `<p class="rc-note" style="margin-top:12px">Duración, calorías y pulsaciones, en las casillas de arriba. No cuenta como sesión del plan.</p></div>`;}
 function sessName(k){return (SESSIONS[k]&&SESSIONS[k].name)||(LEGACY[k]&&LEGACY[k].name)||k;}
 
 /* ===== ALMACENAMIENTO ===== */
@@ -388,7 +408,8 @@ function metaHasData(dt,sid){const mm=(data.days[dt]&&data.days[dt].meta&&data.d
 function getMeta(dt,sid){return (data.days[dt]&&data.days[dt].meta&&data.days[dt].meta[sid])||{};}
 function setMeta(dt,sid,f,v){data.days[dt]=data.days[dt]||{};data.days[dt].meta=data.days[dt].meta||{};data.days[dt].meta[sid]=data.days[dt].meta[sid]||{};if(v)data.days[dt].meta[sid][f]=v;else delete data.days[dt].meta[sid][f];queueSave();}
 function daySessions(dt){const d=data.days[dt]||{};const out=ALLS.filter(k=>(d[k]&&Object.values(d[k]).some(filled))||metaHasData(dt,k));
-  if((d.POOL&&d.POOL.largos)||metaHasData(dt,'POOL'))out.push('POOL');return out;}
+  if((d.POOL&&d.POOL.largos)||metaHasData(dt,'POOL'))out.push('POOL');
+  ['RUN','WALK'].forEach(k=>{const c=d[k];if((c&&Object.values(c).some(v=>v!==''&&v!=null))||metaHasData(dt,k))out.push(k);});return out;}
 /* "Anterior" = último registro de ese ejercicio EN LA MISMA SESIÓN (A/B/C/D).
    Solo si nunca se ha hecho en esa sesión se muestra, como referencia, el plan antiguo (PUSH/PULL/LEGS). */
 function prevRecord(sid,id,before){const ds=Object.keys(data.days).filter(d=>d<before).sort().reverse();
@@ -570,6 +591,7 @@ function renderEntreno(){
   h+=`<div class="subtabs">`+SKEYS.map(k=>`<button class="tab ${TABCLS[k]} ${k===current?'on '+TABCLS[k]:''}" data-sess="${k}">${SNAME[k]}</button>`).join('')+`</div>`;
   h+=`<div class="sessname" style="color:${SCOL[current]}">${S.name}</div>`;
   if(!S.grip)h+=sessStatsHTML(current);
+  if(S.cardio){h+=cardioHTML(current)+noteHTML();viewEl.innerHTML=h;bindEntreno();return;}
   if(S.pool){h+=poolHTML()+noteHTML();viewEl.innerHTML=h;bindEntreno();return;}
   h+=`<div class="legend"><span><span class="dot" style="background:var(--work)"></span>Principal</span><span><span class="dot" style="background:var(--sec)"></span>Secundario</span><span>⭐ Progresar sí o sí</span><span><b style="color:var(--star)">C</b> = calentamiento</span></div>`;
   if(S.grip)h+=`<div class="opt-head"><b>Extra de agarre en casa.</b> 2-3 veces por semana, no a diario. Mejor tras un día de pierna o en descanso, no antes de un Torso. Si notas molestia en la parte interna del codo o en la muñeca, para unos días y vuelve con menos resistencia. No cuenta como sesión del plan.</div>`;
@@ -664,6 +686,8 @@ function bindEntreno(){
   const th=viewEl.querySelector('[data-today]');if(th)th.onclick=()=>{activeDate=todayKey();renderEntreno();};
   viewEl.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{current=t.dataset.sess;renderEntreno();updateRestBar();});
   viewEl.querySelectorAll('.sstats input').forEach(inp=>inp.addEventListener('input',()=>setMeta(activeDate,current,inp.dataset.meta,inp.value)));
+  viewEl.querySelectorAll('[data-cf]').forEach(inp=>inp.addEventListener('input',()=>{const d=data.days[activeDate]=data.days[activeDate]||{};const c=d[current]=d[current]||{};
+    if(inp.value)c[inp.dataset.cf]=inp.value;else delete c[inp.dataset.cf];if(!Object.keys(c).length)delete d[current];queueSave();}));
   const pi=document.getElementById('poolInput');
   if(pi)pi.addEventListener('input',e=>{data.days[activeDate]=data.days[activeDate]||{};data.days[activeDate].POOL={largos:e.target.value};queueSave();});
   const nb=document.getElementById('noteBox');
@@ -708,6 +732,7 @@ function dayPreview(dt){
   const dd=cap(new Date(dt+'T12:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}));
   let inner='';
   sess.forEach(sid=>{
+    if(CARDIO[sid]){inner+=`<div class="cp-sess" style="color:${SCOL[sid]}">${CARDIO[sid].icon} ${CARDIO[sid].name}</div><div class="cp-ex"><span>${esc(cardioBits(dt,sid).join(' · ')||'—')}</span><span></span></div>`;return;}
     if(sid==='POOL'){const p=d.POOL||{};const mm=getMeta(dt,'POOL');const bits=[];if(p.largos)bits.push(`${esc(p.largos)} largos`);if(mm.dur)bits.push(`${esc(mm.dur)} min`);if(mm.kcal)bits.push(`${esc(mm.kcal)} kcal`);if(mm.hr)bits.push(`${esc(mm.hr)} ppm`);
       inner+=`<div class="cp-sess" style="color:${SCOL.POOL}">🏊 Piscina</div><div class="cp-ex"><span>${bits.join(' · ')||'—'}</span><span></span></div>`;return;}
     const s=d[sid]||{};const mm=getMeta(dt,sid);const mb=[];if(mm.dur)mb.push(`${esc(mm.dur)} min`);if(mm.kcal)mb.push(`${esc(mm.kcal)} kcal`);if(mm.hr)mb.push(`${esc(mm.hr)} ppm`);
@@ -773,13 +798,14 @@ function buildReport(){
     const dd=new Date(dt+'T12:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
     out+=dd.toUpperCase()+'\n'+'-'.repeat(dd.length)+'\n';
     sess.forEach(sid=>{
+      if(CARDIO[sid]){out+=CARDIO[sid].name+': '+(cardioBits(dt,sid).join(' · ')||'—')+'\n';return;}
       if(sid==='POOL'){const p=d.POOL||{};const mm=getMeta(dt,'POOL');const bits=[];if(p.largos)bits.push(p.largos+' largos');if(mm.dur)bits.push(mm.dur+' min');if(mm.kcal)bits.push(mm.kcal+' kcal');if(mm.hr)bits.push(mm.hr+' ppm');
         out+='Piscina: '+(bits.join(' · ')||'—')+'\n';return;}
       const mm=getMeta(dt,sid);const mb=[];if(mm.dur)mb.push(mm.dur+' min');if(mm.kcal)mb.push(mm.kcal+' kcal');if(mm.hr)mb.push(mm.hr+' ppm');
       const sn=PLAN.includes(sid)?sessNumber(dt,sid):null;
       out+=sessName(sid)+(sn?' — sesión '+sn+' del plan':(PLAN.includes(sid)?' — sin finalizar':''))+(mb.length?' ('+mb.join(' · ')+')':'')+'\n';
       Object.keys(d[sid]||{}).forEach(id=>{const r=d[sid][id];if(!workFilled(r))return;const def=EX[id]||{name:id};
-        out+='  - '+def.name+(def.star?' [principal]':'')+': '+fmtWork(r,def.type||'weight',true)+'\n';});
+        out+='  - '+def.name+(def.star?' [principal]':'')+(def.base?' (solo discos; la máquina suma '+String(def.base).replace('.',',')+' kg)':'')+': '+fmtWork(r,def.type||'weight',true)+'\n';});
     });
     if(d.post)out+='Recuperación / estiramientos: hecho\n';
     if(d.note)out+='Nota: '+d.note+'\n';
@@ -807,6 +833,9 @@ function renderResumen(){
       const lastTxt=last?fmtWork(last,type,false)+(fromLegacy?' (plan antiguo)':''):'—';const bestTxt=best>0?` · máx histórico ${best}kg`:'';
       rows+=`<div class="sumrow"><span class="nm">${it.star?'⭐ ':''}${it.name}</span><span class="vl"><b>${esc(lastTxt)}</b>${bestTxt}</span></div>`;});
     h+=`<div class="sumsec"><h3><i style="background:${SCOL[sid]}"></i>${SESSIONS[sid].name}</h3>${metaLine(sid)}${rows}</div>`;});
+  ['RUN','WALK'].forEach(k=>{const ds=Object.keys(data.days).sort().filter(dt=>daySessions(dt).includes(k));if(!ds.length)return;const dt=ds[ds.length-1];
+    const dd=new Date(dt+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'});
+    h+=`<div class="sumsec"><h3><i style="background:${SCOL[k]}"></i>${CARDIO[k].icon} ${CARDIO[k].name}</h3><div class="metaline"><b>${esc(cardioBits(dt,k).join(' · '))}</b> <span style="opacity:.7">(última: ${dd} · ${ds.length} en total)</span></div></div>`;});
   const pm=lastPool();if(pm)h+=`<div class="sumsec"><h3><i style="background:${SCOL.POOL}"></i>Piscina</h3>${metaLine('POOL',pm.largos)}</div>`;
   h+=`<div class="backup"><h3>Exportar para compartir</h3>
     <p>Texto legible con todos tus días (solo series de trabajo con su RIR, tiempo, calorías y pulsaciones) para pasárselo a alguien.</p>
@@ -841,7 +870,7 @@ function startRest(sec){if(rInt)clearInterval(rInt);rLeft=sec;restShow(true);upd
 function stopRest(){if(rInt){clearInterval(rInt);rInt=null;}restShow(false);}
 function beep(){try{const Ctx=window.AudioContext||window.webkitAudioContext;const c=new Ctx();const o=c.createOscillator();const g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;o.start();g.gain.setValueAtTime(.15,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.4);o.stop(c.currentTime+.42);}catch(e){}}
 function finishRest(){if(rInt){clearInterval(rInt);rInt=null;}beep();try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}const n=document.getElementById('restNum');if(n)n.textContent='¡Ya!';setTimeout(()=>restShow(false),1500);}
-function updateRestBar(){const r=document.getElementById('rest');if(!r)return;r.classList.toggle('hide',!((view==='entreno'&&current!=='POOL')||view==='post'));}
+function updateRestBar(){const r=document.getElementById('rest');if(!r)return;r.classList.toggle('hide',!((view==='entreno'&&current!=='POOL'&&!CARDIO[current])||view==='post'));}
 document.querySelectorAll('#rest [data-rest]').forEach(b=>b.onclick=()=>startRest(parseInt(b.dataset.rest,10)));
 document.getElementById('restStop').onclick=()=>stopRest();
 document.getElementById('restAdd').onclick=()=>{rLeft+=15;updRestNum();};
