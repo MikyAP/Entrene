@@ -162,6 +162,21 @@
   .backup h3{margin:0 0 6px;font-size:14px} .backup p{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
   .backup textarea{width:100%;min-height:70px;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:10px;font-size:12px;padding:8px;font-family:ui-monospace,monospace;resize:vertical}
   .bbtns{display:flex;gap:8px;margin:8px 0} .bbtns button{flex:1;min-height:42px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
+  .meas-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 6px}
+  .meas-grid label{display:block;font-size:11.5px;color:var(--muted);font-weight:600}
+  .meas-grid input{display:block;width:100%;margin-top:4px;min-height:42px;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:9px;font-size:16px;text-align:center;font-weight:700}
+  .meas-row{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:6px 0;border-top:1px solid var(--line)}
+  .meas-row .vl{color:var(--muted);text-align:right;font-variant-numeric:tabular-nums} .meas-row .vl b{color:var(--text)}
+  .meas-how{display:block;font-size:10.5px;font-weight:500;color:var(--muted);margin-top:4px;line-height:1.35;opacity:.85}
+  .meas-row .spark{flex:0 0 auto;display:block}
+  .meas-row .nm{flex:1;min-width:0}
+  .meas-table{overflow-x:auto;margin-top:6px}
+  .meas-table table{border-collapse:collapse;font-size:12px;min-width:100%;font-variant-numeric:tabular-nums}
+  .meas-table th,.meas-table td{padding:6px 7px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+  .meas-table th{color:var(--muted);font-weight:600} .meas-table td:first-child,.meas-table th:first-child{text-align:left}
+  .meas-table button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px}
+  .meas-hist{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.7}
+  .meas-hist button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:0 4px}
   .bbtns button:active{background:var(--line)} .bmsg{font-size:12px;color:var(--good);min-height:16px;margin-top:2px} .bmsg.err{color:var(--work)}
   .save-note{text-align:center;font-size:12px;color:var(--muted);margin-top:16px} .save-note b{color:var(--good)}
   footer{text-align:center;color:var(--muted);font-size:12px;margin-top:22px;line-height:1.6}
@@ -358,7 +373,7 @@ function migrateFlat(logs,pool){const nd={days:{},hidden:{}};
   ['A','B','C'].forEach(sid=>{const lg=logs[sid]||{};Object.entries(lg).forEach(([id,rec])=>{const dt=rec.ts?dkey(new Date(rec.ts)):todayKey();nd.days[dt]=nd.days[dt]||{};nd.days[dt][sid]=nd.days[dt][sid]||{};nd.days[dt][sid][id]={sets:rec.sets||[]};});});
   if(pool&&pool.largos){const dt=pool.ts?dkey(new Date(pool.ts)):todayKey();nd.days[dt]=nd.days[dt]||{};nd.days[dt].POOL={largos:pool.largos};}
   return nd;}
-function normalize(){data.days=data.days||{};data.hidden=data.hidden||{};}
+function normalize(){data.days=data.days||{};data.hidden=data.hidden||{};data.measures=data.measures||{};}
 function migratePlan(){ /* plan antiguo Empuje/Tirón/Pierna (A/B/C) -> etiquetas de solo lectura */
   if(data.v>=4)return false;
   const map={A:'PUSH',B:'PULL',C:'LEGS'};
@@ -558,9 +573,9 @@ let curPhase=1;
 /* ===== ESTADO / NAVEGACIÓN ===== */
 let view='entreno',current='A',calMonth=new Date(),activeDate=todayKey(),selDay=null,postSel='T';
 const navEl=document.getElementById('nav'),viewEl=document.getElementById('view');
-function renderNav(){navEl.innerHTML='';[['entreno','Entreno'],['calendario','Calendario'],['resumen','Resumen'],['post','Post']].forEach(([k,l])=>{
+function renderNav(){navEl.innerHTML='';[['entreno','Entreno'],['calendario','Calendario'],['resumen','Resumen'],['medidas','Medidas'],['post','Post']].forEach(([k,l])=>{
   const b=document.createElement('button');b.textContent=l;if(view===k)b.className='on';b.onclick=()=>{view=k;render();};navEl.appendChild(b);});}
-function render(){renderNav();if(view==='entreno')renderEntreno();else if(view==='calendario')renderCalendar();else if(view==='resumen')renderResumen();else renderPost();updateRestBar();}
+function render(){renderNav();if(view==='entreno')renderEntreno();else if(view==='calendario')renderCalendar();else if(view==='resumen')renderResumen();else if(view==='medidas')renderMedidas();else renderPost();updateRestBar();}
 
 /* ===== ENTRENO ===== */
 function dateBar(){const isToday=activeDate===todayKey();
@@ -789,6 +804,46 @@ function planSummaryHTML(){const st=planStatus();const n=st.today.length?st.done
     <div class="metaline">Toca: <b>${st.next} · ${shortName(st.next)}</b> · Última vez que hiciste cada sesión:</div>
     ${rows}
     <div class="armnote">💪 ${armTxt}</div>${ph===3?reviewHTML():''}</div>`;}
+/* ===== MEDIDAS CORPORALES (cm) ===== */
+const MEAS=[
+ {k:'brazo',l:'Brazo (contraído)',h:'Brazo doblado y el bíceps apretado. Parte más ancha del bíceps.'},
+ {k:'antebrazo',l:'Antebrazo',h:'Brazo estirado y mano relajada. Parte más ancha, justo bajo el codo.'},
+ {k:'pecho',l:'Pecho',h:'A la altura de los pezones, cinta horizontal, tras soltar el aire con normalidad.'},
+ {k:'hombros',l:'Hombros',h:'Brazos relajados a los lados. Rodea la parte más ancha de los hombros.'},
+ {k:'cintura',l:'Cintura (ombligo)',h:'A la altura del ombligo, relajado y sin meter barriga, tras soltar el aire.'},
+ {k:'cadera',l:'Cadera',h:'De pie con los pies juntos. Parte más ancha de los glúteos.'},
+ {k:'muslo',l:'Muslo',h:'De pie y con la pierna relajada. Parte más ancha, justo bajo el glúteo.'},
+ {k:'gemelo',l:'Gemelo',h:'De pie con el peso repartido. Parte más ancha de la pantorrilla.'}];
+function fmtCm(v){return String(Math.round(v*10)/10).replace('.',',');}
+function signCm(v){const r=Math.round(v*10)/10;return (r>0?'+':'')+fmtCm(r);}
+function sparkSVG(vals){const w=84,h=26,p=3;if(vals.length<2)return '';const mn=Math.min(...vals),mx=Math.max(...vals),rg=(mx-mn)||1;
+  const pts=vals.map((v,i)=>[p+i*(w-2*p)/(vals.length-1),h-p-(v-mn)*(h-2*p)/rg]);
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><polyline fill="none" stroke="#7FB2FF" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" points="${pts.map(q=>q.map(n=>n.toFixed(1)).join(',')).join(' ')}"/>${pts.map((q,i)=>i===pts.length-1?`<circle cx="${q[0].toFixed(1)}" cy="${q[1].toFixed(1)}" r="2.6" fill="#7FB2FF"/>`:'').join('')}</svg>`;}
+function renderMedidas(){const m=data.measures||{};const ds=Object.keys(m).sort();const last=ds[ds.length-1];const t=todayKey();
+  const since=last?daysBetween(last,t):null;
+  let h=`<div class="backup" style="margin-top:16px"><h3>📏 Nueva medición (cm)</h3>
+    <p>Cada 3-4 semanas, por la mañana y antes de entrenar, con la cinta ajustada sin apretar, siempre en el mismo punto y del mismo lado. No hace falta rellenarlas todas.${last?` Última medición: ${since===0?'hoy':`hace ${since} días`}.`:''}${last&&since>0&&since<21?' Aún es pronto: los cambios se ven mejor a partir de las 3-4 semanas.':''}</p>
+    <div class="meas-grid">${MEAS.map(f=>`<label>${f.l}<input data-ms="${f.k}" inputmode="decimal" placeholder="—" value="${esc((m[t]||{})[f.k]||'')}"><span class="meas-how">${f.h}</span></label>`).join('')}</div>
+    <div class="bbtns"><button id="msSave">${m[t]?'Actualizar medidas de hoy':'Guardar medidas de hoy'}</button></div><div class="bmsg" id="msmsg"></div></div>`;
+  if(ds.length){
+    const rows=MEAS.map(f=>{const vals=ds.filter(d=>m[d][f.k]).map(d=>numW(m[d][f.k])).filter(v=>!isNaN(v));if(!vals.length)return'';
+      const lastV=vals[vals.length-1];const bits=[];if(vals.length>1)bits.push(`${signCm(lastV-vals[vals.length-2])} vs anterior`);if(vals.length>2)bits.push(`${signCm(lastV-vals[0])} desde el inicio`);
+      return `<div class="meas-row" style="align-items:center"><span class="nm">${f.l}<br><span style="font-size:11.5px;color:var(--muted)">${bits.join(' · ')||'primera medición'}</span></span>${sparkSVG(vals)}<span class="vl"><b>${fmtCm(lastV)} cm</b></span></div>`;}).join('');
+    h+=`<div class="sumsec"><h3>📈 Progresión</h3>${rows}<p class="rc-note" style="margin-top:8px">Brazo, antebrazo, pecho, hombros y muslo deberían ir subiendo poco a poco. Cintura y cadera son referencias: mira la tendencia de varios meses, no una medición suelta.</p></div>`;
+    const cols=MEAS.filter(f=>ds.some(d=>m[d][f.k]));
+    h+=`<div class="sumsec"><h3>🗂 Historial</h3><div class="meas-table"><table><thead><tr><th>Fecha</th>${cols.map(f=>`<th>${f.l.replace(' (contraído)','').replace(' (ombligo)','')}</th>`).join('')}<th></th></tr></thead><tbody>`+
+      ds.slice().reverse().map(d=>`<tr><td>${new Date(d+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'2-digit'})}</td>${cols.map(f=>`<td>${m[d][f.k]?fmtCm(numW(m[d][f.k])):'—'}</td>`).join('')}<td><button data-msdel="${d}" aria-label="Borrar medición">✕</button></td></tr>`).join('')+`</tbody></table></div></div>`;
+  }
+  viewEl.innerHTML=h;
+  document.getElementById('msSave').onclick=()=>{const vals={};viewEl.querySelectorAll('[data-ms]').forEach(i=>{const v=i.value.trim().replace(',','.');if(v!==''&&!isNaN(parseFloat(v)))vals[i.dataset.ms]=v;});
+    const mm=document.getElementById('msmsg');if(!Object.keys(vals).length){mm.textContent='Rellena al menos una medida';mm.className='bmsg err';return;}
+    data.measures=data.measures||{};data.measures[todayKey()]=vals;flush();renderMedidas();const m2=document.getElementById('msmsg');if(m2){m2.textContent='Medidas guardadas ✓';m2.className='bmsg';}};
+  viewEl.querySelectorAll('[data-msdel]').forEach(b=>b.onclick=()=>{if(!confirm('¿Borrar esta medición?'))return;delete data.measures[b.dataset.msdel];flush();renderMedidas();});
+  updateRestBar();}
+function measuresReport(){const m=data.measures||{};const ds=Object.keys(m).sort();if(!ds.length)return'';
+  let o='\nMEDIDAS (cm)\n'+'-'.repeat(12)+'\n';
+  ds.forEach(d=>{const parts=MEAS.filter(f=>m[d][f.k]).map(f=>f.l+' '+String(m[d][f.k]).replace('.',','));if(parts.length)o+=new Date(d+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})+': '+parts.join(' · ')+'\n';});
+  return o;}
 function buildReport(){
   const days=Object.keys(data.days).sort();
   let out='SEGUIMIENTO DE ENTRENAMIENTO\n'+'='.repeat(32)+'\n(solo series de trabajo; el calentamiento no se incluye)\n\n';
@@ -811,7 +866,8 @@ function buildReport(){
     if(d.note)out+='Nota: '+d.note+'\n';
     out+='\n';
   });
-  return any?out.trim()+'\n':'Sin datos registrados todavía.';
+  const mr=measuresReport();
+  return any||mr?(out.trim()+'\n'+mr):'Sin datos registrados todavía.';
 }
 function renderResumen(){
   const now=new Date();const ws=new Date(now);ws.setDate(now.getDate()-((now.getDay()+6)%7));ws.setHours(0,0,0,0);
