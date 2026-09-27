@@ -373,7 +373,7 @@ function migrateFlat(logs,pool){const nd={days:{},hidden:{}};
   ['A','B','C'].forEach(sid=>{const lg=logs[sid]||{};Object.entries(lg).forEach(([id,rec])=>{const dt=rec.ts?dkey(new Date(rec.ts)):todayKey();nd.days[dt]=nd.days[dt]||{};nd.days[dt][sid]=nd.days[dt][sid]||{};nd.days[dt][sid][id]={sets:rec.sets||[]};});});
   if(pool&&pool.largos){const dt=pool.ts?dkey(new Date(pool.ts)):todayKey();nd.days[dt]=nd.days[dt]||{};nd.days[dt].POOL={largos:pool.largos};}
   return nd;}
-function normalize(){data.days=data.days||{};data.hidden=data.hidden||{};data.measures=data.measures||{};}
+function normalize(){data.days=data.days||{};data.hidden=data.hidden||{};data.measures=data.measures||{};if(typeof migrateMeasures==='function')migrateMeasures();}
 function migratePlan(){ /* plan antiguo Empuje/Tirón/Pierna (A/B/C) -> etiquetas de solo lectura */
   if(data.v>=4)return false;
   const map={A:'PUSH',B:'PULL',C:'LEGS'};
@@ -806,14 +806,21 @@ function planSummaryHTML(){const st=planStatus();const n=st.today.length?st.done
     <div class="armnote">💪 ${armTxt}</div>${ph===3?reviewHTML():''}</div>`;}
 /* ===== MEDIDAS CORPORALES (cm) ===== */
 const MEAS=[
- {k:'brazo',l:'Brazo (contraído)',h:'Brazo doblado y el bíceps apretado. Parte más ancha del bíceps.'},
- {k:'antebrazo',l:'Antebrazo',h:'Brazo estirado y mano relajada. Parte más ancha, justo bajo el codo.'},
+ {k:'brazo_d',l:'Brazo dcho (contraído)',g:'brazo',h:'Brazo doblado y el bíceps apretado. Parte más ancha del bíceps.'},
+ {k:'brazo_i',l:'Brazo izdo (contraído)',g:'brazo',h:'Igual que el derecho.'},
+ {k:'antebrazo_d',l:'Antebrazo dcho',g:'antebrazo',h:'Brazo estirado y mano relajada. Parte más ancha, justo bajo el codo.'},
+ {k:'antebrazo_i',l:'Antebrazo izdo',g:'antebrazo',h:'Igual que el derecho.'},
  {k:'pecho',l:'Pecho',h:'A la altura de los pezones, cinta horizontal, tras soltar el aire con normalidad.'},
  {k:'hombros',l:'Hombros',h:'Brazos relajados a los lados. Rodea la parte más ancha de los hombros.'},
  {k:'cintura',l:'Cintura (ombligo)',h:'A la altura del ombligo, relajado y sin meter barriga, tras soltar el aire.'},
  {k:'cadera',l:'Cadera',h:'De pie con los pies juntos. Parte más ancha de los glúteos.'},
- {k:'muslo',l:'Muslo',h:'De pie y con la pierna relajada. Parte más ancha, justo bajo el glúteo.'},
- {k:'gemelo',l:'Gemelo',h:'De pie con el peso repartido. Parte más ancha de la pantorrilla.'}];
+ {k:'muslo_d',l:'Muslo dcho',g:'muslo',h:'De pie y con la pierna relajada. Parte más ancha, justo bajo el glúteo.'},
+ {k:'muslo_i',l:'Muslo izdo',g:'muslo',h:'Igual que el derecho.'},
+ {k:'gemelo_d',l:'Gemelo dcho',g:'gemelo',h:'De pie con el peso repartido. Parte más ancha de la pantorrilla.'},
+ {k:'gemelo_i',l:'Gemelo izdo',g:'gemelo',h:'Igual que el derecho.'}];
+const MEAS_PAIRS=[{g:'brazo',l:'Brazos'},{g:'antebrazo',l:'Antebrazos'},{g:'muslo',l:'Muslos'},{g:'gemelo',l:'Gemelos'}];
+/* medidas antiguas de un solo lado -> derecho */
+function migrateMeasures(){let ch=false;Object.values(data.measures||{}).forEach(m=>{['brazo','antebrazo','muslo','gemelo'].forEach(k=>{if(m[k]!==undefined){if(m[k+'_d']===undefined)m[k+'_d']=m[k];delete m[k];ch=true;}});});return ch;}
 function fmtCm(v){return String(Math.round(v*10)/10).replace('.',',');}
 function signCm(v){const r=Math.round(v*10)/10;return (r>0?'+':'')+fmtCm(r);}
 function sparkSVG(vals){const w=84,h=26,p=3;if(vals.length<2)return '';const mn=Math.min(...vals),mx=Math.max(...vals),rg=(mx-mn)||1;
@@ -822,16 +829,20 @@ function sparkSVG(vals){const w=84,h=26,p=3;if(vals.length<2)return '';const mn=
 function renderMedidas(){const m=data.measures||{};const ds=Object.keys(m).sort();const last=ds[ds.length-1];const t=todayKey();
   const since=last?daysBetween(last,t):null;
   let h=`<div class="backup" style="margin-top:16px"><h3>📏 Nueva medición (cm)</h3>
-    <p>Cada 3-4 semanas, por la mañana y antes de entrenar, con la cinta ajustada sin apretar, siempre en el mismo punto y del mismo lado. No hace falta rellenarlas todas.${last?` Última medición: ${since===0?'hoy':`hace ${since} días`}.`:''}${last&&since>0&&since<21?' Aún es pronto: los cambios se ven mejor a partir de las 3-4 semanas.':''}</p>
+    <p>Cada 3-4 semanas, por la mañana y antes de entrenar, con la cinta ajustada sin apretar, siempre en el mismo punto. Brazos, antebrazos, muslos y gemelos se miden por separado a cada lado. No hace falta rellenarlas todas.${last?` Última medición: ${since===0?'hoy':`hace ${since} días`}.`:''}${last&&since>0&&since<21?' Aún es pronto: los cambios se ven mejor a partir de las 3-4 semanas.':''}</p>
     <div class="meas-grid">${MEAS.map(f=>`<label>${f.l}<input data-ms="${f.k}" inputmode="decimal" placeholder="—" value="${esc((m[t]||{})[f.k]||'')}"><span class="meas-how">${f.h}</span></label>`).join('')}</div>
     <div class="bbtns"><button id="msSave">${m[t]?'Actualizar medidas de hoy':'Guardar medidas de hoy'}</button></div><div class="bmsg" id="msmsg"></div></div>`;
   if(ds.length){
     const rows=MEAS.map(f=>{const vals=ds.filter(d=>m[d][f.k]).map(d=>numW(m[d][f.k])).filter(v=>!isNaN(v));if(!vals.length)return'';
       const lastV=vals[vals.length-1];const bits=[];if(vals.length>1)bits.push(`${signCm(lastV-vals[vals.length-2])} vs anterior`);if(vals.length>2)bits.push(`${signCm(lastV-vals[0])} desde el inicio`);
       return `<div class="meas-row" style="align-items:center"><span class="nm">${f.l}<br><span style="font-size:11.5px;color:var(--muted)">${bits.join(' · ')||'primera medición'}</span></span>${sparkSVG(vals)}<span class="vl"><b>${fmtCm(lastV)} cm</b></span></div>`;}).join('');
-    h+=`<div class="sumsec"><h3>📈 Progresión</h3>${rows}<p class="rc-note" style="margin-top:8px">Brazo, antebrazo, pecho, hombros y muslo deberían ir subiendo poco a poco. Cintura y cadera son referencias: mira la tendencia de varios meses, no una medición suelta.</p></div>`;
+    const asym=MEAS_PAIRS.map(pr=>{const d=ds.filter(x=>m[x][pr.g+'_d']&&m[x][pr.g+'_i']);if(!d.length)return'';const x=m[d[d.length-1]];
+      const vd=numW(x[pr.g+'_d']),vi=numW(x[pr.g+'_i']);if(isNaN(vd)||isNaN(vi))return'';const df=Math.round((vd-vi)*10)/10;
+      const txt=df===0?'iguales':`${df>0?'derecho':'izquierdo'} +${fmtCm(Math.abs(df))} cm`;
+      return `<div class="meas-row"><span>${pr.l}</span><span class="vl"><b>${txt}</b>${Math.abs(df)>=1.5?' ⚠':''}</span></div>`;}).join('');
+    h+=`<div class="sumsec"><h3>📈 Progresión</h3>${rows}${asym?`<h3 style="margin-top:14px">↔ Diferencia derecha / izquierda</h3>${asym}<p class="rc-note" style="margin-top:6px">Es normal que el lado dominante sea algo mayor (hasta ~1 cm). Si la diferencia pasa de 1,5 cm o va creciendo, prioriza los ejercicios a una mano o una pierna y empieza siempre por el lado más débil.</p>`:''}<p class="rc-note" style="margin-top:8px">Brazo, antebrazo, pecho, hombros y muslo deberían ir subiendo poco a poco. Cintura y cadera son referencias: mira la tendencia de varios meses, no una medición suelta.</p></div>`;
     const cols=MEAS.filter(f=>ds.some(d=>m[d][f.k]));
-    h+=`<div class="sumsec"><h3>🗂 Historial</h3><div class="meas-table"><table><thead><tr><th>Fecha</th>${cols.map(f=>`<th>${f.l.replace(' (contraído)','').replace(' (ombligo)','')}</th>`).join('')}<th></th></tr></thead><tbody>`+
+    h+=`<div class="sumsec"><h3>🗂 Historial</h3><div class="meas-table"><table><thead><tr><th>Fecha</th>${cols.map(f=>`<th>${f.l.replace(' (contraído)','').replace(' dcho',' D').replace(' izdo',' I').replace(' (ombligo)','')}</th>`).join('')}<th></th></tr></thead><tbody>`+
       ds.slice().reverse().map(d=>`<tr><td>${new Date(d+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'2-digit'})}</td>${cols.map(f=>`<td>${m[d][f.k]?fmtCm(numW(m[d][f.k])):'—'}</td>`).join('')}<td><button data-msdel="${d}" aria-label="Borrar medición">✕</button></td></tr>`).join('')+`</tbody></table></div></div>`;
   }
   viewEl.innerHTML=h;
