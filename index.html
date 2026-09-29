@@ -7,7 +7,7 @@
 <style>
   :root{--ink:#14161B;--panel:#1E222B;--panel2:#262C37;--line:#333B47;--text:#EEF1F4;--muted:#98A1AE;
     --work:#FF4D5E;--sec:#F49AA1;--rest:#39414D;--good:#35C67A;--star:#F5C542;
-    --A:#FF4D5E;--B:#FF9F3C;--C:#8A6BFF;--D:#2FBFA0;--P:#2C9AD0;--G:#C98A5B;--R:#7AC74F;--W:#C2A57C;--L:#6B7483;--r:14px;}
+    --A:#FF4D5E;--B:#FF9F3C;--C:#8A6BFF;--D:#2FBFA0;--P:#2C9AD0;--G:#C98A5B;--R:#7AC74F;--W:#C2A57C;--X:#E86FB0;--L:#6B7483;--r:14px;}
   *{box-sizing:border-box} html,body{margin:0}
   body{background:var(--ink);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%;padding:0 0 96px;line-height:1.4}
   .wrap{max-width:560px;margin:0 auto;padding:0 14px}
@@ -25,7 +25,9 @@
   .subtabs{display:flex;gap:7px;margin:12px 0 2px}
   .tab{flex:1;min-height:44px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:11px;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .08s ease}
   .tab:active{transform:scale(.97)} .tab.on{color:#fff;border-color:transparent}
-  .tab.on.a{background:var(--A)} .tab.on.b{background:var(--B)} .tab.on.c{background:var(--C)} .tab.on.d{background:var(--D);color:#062019} .tab.on.p{background:var(--P)} .tab.on.g{background:var(--G);color:#1a0f05} .tab.on.r{background:var(--R);color:#0f1a08} .tab.on.w{background:var(--W);color:#1a1206}
+  .tab.on.a{background:var(--A)} .tab.on.b{background:var(--B)} .tab.on.c{background:var(--C)} .tab.on.d{background:var(--D);color:#062019} .tab.on.p{background:var(--P)} .tab.on.g{background:var(--G);color:#1a0f05} .tab.on.r{background:var(--R);color:#0f1a08} .tab.on.w{background:var(--W);color:#1a1206} .tab.on.x{background:var(--X);color:#1a0612}
+  .locsw{display:flex;gap:8px;margin:12px 0 4px} .locsw button{flex:1;min-height:42px;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:11px;font-size:14px;font-weight:700;cursor:pointer} .locsw button.on{background:var(--panel2);color:var(--text);border-color:var(--X)}
+  .absblk{margin:18px 2px 6px;font-size:13px;font-weight:800;color:var(--X)} .absblk span{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:2px}
   .sessname{font-size:14px;font-weight:700;margin:12px 2px 0}
   .sstats{display:flex;gap:8px;margin:10px 0 2px}
   .sf{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 8px 10px;text-align:center}
@@ -247,7 +249,11 @@ const LBL={traps:'Trapecio',delts:'Hombros',chest:'Pecho',biceps:'Bíceps',trice
 
 /* ===== PLAN (los 'id' conservan el historial aunque cambie el día) ===== */
 const LATRAISE={id:'latraise',name:'Elevaciones laterales',scheme:'3 × 12-20',rest:75,q:'elevaciones laterales con mancuernas',p:['delts'],s:[],cue:'Sube hasta la altura del hombro y baja lento. Peso ligero, sin impulso.'};
-const CABLECRUNCH={id:'wcrunch',name:'Crunch con peso (tumbado)',scheme:'2 × 10-15',rest:75,q:'crunch con disco en el pecho',p:['abs'],s:['obliques'],cue:'Tumbado boca arriba, rodillas flexionadas, disco o mancuerna abrazado sobre el pecho. Enrolla el tronco despegando los omóplatos del suelo, aprieta 1 s arriba y baja despacio. No tires del cuello ni subas de golpe. Apunta el peso del disco o mancuerna.'};
+const CABLECRUNCH={id:'wcrunch',name:'Crunch con peso (tumbado)',scheme:'3 × 10-15',rest:75,q:'crunch con disco en el pecho',p:['abs'],s:['obliques'],cue:'Tumbado boca arriba, rodillas flexionadas, disco o mancuerna abrazado sobre el pecho. Enrolla el tronco despegando los omóplatos del suelo, aprieta 1 s arriba y baja despacio. No tires del cuello ni subas de golpe. Apunta el peso del disco o mancuerna.'};
+const DECLINE={id:'declinecrunch',name:'Crunch en banco declinado',scheme:'3 × 10-15',rest:75,q:'crunch en banco declinado',p:['abs'],s:['obliques'],cue:'Piernas sujetas en los rodillos, brazos cruzados sobre el pecho (o abrazando un disco). Sube ENROLLANDO la espalda, acercando las costillas a la cadera, y para antes de sentarte del todo: la zona lumbar se queda en el banco. Aprieta 1 s y baja despacio (2-3 s). Sin tirones ni tirar del cuello. Para progresar: primero más reps, luego más inclinación o un disco. Si lo haces sin peso, apunta 0.'};
+const LEGRAISE={id:'legraise',name:'Elevación de piernas',scheme:'3 × 10-15',rest:75,type:'reps',q:'elevación de piernas abdominales',p:['abs'],s:['obliques'],cue:'Tumbado, manos bajo los glúteos o agarrado al banco. Sube las piernas y al final despega un poco la cadera del suelo enrollando la pelvis. Baja controlado sin que la lumbar se arquee. Sin balanceo.'};
+const SIDEPLANK={id:'sideplank',name:'Plancha lateral',scheme:'2 × 20-45 s / lado',rest:60,type:'time',q:'plancha lateral técnica',p:['obliques'],s:['abs'],cue:'Apoyado en el antebrazo, cuerpo recto de lado y cadera arriba, sin dejar que caiga. Respira normal, sin aguantar el aire. Para cuando la cadera empiece a bajar, aunque no hayas llegado al tiempo. Apunta los segundos por lado. Cuando hagas 45 s en todas las series, pasa a una versión más difícil (pierna de arriba levantada o apoyado en la mano) y vuelve a empezar desde 20 s.'};
+const PLANK={id:'plank',name:'Plancha frontal',scheme:'2 × 30-60 s',rest:60,type:'time',q:'plancha abdominal técnica correcta',p:['abs'],s:['obliques'],cue:'Antebrazos y puntas de los pies, cuerpo recto de cabeza a talones. Aprieta abdomen y glúteo; que la cadera no caiga ni suba. Respira normal, sin aguantar el aire. Para cuando la cadera empiece a caer, aunque no hayas llegado al tiempo. Cuando hagas 60 s en todas las series, pasa a una versión más difícil (pies juntos, codos más adelantados o un disco en la espalda) y vuelve a empezar desde 30 s.'};
 const SESSIONS={
  A:{name:'Torso 1 · pecho y espalda',items:[
    {id:'chestpress',star:1,name:'Press de pecho en máquina',scheme:'3-4 × 6-10',rest:150,q:'press de pecho en máquina',p:['chest'],s:['delts','triceps'],cue:'Baja controlando hasta notar el pecho y sube sin dar tirón.'},
@@ -256,7 +262,7 @@ const SESSIONS={
    {id:'pulldown',name:'Jalón al pecho',scheme:'3 × 8-12',rest:105,q:'jalón al pecho polea',p:['lats'],s:['biceps','upperback'],cue:'Lleva la barra al pecho apretando la espalda. No te eches muy hacia atrás.'},
    {id:'barbellcurl',name:'Curl con barra',scheme:'3 × 8-12',rest:105,q:'curl de bíceps con barra',p:['biceps'],s:['forearms'],cue:'Codos fijos a los lados, sin balancear. La barra corta pesa 9 kg: apunta barra + discos.'},
    {id:'pushdown',name:'Tríceps en polea (pushdown)',scheme:'3 × 10-15',rest:105,q:'extensión de tríceps en polea',p:['triceps'],s:[],cue:'Codos pegados al cuerpo, extiende del todo y controla la subida.'},
-   LATRAISE, CABLECRUNCH
+   LATRAISE
  ]},
  B:{name:'Pierna 1 · cuádriceps',items:[
    {id:'squat',star:1,name:'Sentadilla con mancuernas',total:1,wlabel:'Total (kg)',scheme:'3-4 × 6-10',rest:150,q:'sentadilla con mancuernas',p:['quads','glutes'],s:['hamstrings'],cue:'Una mancuerna en cada mano (a los lados o sobre los hombros: elige una forma y repítela siempre). Pies al ancho de hombros, pecho arriba, baja hasta al menos paralelo y sube empujando con todo el pie. Apunta el peso TOTAL: la suma de las dos mancuernas (2 de 5 kg = 10 kg).'},
@@ -264,7 +270,7 @@ const SESSIONS={
    {id:'legext',name:'Extensión de cuádriceps',scheme:'2-3 × 10-15',rest:105,q:'extensión de cuádriceps máquina',p:['quads'],s:[],cue:'Sube extendiendo, aprieta arriba y baja controlado.'},
    {id:'legcurl',name:'Curl femoral',scheme:'2-3 × 10-15',rest:105,q:'curl femoral tumbado máquina',p:['hamstrings'],s:[],cue:'Lleva el talón al glúteo sin despegar la cadera y baja lento.'},
    {id:'calf',name:'Gemelos',scheme:'3 × 12-20',rest:75,q:'elevación de gemelos de pie máquina',p:['calves'],s:[],cue:'Sube de puntillas al máximo, pausa arriba y baja notando el estiramiento.'},
-   {id:'legraise',name:'Elevación de piernas',scheme:'2 × 10-15',rest:75,type:'reps',q:'elevación de piernas abdominales',p:['abs'],s:['obliques'],cue:'Sube las piernas enrollando la pelvis, sin balanceo. Baja controlado.'}
+
  ]},
  C:{name:'Torso 2 · hombro y espalda vertical',items:[
    {id:'shoulderpress',star:1,name:'Press de hombro en máquina',scheme:'3-4 × 6-10',rest:150,q:'press militar en máquina',p:['delts'],s:['triceps'],cue:'Sube sin encoger el cuello, hombros hacia abajo.'},
@@ -275,7 +281,6 @@ const SESSIONS={
    {id:'ohtriceps',name:'Tríceps sobre la cabeza (mancuerna o polea)',scheme:'3 × 10-15',rest:105,q:'extensión de tríceps sobre la cabeza',p:['triceps'],s:[],cue:'Con mancuerna (sujeta con las dos manos) o con polea y cuerda de espaldas a la máquina. Codos arriba y quietos; extiende del todo y deja que el tríceps se estire al bajar.'},
    LATRAISE,
    {id:'facepull',name:'Face pull',scheme:'2 × 12-20',rest:75,q:'face pull en polea',p:['reardelts'],s:['upperback'],cue:'Tira hacia la cara abriendo los codos. Aprieta la espalda alta.'},
-   CABLECRUNCH
  ]},
  D:{name:'Pierna 2 · glúteo e isquios',items:[
    {id:'hipthrust',star:1,name:'Hip thrust',scheme:'3-4 × 8-12',rest:150,q:'hip thrust con barra',p:['glutes'],s:['hamstrings'],cue:'Empuja con los talones, aprieta el glúteo arriba, sin arquear la lumbar.'},
@@ -283,13 +288,26 @@ const SESSIONS={
    {id:'lunge',name:'Zancadas',scheme:'2 × 8-12 / pierna',rest:105,q:'zancadas con mancuernas',p:['quads','glutes'],s:['hamstrings'],cue:'Paso largo, rodilla de atrás hacia el suelo, tronco recto.'},
    {id:'legcurl',name:'Curl femoral',scheme:'3 × 10-15',rest:105,q:'curl femoral tumbado máquina',p:['hamstrings'],s:[],cue:'Lleva el talón al glúteo sin despegar la cadera y baja lento.'},
    {id:'calf',name:'Gemelos',scheme:'3 × 12-20',rest:75,q:'elevación de gemelos de pie máquina',p:['calves'],s:[],cue:'Sube de puntillas al máximo, pausa arriba y baja notando el estiramiento.'},
-   {id:'sideplank',name:'Plancha lateral',scheme:'2 × 20-45 s / lado',rest:60,type:'time',q:'plancha lateral técnica',p:['obliques'],s:['abs'],cue:'Cuerpo recto de lado, cadera arriba.'},
    {id:'barbellcurl',opt:1,name:'Curl con barra',scheme:'2 × 10-12',rest:90,q:'curl de bíceps con barra',p:['biceps'],s:['forearms'],cue:'Codos fijos, sin balanceo.'},
-   {id:'pushdown',opt:1,name:'Tríceps en polea (pushdown)',scheme:'2 × 10-15',rest:90,q:'extensión de tríceps en polea',p:['triceps'],s:[],cue:'Codos pegados al cuerpo, extiende del todo.'}
+   {id:'pushdown',opt:1,name:'Tríceps en polea (pushdown)',scheme:'2 × 10-15',rest:90,q:'extensión de tríceps en polea',p:['triceps'],s:[],cue:'Codos pegados al cuerpo, extiende del todo.'},
+
  ]},
  POOL:{name:'Piscina',pool:true},
  RUN:{name:'Correr',cardio:true},
  WALK:{name:'Andar',cardio:true},
+ ABS:{name:'Abdominales · al acabar',abs:true,items:[
+   Object.assign({},DECLINE,{loc:'gym',cat:'crunch'}),
+   {id:'polcrunch',loc:'gym',cat:'crunch',name:'Crunch en polea de rodillas',scheme:'3 × 10-15',rest:75,q:'crunch en polea de rodillas técnica',p:['abs'],s:['obliques'],cue:'De rodillas frente a la polea alta, cuerda sujeta junto a la cabeza. Enrolla el tronco llevando los codos hacia los muslos: la cadera no se mueve, solo se dobla la espalda. Sube despacio sin soltar la tensión. Apunta el peso de la polea.'},
+   Object.assign({},CABLECRUNCH,{loc:'casa',cat:'crunch'}),
+   {id:'hangknee',loc:'gym',cat:'elev',name:'Elevación de rodillas colgado',scheme:'3 × 8-15',rest:75,type:'reps',q:'elevación de rodillas colgado barra abdominales',p:['abs'],s:['obliques','forearms'],cue:'Colgado de la barra, o con los antebrazos apoyados en la estación de abdominales. Sube las rodillas al pecho y al final enrolla la pelvis hacia arriba. Sin balanceo: baja despacio y para antes de coger impulso. Si el agarre se cansa antes que el abdomen, usa la estación de antebrazos. Para progresar: piernas más estiradas.'},
+   Object.assign({},LEGRAISE,{loc:'both',cat:'elev'}),
+   {id:'revcrunch',loc:'casa',cat:'elev',name:'Crunch inverso',scheme:'3 × 10-15',rest:75,type:'reps',q:'crunch inverso abdominales técnica',p:['abs'],s:['obliques'],cue:'Tumbado boca arriba, rodillas dobladas a 90° y brazos a los lados. Lleva las rodillas hacia el pecho despegando la cadera del suelo (enrolla la pelvis), aguanta 1 s y baja despacio sin dejar caer las piernas.'},
+   Object.assign({},PLANK,{loc:'both',cat:'estab',scheme:'2-3 × 30-60 s'}),
+   {id:'deadbug',loc:'both',cat:'estab',name:'Dead bug',scheme:'2-3 × 8-12 / lado',rest:60,type:'reps',q:'dead bug ejercicio abdominal técnica',p:['abs'],s:['obliques'],cue:'Tumbado boca arriba, brazos al techo y rodillas a 90° por encima de la cadera. Pega la zona lumbar al suelo y NO la despegues: estira a la vez un brazo hacia atrás y la pierna contraria hacia delante, despacio, y vuelve. Alterna lados. Si la lumbar se despega, no bajes tanto la pierna.'},
+   Object.assign({},SIDEPLANK,{loc:'both',cat:'obl',scheme:'2-3 × 20-45 s / lado'}),
+   {id:'pallof',loc:'gym',cat:'obl',name:'Pallof press en polea',scheme:'2-3 × 10-12 / lado',rest:60,q:'pallof press polea técnica',p:['obliques'],s:['abs'],cue:'Polea a la altura del pecho y tú de lado a la máquina. Agarre con las dos manos pegado al pecho; estira los brazos al frente sin dejar que el tronco gire hacia la polea, aguanta 2 s y vuelve. Todas las reps de un lado y luego el otro. Peso ligero: el truco es no girar. Apunta el peso de la polea.'},
+   {id:'bicycle',loc:'casa',cat:'obl',name:'Bicicleta (crunch cruzado)',scheme:'2-3 × 12-20 / lado',rest:60,type:'reps',q:'crunch bicicleta abdominales técnica',p:['obliques'],s:['abs'],cue:'Tumbado, manos junto a la cabeza sin tirar del cuello. Lleva el codo hacia la rodilla contraria girando el tronco (no solo el codo) mientras estiras la otra pierna sin tocar el suelo. Despacio y controlado: cuenta las reps de cada lado.'}
+ ]},
  GRIP:{name:'Agarre · en casa',grip:true,items:[
    {id:'gripR',name:'Gripper · mano derecha',scheme:'3 × 10-15',rest:60,wlabel:'Resist. (kg)',q:'hand grip ejercicio antebrazo',p:['forearms'],s:[],cue:'Cierra del todo, aprieta 1-2 s y abre despacio. Apunta los kg aproximados según el cuadradito (≈7 kg por cuadradito desde 10). Sube un cuadradito cuando hagas 3 × 15 con facilidad.'},
    {id:'gripL',name:'Gripper · mano izquierda',scheme:'3 × 10-15',rest:60,wlabel:'Resist. (kg)',q:'hand grip ejercicio antebrazo',p:['forearms'],s:[],cue:'Mismo ajuste que la derecha para poder comparar. Si una mano va más floja, no fuerces la otra para igualar.'}
@@ -321,29 +339,38 @@ const EXIMG={
   legpress:['leg-press-start.webp','leg-press-peak.webp'],
   lunge:['lunge-start.webp','lunge-peak.webp'],
   facepull:['face-pull-start.webp','face-pull-peak.webp'],
-  sideplank:['side-plank-main.webp','side-plank-main.webp']
+  sideplank:['side-plank-main.webp','side-plank-main.webp'],
+  plank:['plank-main.webp','plank-main.webp'],
+  declinecrunch:['decline-crunch-start.webp','decline-crunch-peak.webp'],
+  polcrunch:['cable-crunch-start.webp','cable-crunch-peak.webp'],
+  hangknee:['hanging-knee-raise-start.webp','hanging-knee-raise-peak.webp'],
+  revcrunch:['reverse-crunches-start.webp','reverse-crunches-peak.webp'],
+  deadbug:['dead-bug-start.webp','dead-bug-peak.webp'],
+  pallof:['cable-pallof-press-start.webp','cable-pallof-press-peak.webp'],
+  bicycle:['bicycle-crunch-start.webp','bicycle-crunch-peak.webp']
 };
 const IMGBASE='https://exercise-dataset.com/images/flat/';
 const IMGALT={
   chestpress:'Press de pecho en máquina',seatedrow:'Remo sentado en polea',incline:'Press inclinado con mancuernas',pulldown:'Jalón al pecho',barbellcurl:'Curl con barra',pushdown:'Tríceps en polea',latraise:'Elevaciones laterales',wcrunch:'Crunch con peso (tumbado)',
-  squat:'Sentadilla con mancuernas',rdl:'Peso muerto rumano',legext:'Extensión de cuádriceps',legcurl:'Curl femoral',calf:'Gemelos',legraise:'Elevación de piernas',shoulderpress:'Press de hombro en máquina',neutralpulldown:'Jalón con agarre neutro',row:'Remo con mancuerna a una mano',pecdeck:'Aperturas en máquina',dbfly:'Aperturas con mancuernas en banco',hammercurl:'Curl martillo',ohtriceps:'Extensión de tríceps por encima de la cabeza',hipthrust:'Hip thrust',legpress:'Prensa de piernas',lunge:'Zancadas',facepull:'Face pull en polea',sideplank:'Plancha lateral'
+  squat:'Sentadilla con mancuernas',rdl:'Peso muerto rumano',legext:'Extensión de cuádriceps',legcurl:'Curl femoral',calf:'Gemelos',legraise:'Elevación de piernas',shoulderpress:'Press de hombro en máquina',neutralpulldown:'Jalón con agarre neutro',row:'Remo con mancuerna a una mano',pecdeck:'Aperturas en máquina',dbfly:'Aperturas con mancuernas en banco',hammercurl:'Curl martillo',ohtriceps:'Extensión de tríceps por encima de la cabeza',hipthrust:'Hip thrust',legpress:'Prensa de piernas',lunge:'Zancadas',facepull:'Face pull en polea',sideplank:'Plancha lateral',plank:'Plancha frontal',declinecrunch:'Crunch en banco declinado',polcrunch:'Crunch en polea de rodillas',hangknee:'Elevación de rodillas colgado',revcrunch:'Crunch inverso',deadbug:'Dead bug',pallof:'Pallof press en polea',bicycle:'Crunch bicicleta'
 };
 function demoHTML(it){
   const imgs=EXIMG[it.id]; if(!imgs)return '';
   const alt=esc(IMGALT[it.id]||it.name);
-  if(it.id==='sideplank') return `<div class="demo-pair"><a class="demo-shot" href="${IMGBASE}${imgs[0]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[0]}" alt="${alt}"><span class="demo-cap">Demostración</span></a></div>`;
+  if(it.id==='sideplank'||it.id==='plank') return `<div class="demo-pair"><a class="demo-shot" href="${IMGBASE}${imgs[0]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[0]}" alt="${alt}"><span class="demo-cap">Demostración</span></a></div>`;
   return `<div class="demo-pair"><a class="demo-shot" href="${IMGBASE}${imgs[0]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[0]}" alt="${alt} — inicio"><span class="demo-cap">Inicio</span></a><a class="demo-shot" href="${IMGBASE}${imgs[1]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[1]}" alt="${alt} — final"><span class="demo-cap">Final</span></a></div>`;
 }
 
-const SKEYS=['A','B','C','D','POOL','GRIP','RUN','WALK'];
+const SKEYS=['A','B','C','D','ABS','POOL','GRIP','RUN','WALK'];
 const LEGACY={PUSH:{name:'Empuje (plan anterior)'},PULL:{name:'Tirón (plan anterior)'},LEGS:{name:'Pierna (plan anterior)'}};
-const ALLS=['A','B','C','D','PUSH','PULL','LEGS','GRIP'];
-const SNAME={A:'A',B:'B',C:'C',D:'D',POOL:'🏊',GRIP:'✊',RUN:'🏃',WALK:'🚶'};
-const TABCLS={A:'a',B:'b',C:'c',D:'d',POOL:'p',GRIP:'g',RUN:'r',WALK:'w'};
-const SCOL={A:'var(--A)',B:'var(--B)',C:'var(--C)',D:'var(--D)',POOL:'var(--P)',GRIP:'var(--G)',RUN:'var(--R)',WALK:'var(--W)',PUSH:'var(--L)',PULL:'var(--L)',LEGS:'var(--L)'};
+const ALLS=['A','B','C','D','PUSH','PULL','LEGS','ABS','GRIP'];
+const SNAME={A:'A',B:'B',C:'C',D:'D',ABS:'Abs',POOL:'🏊',GRIP:'✊',RUN:'🏃',WALK:'🚶'};
+const TABCLS={A:'a',B:'b',C:'c',D:'d',ABS:'x',POOL:'p',GRIP:'g',RUN:'r',WALK:'w'};
+const SCOL={A:'var(--A)',B:'var(--B)',C:'var(--C)',D:'var(--D)',ABS:'var(--X)',POOL:'var(--P)',GRIP:'var(--G)',RUN:'var(--R)',WALK:'var(--W)',PUSH:'var(--L)',PULL:'var(--L)',LEGS:'var(--L)'};
 const EX={};
 Object.values(SESSIONS).forEach(S=>(S.items||[]).forEach(it=>{if(!EX[it.id]||EX[it.id].opt)EX[it.id]=it;}));
 [{id:'cablecrunch',name:'Crunch en polea'},{id:'cablefly',name:'Aperturas en polea'},{id:'pecdeck',name:'Aperturas en máquina'},{id:'dips',name:'Fondos de banco'},{id:'pullover',name:'Pullover en polea'},{id:'backext',name:'Hiperextensiones'},{id:'plank',name:'Plancha',type:'time'},{id:'crunch',name:'Crunch',type:'reps'}].forEach(e=>{if(!EX[e.id])EX[e.id]=e;});
+if(!EX.wcrunch)EX.wcrunch=CABLECRUNCH; /* ya no está en el plan, pero conserva nombre en el historial */
 const CARDIO={
  RUN:{icon:'🏃',name:'Correr',fields:[{k:'km',label:'Distancia (km)',fmt:v=>v+' km'},{k:'lastre',label:'Lastre (kg)',fmt:v=>'lastre '+v+' kg'}],tips:[
    '<b>Ritmo suave:</b> que puedas hablar mientras corres.',
@@ -434,6 +461,7 @@ function daySessions(dt){const d=data.days[dt]||{};const out=ALLS.filter(k=>(d[k
    Solo si nunca se ha hecho en esa sesión se muestra, como referencia, el plan antiguo (PUSH/PULL/LEGS). */
 function prevRecord(sid,id,before){const ds=Object.keys(data.days).filter(d=>d<before).sort().reverse();
   for(const d of ds){const r=((data.days[d]||{})[sid]||{})[id];if(workFilled(r))return{date:d,rec:r,sid};}
+  if(sid==='ABS')for(const d of ds){for(const k of ['A','B','C','D']){const r=((data.days[d]||{})[k]||{})[id];if(workFilled(r))return{date:d,rec:r,sid:k};}}
   for(const d of ds){for(const k of ['PUSH','PULL','LEGS']){const r=((data.days[d]||{})[k]||{})[id];if(workFilled(r))return{date:d,rec:r,sid:k,legacy:true};}}
   return null;}
 function fmtSet(s,type,long){
@@ -604,17 +632,28 @@ function sessStatsHTML(sid){const mm=getMeta(activeDate,sid);
     <div class="sf"><label>Duración (min)</label><input data-meta="dur" inputmode="numeric" value="${esc(mm.dur||'')}" aria-label="Duración en minutos" placeholder="—"></div>
     <div class="sf"><label>Calorías (kcal)</label><input data-meta="kcal" inputmode="numeric" value="${esc(mm.kcal||'')}" aria-label="Calorías" placeholder="—"></div>
     <div class="sf"><label>Puls. media (ppm)</label><input data-meta="hr" inputmode="numeric" value="${esc(mm.hr||'')}" aria-label="Pulsaciones medias" placeholder="—"></div></div>`;}
+const ABS_BLOCKS=[{t:'Bloque 1 · Crunch o elevación',h:'Elige uno · 3 series · el que mejor hace crecer el abdomen',cats:['crunch','elev']},{t:'Bloque 2 · Estabilidad u oblicuos',h:'Elige uno · 2-3 series',cats:['estab','obl']}];
+function absVisible(){const loc=data.absLoc||'gym';return SESSIONS.ABS.items.filter(it=>!isHidden('ABS',it.id)&&(it.loc==='both'||it.loc===loc||filled(recOf(activeDate,'ABS',it.id))));}
 function renderEntreno(){
   const S=SESSIONS[current];
   {const n=sessNumber(activeDate,current);curPhase=phaseOf(n||planStatus().done+1);}
   let h=`<div id="status">${statusHTML()}</div>`+dateBar();
   h+=`<div class="subtabs">`+SKEYS.map(k=>`<button class="tab ${TABCLS[k]} ${k===current?'on '+TABCLS[k]:''}" data-sess="${k}">${SNAME[k]}</button>`).join('')+`</div>`;
   h+=`<div class="sessname" style="color:${SCOL[current]}">${S.name}</div>`;
-  if(!S.grip)h+=sessStatsHTML(current);
+  if(!S.grip&&!S.abs)h+=sessStatsHTML(current);
   if(S.cardio){h+=cardioHTML(current)+noteHTML();viewEl.innerHTML=h;bindEntreno();return;}
   if(S.pool){h+=poolHTML()+noteHTML();viewEl.innerHTML=h;bindEntreno();return;}
   h+=`<div class="legend"><span><span class="dot" style="background:var(--work)"></span>Principal</span><span><span class="dot" style="background:var(--sec)"></span>Secundario</span><span>⭐ Progresar sí o sí</span><span><b style="color:var(--star)">C</b> = calentamiento</span></div>`;
   if(S.grip)h+=`<div class="opt-head"><b>Extra de agarre en casa.</b> 2-3 veces por semana, no a diario. Mejor tras un día de pierna o en descanso, no antes de un Torso. Si notas molestia en la parte interna del codo o en la muñeca, para unos días y vuelve con menos resistencia. No cuenta como sesión del plan.</div>`;
+  else if(S.abs){const loc=data.absLoc||'gym';
+    h+=`<div class="opt-head"><b>Para cerrar el entreno.</b> Al acabar la sesión de fuerza y antes de la piscina, o en casa. Elige <b>2 ejercicios</b>: uno del bloque 1 (3 series) y otro del bloque 2 (2-3 series). 3-4 días por semana, no a diario. Repite los mismos varias semanas para ver si progresas y cambia cuando te estanques o te aburras. No cuenta como sesión del plan.</div>`;
+    h+=`<div class="locsw">${[['gym','🏋️ Gimnasio'],['casa','🏠 Casa']].map(([k,l])=>`<button data-absloc="${k}" class="${k===loc?'on':''}">${l}</button>`).join('')}</div>`;
+    const vis=absVisible();const cnt=vis.filter(it=>filled(recOf(activeDate,current,it.id))).length;
+    h+=`<div class="meta"><div class="sub">${loc==='gym'?'Gimnasio':'Casa'} · ${vis.length} opciones</div><div class="prog" id="prog"><b>${cnt}</b> hechos hoy</div></div>`;
+    ABS_BLOCKS.forEach(b=>{const its=vis.filter(it=>b.cats.includes(it.cat));if(!its.length)return;h+=`<div class="absblk">${b.t}<span>${b.h}</span></div>`;its.forEach(it=>{h+=exHTML(it);});});
+    const hid=S.items.filter(it=>isHidden(current,it.id));
+    if(hid.length){h+=`<div class="hidden-sec"><h4>Ocultos (${hid.length})</h4>`+hid.map(it=>`<div class="hidden-row"><span>${it.name}</span><button data-show="${it.id}">Mostrar</button></div>`).join('')+`</div>`;}
+    h+=noteHTML()+`<div class="save-note">Editas el día de arriba. <b>Se guarda solo.</b></div>`;viewEl.innerHTML=h;bindEntreno();return;}
   else h+=protoHTML();
   const main=S.items.filter(it=>!it.opt&&!isHidden(current,it.id));
   const opt=S.items.filter(it=>it.opt&&!isHidden(current,it.id));
@@ -627,6 +666,7 @@ function renderEntreno(){
     h+=`<div class="opt-head"><b>Bloque opcional de brazos.</b> No se activa por llegar a ninguna sesión ni fecha. Valóralo solo si bíceps o tríceps llevan 2-3 sesiones sin progresar, la técnica es buena, sueño y comida van bien, recuperas bien y no hay molestias en codos u hombros. Pasarías de 6 a 8 series directas. La decisión es tuya.<div class="armsig">${arms.length?'📊 Señal: '+arms.map(a=>a.name+' ('+a.sid+')').join(', ')+' sin progresar en sus 3 últimas sesiones.':'📊 Ahora mismo no hay señal de estancamiento en brazos.'}</div></div>`;
     opt.forEach(it=>{h+=exHTML(it);});
   }
+  if(PLAN.includes(current))h+=`<div class="opt-head">🔥 <b>Para cerrar:</b> abdominales en la pestaña <b>Abs</b> (2 ejercicios, unos 10 min).</div>`;
   if(PLAN.includes(current)){h+=finishHTML();if(sessionDone(activeDate,current))h+=reviewCardHTML(activeDate,current);}
   if(hidden.length){h+=`<div class="hidden-sec"><h4>Ocultos (${hidden.length})</h4>`+hidden.map(it=>`<div class="hidden-row"><span>${it.name}</span><button data-show="${it.id}">Mostrar</button></div>`).join('')+`</div>`;}
   h+=noteHTML();
@@ -699,12 +739,13 @@ function readCard(card){const id=card.dataset.id;const rec=ensureRec(activeDate,
   updStatus();
   const fb=document.querySelector('.finish');if(fb&&fb.disabled&&sessionHasWork(activeDate,current)){const tmp=document.createElement('div');tmp.innerHTML=finishHTML();const sub=fb.nextElementSibling;if(sub&&sub.classList.contains('finish-sub'))sub.remove();fb.replaceWith(...tmp.childNodes);
     document.querySelectorAll('[data-finish]').forEach(b=>b.onclick=()=>{flush();setDone(activeDate,current,b.dataset.finish==='1');renderEntreno();});}}
-function updateProg(){const p=document.getElementById('prog');if(!p)return;const S=SESSIONS[current];const vis=S.items.filter(it=>!it.opt&&!isHidden(current,it.id));let f=0;
+function updateProg(){const p=document.getElementById('prog');if(!p)return;const S=SESSIONS[current];if(S.abs){p.innerHTML=`<b>${absVisible().filter(it=>filled(recOf(activeDate,current,it.id))).length}</b> hechos hoy`;return;}const vis=S.items.filter(it=>!it.opt&&!isHidden(current,it.id));let f=0;
   vis.forEach(it=>{if(filled(recOf(activeDate,current,it.id)))f++;});p.innerHTML=`<b>${f}</b>/${vis.length} registrados`;}
 function bindEntreno(){
   viewEl.querySelectorAll('[data-dd]').forEach(b=>b.onclick=()=>{activeDate=shiftDate(activeDate,parseInt(b.dataset.dd,10));renderEntreno();});
   const th=viewEl.querySelector('[data-today]');if(th)th.onclick=()=>{activeDate=todayKey();renderEntreno();};
   viewEl.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{current=t.dataset.sess;renderEntreno();updateRestBar();});
+  viewEl.querySelectorAll('[data-absloc]').forEach(b=>b.onclick=()=>{data.absLoc=b.dataset.absloc;queueSave();renderEntreno();});
   viewEl.querySelectorAll('.sstats input').forEach(inp=>inp.addEventListener('input',()=>setMeta(activeDate,current,inp.dataset.meta,inp.value)));
   viewEl.querySelectorAll('[data-cf]').forEach(inp=>inp.addEventListener('input',()=>{const d=data.days[activeDate]=data.days[activeDate]||{};const c=d[current]=d[current]||{};
     if(inp.value)c[inp.dataset.cf]=inp.value;else delete c[inp.dataset.cf];if(!Object.keys(c).length)delete d[current];queueSave();}));
@@ -976,11 +1017,11 @@ function renderResumen(){
     <div class="stat"><div class="big">${monthMin}</div><div class="lbl">min este mes</div></div>
     <div class="stat"><div class="big">${monthKcal}</div><div class="lbl">kcal este mes</div></div></div>`;
   h=planSummaryHTML()+h;
-  ['A','B','C','D','GRIP'].forEach(sid=>{let rows='';
-    SESSIONS[sid].items.forEach(it=>{if(it.opt)return;const type=it.type||'weight';const {last,fromLegacy,best}=lastAndBest(sid,it.id,type);
+  ['A','B','C','D','ABS','GRIP'].forEach(sid=>{let rows='';
+    SESSIONS[sid].items.forEach(it=>{if(it.opt)return;const type=it.type||'weight';const {last,fromLegacy,best}=lastAndBest(sid,it.id,type);if(sid==='ABS'&&!last)return;
       const lastTxt=last?fmtWork(last,type,false)+(fromLegacy?' (plan antiguo)':''):'—';const bestTxt=best>0?` · máx histórico ${best}kg`:'';
       rows+=`<div class="sumrow"><span class="nm">${it.star?'⭐ ':''}${it.name}</span><span class="vl"><b>${esc(lastTxt)}</b>${bestTxt}</span></div>`;});
-    h+=`<div class="sumsec"><h3><i style="background:${SCOL[sid]}"></i>${SESSIONS[sid].name}</h3>${metaLine(sid)}${rows}</div>`;});
+    if(sid==='ABS'&&!rows)return;h+=`<div class="sumsec"><h3><i style="background:${SCOL[sid]}"></i>${SESSIONS[sid].name}</h3>${metaLine(sid)}${rows}</div>`;});
   ['RUN','WALK'].forEach(k=>{const ds=Object.keys(data.days).sort().filter(dt=>daySessions(dt).includes(k));if(!ds.length)return;const dt=ds[ds.length-1];
     const dd=new Date(dt+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'});
     h+=`<div class="sumsec"><h3><i style="background:${SCOL[k]}"></i>${CARDIO[k].icon} ${CARDIO[k].name}</h3><div class="metaline"><b>${esc(cardioBits(dt,k).join(' · '))}</b> <span style="opacity:.7">(última: ${dd} · ${ds.length} en total)</span></div></div>`;});
