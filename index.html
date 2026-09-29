@@ -254,7 +254,7 @@ const SESSIONS={
    LATRAISE, CABLECRUNCH
  ]},
  B:{name:'Pierna 1 · cuádriceps',items:[
-   {id:'squat',star:1,name:'Sentadilla con mancuernas',scheme:'3-4 × 6-10',rest:150,q:'sentadilla con mancuernas',p:['quads','glutes'],s:['hamstrings'],cue:'Una mancuerna en cada mano (a los lados o sobre los hombros: elige una forma y repítela siempre). Pies al ancho de hombros, pecho arriba, baja hasta al menos paralelo y sube empujando con todo el pie. Apunta el peso de cada mancuerna.'},
+   {id:'squat',star:1,name:'Sentadilla con mancuernas',total:1,wlabel:'Total (kg)',scheme:'3-4 × 6-10',rest:150,q:'sentadilla con mancuernas',p:['quads','glutes'],s:['hamstrings'],cue:'Una mancuerna en cada mano (a los lados o sobre los hombros: elige una forma y repítela siempre). Pies al ancho de hombros, pecho arriba, baja hasta al menos paralelo y sube empujando con todo el pie. Apunta el peso TOTAL: la suma de las dos mancuernas (2 de 5 kg = 10 kg).'},
    {id:'rdl',star:1,name:'Peso muerto rumano (barra o mancuernas)',scheme:'3 × 6-10',rest:150,q:'peso muerto rumano',p:['hamstrings','glutes'],s:['lowerback'],warn:1,cue:'Con barra o mancuernas, lo que tengas libre: apunta siempre el peso total. Bisagra de cadera y espalda RECTA siempre. Baja pegando el peso a las piernas hasta notar el estiramiento.'},
    {id:'legext',name:'Extensión de cuádriceps',scheme:'2-3 × 10-15',rest:105,q:'extensión de cuádriceps máquina',p:['quads'],s:[],cue:'Sube extendiendo, aprieta arriba y baja controlado.'},
    {id:'legcurl',name:'Curl femoral',scheme:'2-3 × 10-15',rest:105,q:'curl femoral tumbado máquina',p:['hamstrings'],s:[],cue:'Lleva el talón al glúteo sin despegar la cadera y baja lento.'},
@@ -871,7 +871,7 @@ function buildReport(){
       const sn=PLAN.includes(sid)?sessNumber(dt,sid):null;
       out+=sessName(sid)+(sn?' — sesión '+sn+' del plan':(PLAN.includes(sid)?' — sin finalizar':''))+(mb.length?' ('+mb.join(' · ')+')':'')+'\n';
       Object.keys(d[sid]||{}).forEach(id=>{const r=d[sid][id];if(!workFilled(r))return;const def=EX[id]||{name:id};
-        out+='  - '+def.name+(def.star?' [principal]':'')+(def.base?' (solo discos; la máquina suma '+String(def.base).replace('.',',')+' kg)':'')+': '+fmtWork(r,def.type||'weight',true)+'\n';});
+        out+='  - '+def.name+(def.star?' [principal]':'')+(def.base?' (solo discos; la máquina suma '+String(def.base).replace('.',',')+' kg)':'')+(def.total?' (peso total: suma de las dos mancuernas)':'')+': '+fmtWork(r,def.type||'weight',true)+'\n';});
     });
     if(d.post)out+='Recuperación / estiramientos: hecho\n';
     if(d.note)out+='Nota: '+d.note+'\n';
