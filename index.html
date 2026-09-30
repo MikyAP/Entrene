@@ -457,11 +457,13 @@ function setMeta(dt,sid,f,v){data.days[dt]=data.days[dt]||{};data.days[dt].meta=
 function daySessions(dt){const d=data.days[dt]||{};const out=ALLS.filter(k=>(d[k]&&Object.values(d[k]).some(filled))||metaHasData(dt,k));
   if((d.POOL&&d.POOL.largos)||metaHasData(dt,'POOL'))out.push('POOL');
   ['RUN','WALK'].forEach(k=>{const c=d[k];if((c&&Object.values(c).some(v=>v!==''&&v!=null))||metaHasData(dt,k))out.push(k);});return out;}
-/* "Anterior" = último registro de ese ejercicio EN LA MISMA SESIÓN (A/B/C/D).
-   Solo si nunca se ha hecho en esa sesión se muestra, como referencia, el plan antiguo (PUSH/PULL/LEGS). */
+/* "Anterior" = la última vez que hiciste ESE ejercicio, en cualquier sesión del plan (A/B/C/D/Abs).
+   Ej.: gemelos del B toma como referencia los del D si fueron más recientes.
+   Solo si nunca se ha hecho en el plan nuevo se muestra, como referencia, el plan antiguo (PUSH/PULL/LEGS). */
+const HIST_POOL=['A','B','C','D','ABS'];
 function prevRecord(sid,id,before){const ds=Object.keys(data.days).filter(d=>d<before).sort().reverse();
-  for(const d of ds){const r=((data.days[d]||{})[sid]||{})[id];if(workFilled(r))return{date:d,rec:r,sid};}
-  if(sid==='ABS')for(const d of ds){for(const k of ['A','B','C','D']){const r=((data.days[d]||{})[k]||{})[id];if(workFilled(r))return{date:d,rec:r,sid:k};}}
+  const ks=HIST_POOL.includes(sid)?[sid,...HIST_POOL.filter(k=>k!==sid)]:[sid];
+  for(const d of ds){for(const k of ks){const r=((data.days[d]||{})[k]||{})[id];if(workFilled(r))return{date:d,rec:r,sid:k,other:k!==sid};}}
   for(const d of ds){for(const k of ['PUSH','PULL','LEGS']){const r=((data.days[d]||{})[k]||{})[id];if(workFilled(r))return{date:d,rec:r,sid:k,legacy:true};}}
   return null;}
 function fmtSet(s,type,long){
@@ -475,7 +477,9 @@ function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
 function topRep(scheme,type){if(type==='time')return null;const seg=scheme.split('×')[1]||'';const nums=(seg.match(/\d+/g)||[]).map(Number);if(!nums.length)return null;return nums.length>1?nums[1]:nums[0];}
 /* ↑ sube peso: solo con el registro de la MISMA sesión, TODAS las series de trabajo previstas
    registradas (mínimo el nº del esquema; si hiciste 4, las 4), sin contar calentamiento, y todas en el tope. */
-function needUp(it,type,prev){if(type==='time'||!prev||prev.legacy)return false;const top=topRep(it.scheme,type);if(!top)return false;
+/* si el registro anterior es de otra sesión, se juzga con el rango de reps de esa sesión */
+function refItem(it,prev){if(!prev||!prev.other)return it;const S=SESSIONS[prev.sid];return (S&&S.items&&S.items.find(x=>x.id===it.id))||it;}
+function needUp(it,type,prev){if(type==='time'||!prev||prev.legacy)return false;it=refItem(it,prev);if(analyze(it,type,prev.rec).fail)return false;const top=topRep(it.scheme,type);if(!top)return false;
   const f=type==='weight'?'b':'a';const rows=(prev.rec.sets||[]).filter(s=>!s.w);const planned=Math.max(defaultSets(it),rows.length);
   const done=rows.filter(s=>s[f]!==undefined&&s[f]!==''&&(type!=='weight'||(s.a!==undefined&&s.a!=='')));
   if(done.length<planned)return false;return done.every(s=>(parseInt(s[f],10)||0)>=top);}
@@ -517,16 +521,18 @@ function adviceList(it,type,rec,prev){const a=analyze(it,type,rec);const r=range
 function adviceInner(it,type,rec){return adviceList(it,type,rec,prevRecord(current,it.id,activeDate)).map(x=>`<div>${x}</div>`).join('');}
 function nextWeight(it,type,rec){const a=analyze(it,type,rec);const w=maxW(rec);if(!w)return null;const inc=incOf(it.id);
   if(a.low)return{w:roundW(w+(inc>=5?1:2)*inc),why:'te sobró la última vez'};
-  if(a.high)return{w:roundW(Math.max(inc,w-inc)),why:'no llegaste al mínimo'};
+  if(a.high){const r=rangeOf(it);const reps=workSets(rec).map(s=>repsOf(s,type)).filter(x=>!isNaN(x));const mn=Math.min(...reps);const big=r&&r.lo-mn>=2;
+    return{w:roundW(Math.max(inc,big?Math.min(w-inc,w*0.88):w-inc)),why:big?'te quedaste lejos del mínimo: baja algo más':'no llegaste al mínimo'};}
+  if(a.top&&a.fail)return{w,why:'llegaste al tope pero muy justo: repite peso y sube cuando lo hagas con RIR 2-3'};
   if(a.top)return{w:roundW(w+inc),why:'hiciste todas en el tope'};
   if(a.fail)return{w,why:'mismo peso, para 1-2 repeticiones antes del fallo'};
   return{w,why:'mismo peso, intenta sumar repeticiones'};}
 function targetHTML(it,type,prev){const r=rangeOf(it);if(!r)return'';
   const rng=`${r.lo}-${r.hi} ${type==='time'?'s':'reps'}`;const goal=type==='time'?'':` · ${rirGoal(it)}`;
-  if(type!=='weight'){if(!prev)return `🎯 Hoy: ${rng}${goal}.`;const a=analyze(it,type,prev.rec);return `🎯 Hoy: ${rng}${goal}${(a.low||a.top)?' · <span class="why">te sobró: añade dificultad</span>':''}.`;}
+  if(type!=='weight'){if(!prev)return `🎯 Hoy: ${rng}${goal}.`;const a=analyze(refItem(it,prev),type,prev.rec);return `🎯 Hoy: ${rng}${goal}${(a.low||(a.top&&!a.fail))?' · <span class="why">te sobró: añade dificultad</span>':''}.`;}
   if(!prev)return `🎯 Hoy: elige un peso con el que llegues a ${rng}${goal}.`;
   if(mixedWeights(prev.rec))return `🎯 Hoy: elige un peso fijo con el que llegues a ${rng}${goal} <span class="why">(la última vez cambiaste de peso entre series)</span>`;
-  const nw=nextWeight(it,type,prev.rec);if(!nw)return `🎯 Hoy: ${rng}${goal}.`;
+  const nw=nextWeight(refItem(it,prev),type,prev.rec);if(!nw)return `🎯 Hoy: ${rng}${goal}.`;
   return `🎯 Hoy: ~${nw.w} kg · ${rng}${goal} <span class="why">(${nw.why}${prev.legacy?', según el plan antiguo':''})</span>`;}
 function reviewCardHTML(dt,sid){const S=SESSIONS[sid];const good=[],fix=[];
   S.items.forEach(it=>{const type=it.type||'weight';const rec=((data.days[dt]||{})[sid]||{})[it.id];
@@ -704,8 +710,8 @@ function exHTML(it){
   const prev=prevRecord(current,it.id,activeDate);
   let lastLine;
   if(prev){const dd=new Date(prev.date+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'});
-    lastLine=`Anterior${prev.legacy?' (plan antiguo, ':' ('}${dd}): <b>${fmtWork(prev.rec,type,false)}</b>`;}
-  else lastLine='Primera vez en esta sesión.';
+    lastLine=`Anterior${prev.legacy?' (plan antiguo, ':' ('}${dd}${prev.other?' · '+(SNAME[prev.sid]||prev.sid):''}): <b>${fmtWork(prev.rec,type,false)}</b>`;}
+  else lastLine='Primera vez.';
   const up=needUp(it,type,prev);
   const mixed=type==='weight'&&mixedWeights(rec);
   const restSec=it.rest||90;
@@ -837,9 +843,11 @@ function renderPost(){
 }
 
 /* ===== RESUMEN / EXPORTAR ===== */
-function lastAndBest(sid,id,type){const ds=Object.keys(data.days).sort();let last=null,legacy=null,best=0;
-  ds.forEach(dt=>{ALLS.forEach(k=>{const r=((data.days[dt]||{})[k]||{})[id];if(workFilled(r)){if(k===sid)last=r;else if(LEGACY[k])legacy=r;if(type==='weight')workSets(r).forEach(s=>{const v=parseFloat(s.a)||0;if(v>best)best=v;});}});});
-  return{last:last||legacy,fromLegacy:!last&&!!legacy,best};}
+function lastAndBest(sid,id,type){const ds=Object.keys(data.days).sort();let last=null,legacy=null,best=0,lastSid=null,lastDate=null;
+  const pool=HIST_POOL.includes(sid)?HIST_POOL:[sid];
+  ds.forEach(dt=>{let cand=null;ALLS.forEach(k=>{const r=((data.days[dt]||{})[k]||{})[id];if(workFilled(r)){if(pool.includes(k)){if(!cand||k===sid)cand=k;}else if(LEGACY[k])legacy=r;if(type==='weight')workSets(r).forEach(s=>{const v=parseFloat(s.a)||0;if(v>best)best=v;});}});
+    if(cand){last=data.days[dt][cand][id];lastSid=cand;lastDate=dt;}});
+  return{last:last||legacy,fromLegacy:!last&&!!legacy,best,lastSid,lastDate};}
 function planSummaryHTML(){const st=planStatus();const n=st.today.length?st.done:st.done+1;const ph=phaseOf(n);const stale=staleInfo();
   const rows=PLAN.map(sid=>{const x=stale.find(y=>y.sid===sid);const txt=!x||x.never?'sin registrar':(x.days===0?'hoy':x.days===1?'hace 1 día':`hace ${x.days} días`);
     return `<div class="sumrow"><span class="nm">${sid} · ${shortName(sid)}</span><span class="vl"><b>${txt}</b>${x&&x.stale?' ⚠':''}</span></div>`;}).join('');
@@ -1005,21 +1013,22 @@ function buildReport(){
 function renderResumen(){
   const now=new Date();const ws=new Date(now);ws.setDate(now.getDate()-((now.getDay()+6)%7));ws.setHours(0,0,0,0);
   const mk=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
-  let weekDays=0,monthSess=0,totalSess=0,monthMin=0,monthKcal=0;
-  Object.keys(data.days).forEach(dt=>{const sess=daySessions(dt);totalSess+=sess.length;if(dt.startsWith(mk))monthSess+=sess.length;
+  let weekDays=0,monthStr=0,monthPool=0,monthExtra=0,monthMin=0,monthKcal=0;const STR=['A','B','C','D','PUSH','PULL','LEGS'];
+  Object.keys(data.days).forEach(dt=>{const sess=daySessions(dt);if(dt.startsWith(mk))sess.forEach(k=>{if(STR.includes(k))monthStr++;else if(k==='POOL')monthPool++;else monthExtra++;});
     const d=new Date(dt+'T12:00');if(d>=ws&&d<=now&&sess.length)weekDays++;
     if(dt.startsWith(mk)){const mt=(data.days[dt].meta)||{};Object.values(mt).forEach(mm=>{monthMin+=parseInt(mm.dur,10)||0;monthKcal+=parseInt(mm.kcal,10)||0;});}});
   let h=`<div class="stat-row">
     <div class="stat"><div class="big">${weekDays}</div><div class="lbl">días esta semana</div></div>
-    <div class="stat"><div class="big">${monthSess}</div><div class="lbl">sesiones este mes</div></div>
-    <div class="stat"><div class="big">${totalSess}</div><div class="lbl">sesiones total</div></div></div>
+    <div class="stat"><div class="big">${monthStr}</div><div class="lbl">fuerza este mes</div></div>
+    <div class="stat"><div class="big">${monthPool}</div><div class="lbl">piscina este mes</div></div></div>
     <div class="stat-row">
+    <div class="stat"><div class="big">${monthExtra}</div><div class="lbl">abs, agarre y cardio este mes</div></div>
     <div class="stat"><div class="big">${monthMin}</div><div class="lbl">min este mes</div></div>
     <div class="stat"><div class="big">${monthKcal}</div><div class="lbl">kcal este mes</div></div></div>`;
   h=planSummaryHTML()+h;
   ['A','B','C','D','ABS','GRIP'].forEach(sid=>{let rows='';
-    SESSIONS[sid].items.forEach(it=>{if(it.opt)return;const type=it.type||'weight';const {last,fromLegacy,best}=lastAndBest(sid,it.id,type);if(sid==='ABS'&&!last)return;
-      const lastTxt=last?fmtWork(last,type,false)+(fromLegacy?' (plan antiguo)':''):'—';const bestTxt=best>0?` · máx histórico ${best}kg`:'';
+    SESSIONS[sid].items.forEach(it=>{if(it.opt)return;const type=it.type||'weight';const {last,fromLegacy,best,lastSid,lastDate}=lastAndBest(sid,it.id,type);if(sid==='ABS'&&!last)return;
+      const lastTxt=last?fmtWork(last,type,false)+(fromLegacy?' (plan antiguo)':(lastSid&&lastSid!==sid?` (en ${SNAME[lastSid]||lastSid}, ${new Date(lastDate+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'})})`:'')):'—';const bestTxt=best>0?` · máx histórico ${best}kg`:'';
       rows+=`<div class="sumrow"><span class="nm">${it.star?'⭐ ':''}${it.name}</span><span class="vl"><b>${esc(lastTxt)}</b>${bestTxt}</span></div>`;});
     if(sid==='ABS'&&!rows)return;h+=`<div class="sumsec"><h3><i style="background:${SCOL[sid]}"></i>${SESSIONS[sid].name}</h3>${metaLine(sid)}${rows}</div>`;});
   ['RUN','WALK'].forEach(k=>{const ds=Object.keys(data.days).sort().filter(dt=>daySessions(dt).includes(k));if(!ds.length)return;const dt=ds[ds.length-1];
