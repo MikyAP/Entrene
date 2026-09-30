@@ -234,6 +234,21 @@
   .rs-scr{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:2px -4px 0;padding:0 4px 4px}
   .rs-scr svg text{fill:var(--muted);font-size:10px}.rs-scr svg .rs-lab{font-weight:600}.rs-scr svg .rs-val{fill:var(--text);font-size:10.5px;font-weight:700}.rs-scr svg .rs-okt{fill:var(--rs-ok);font-weight:800}
   .rs-bar{cursor:pointer}
+  .rs-go .rs-exs{cursor:pointer}.rs-go:active{background:var(--panel2)}
+  .rs-sel{width:100%;min-height:44px;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:11px;font-size:15px;padding:0 10px;margin:0 0 4px}
+  .rs-cap{font-size:11.5px;color:var(--muted);margin:4px 0 0}
+  #rsCharts{scroll-margin-top:112px}
+  .rs-gt{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none}.rs-gt::-webkit-scrollbar{display:none}
+  .rs-gt button{flex:1 1 0;min-width:0;min-height:38px;padding:0 4px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--muted);font-weight:700;font-size:13px;cursor:pointer}.rs-gt button.on{color:#111;border-color:transparent}
+  .rs-pills{display:flex;gap:6px;overflow-x:auto;padding:4px 0 8px;scrollbar-width:none}.rs-pills::-webkit-scrollbar{display:none}
+  .rs-pills button{flex:0 0 auto;display:flex;align-items:center;gap:6px;min-height:38px;padding:3px 12px 3px 3px;border-radius:20px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:12.5px;cursor:pointer;white-space:nowrap}
+  .rs-pills button.on{background:#7FB2FF;color:#0b1320;border-color:#7FB2FF;font-weight:800}.rs-pills button.empty{opacity:.45}
+  .rs-th{width:30px;height:30px;border-radius:50%;object-fit:cover;background:#fff;flex:0 0 auto}
+  .rs-th2{width:44px;height:44px;border-radius:10px;object-fit:cover;background:#fff;flex:0 0 auto}
+  .rs-emo{display:inline-flex;align-items:center;justify-content:center;background:var(--panel);font-size:16px}.rs-th2.rs-emo{font-size:24px}
+  .rs-nav3{display:flex;align-items:center;gap:8px;margin:4px 0 2px}.rs-nav3>button{width:40px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:22px;cursor:pointer;flex:0 0 auto}
+  .rs-n3{flex:1;display:flex;align-items:center;gap:9px;min-width:0}.rs-n3 b{display:block;font-size:14.5px;line-height:1.2}.rs-n3 span{font-size:11px;color:var(--muted)}
+
   .rs-stl{position:sticky;left:0;display:inline-block;font-size:10.5px;font-weight:600;color:var(--muted);margin:6px 0 0;background:var(--panel);padding-right:6px}
   .rs-cols{display:flex}.rs-col{flex:0 0 auto;display:flex;flex-direction:column;gap:3px;padding:0 3px}
   .rs-dt{text-align:center;font-size:11px;color:var(--text);font-weight:700;margin:2px 0 3px}.rs-dt small{display:block;color:var(--muted);font-weight:500;font-size:10px}
@@ -1109,7 +1124,7 @@ function rsRow(it){const type=it.type||'weight';const E=rsExpo(it.id,type);
   let tr='<span class="rs-tr rs-nw">nuevo</span>';if(P)tr=lv>pv?'<span class="rs-tr rs-up">↑</span>':lv<pv?'<span class="rs-tr rs-dn">↓</span>':'<span class="rs-tr rs-fl">→</span>';
   const pr=P&&lv>Math.max(...vals.slice(0,-1))?' 🏆':'';
   const big=type==='weight'?`${rsFmt(lv)}<small> kg</small>`:type==='time'?`${lv}<small> s</small>`:`${lv}<small> reps</small>`;
-  return `<details class="rs-ex" data-id="${it.id}"><summary class="rs-exs"><span class="rs-nm">${nm}${pr}<small>${rsDD(L.dt)} · ${rsSN(L.k)} · ${E.length} ${E.length===1?'vez':'veces'}</small></span>${rsSpark(vals)}<span class="rs-w">${big}</span>${tr}</summary><div class="rs-body"></div></details>`;}
+  return `<div class="rs-ex rs-go" data-go="${it.id}"><div class="rs-exs"><span class="rs-nm">${nm}${pr}<small>${rsDD(L.dt)} · ${rsSN(L.k)} · ${E.length} ${E.length===1?'vez':'veces'}</small></span>${rsSpark(vals)}<span class="rs-w">${big}</span>${tr}</div></div>`;}
 function rsWeekHTML(){const t=todayKey();const monday=rsAdd(t,-((new Date(t+'T12:00').getDay()+6)%7));
   let h=`<div class="rs-card"><h3>📅 Semana</h3><div class="rs-wk"><span></span>${['L','M','X','J','V','S','D'].map(x=>`<span class="rs-wh">${x}</span>`).join('')}`;
   [[monday,'Esta'],[rsAdd(monday,-7),'Pasada']].forEach(([m,l])=>{h+=`<span class="rs-wl">${l}</span>`;for(let i=0;i<7;i++){const dt=rsAdd(m,i);const ss=dt>t?[]:daySessions(dt);
@@ -1167,11 +1182,46 @@ function rsCardioHTML(){const mk=todayKey().slice(0,7);
   const rows=RS_ACT.map(a=>{const E=rsActExpo(a);if(!E.length)return'';const {vals,u}=rsActVal(a,E);const L=E[E.length-1];const lv=vals[vals.length-1],pv=vals[vals.length-2];
     const tr=E.length<2?'<span class="rs-tr rs-nw">nuevo</span>':lv>pv?'<span class="rs-tr rs-up">↑</span>':lv<pv?'<span class="rs-tr rs-dn">↓</span>':'<span class="rs-tr rs-fl">→</span>';
     const nm=E.filter(e=>e.dt.startsWith(mk)).length;
-    return `<details class="rs-ex" data-act="${a.k}"><summary class="rs-exs"><span class="rs-nm"><span class="rs-ai" style="background:${SCOL[a.k]}"></span>${a.icon} ${a.name}<small>última ${rsDD(L.dt)} · ${nm} este mes</small></span>${rsSpark(vals)}<span class="rs-w">${rsFmt(lv)}<small> ${u}</small></span>${tr}</summary><div class="rs-body"></div></details>`;}).join('');
+    return `<div class="rs-ex rs-go" data-go="act:${a.k}"><div class="rs-exs"><span class="rs-nm"><span class="rs-ai" style="background:${SCOL[a.k]}"></span>${a.icon} ${a.name}<small>última ${rsDD(L.dt)} · ${nm} este mes</small></span>${rsSpark(vals)}<span class="rs-w">${rsFmt(lv)}<small> ${u}</small></span>${tr}</div></div>`;}).join('');
   if(!rows)return'';
   return `<details class="rs-ses"><summary><span class="rs-sl" style="background:var(--P)">🏃</span><span class="rs-sname">Cardio y deportes</span><span class="rs-when">extras</span><span class="rs-chev">›</span></summary>${rows}</details>`;}
 function rsBindCardio(){viewEl.querySelectorAll('details.rs-ex[data-act]').forEach(d=>d.addEventListener('toggle',()=>{if(!d.open)return;const b=d.querySelector('.rs-body');if(b.dataset.done)return;
   const a=RS_ACT.find(x=>x.k===d.dataset.act);b.innerHTML=rsActCombo(a,rsActExpo(a));b.dataset.done=1;const s=b.querySelector('.rs-scr');if(s)s.scrollLeft=s.scrollWidth;}));}
+
+/* ===== SECCIÓN GRÁFICAS: un desplegable con todo ===== */
+let rsChartSel=null;
+function rsAllItems(){const seen={};const groups=[['Torso',['A','C']],['Pierna',['B','D']],['Abdominales',['ABS']],['Agarre',['GRIP']]].map(([g,ks])=>{const its=[];ks.forEach(k=>SESSIONS[k].items.forEach(it=>{if(seen[it.id])return;seen[it.id]=1;its.push(it);}));return[g,its];});return groups;}
+function rsItemById(id){for(const k of ['A','B','C','D','ABS','GRIP']){const it=SESSIONS[k].items.find(x=>x.id===id);if(it)return it;}return EX[id];}
+function rsDefaultChart(){const st=planStatus();const it=SESSIONS[st.next].items.find(x=>rsExpo(x.id,x.type||'weight').length);return it?it.id:'latraise';}
+const RS_GROUPS=[['Torso','var(--C)'],['Pierna','var(--B)'],['Abs','var(--X)'],['Agarre','var(--G)'],['Cardio','var(--P)']];
+function rsGroupList(g){if(g==='Cardio')return RS_ACT.map(a=>'act:'+a.k);const m={Torso:['A','C'],Pierna:['B','D'],Abs:['ABS'],Agarre:['GRIP']}[g];const seen={},out=[];m.forEach(k=>SESSIONS[k].items.forEach(it=>{if(!seen[it.id]){seen[it.id]=1;out.push(it.id);}}));return out;}
+function rsGroupOf(v){for(const [g] of RS_GROUPS)if(rsGroupList(g).includes(v))return g;return 'Torso';}
+function rsCount(v){if(v.startsWith('act:'))return rsActExpo(RS_ACT.find(a=>a.k===v.slice(4))).length;const it=rsItemById(v);return it?rsExpo(v,it.type||'weight').length:0;}
+function rsLabel(v){if(v.startsWith('act:')){const a=RS_ACT.find(x=>x.k===v.slice(4));return a.name;}const it=rsItemById(v);return it?it.name:v;}
+function rsThumb(v,cls){if(v.startsWith('act:')){const a=RS_ACT.find(x=>x.k===v.slice(4));return `<span class="${cls} rs-emo">${a.icon}</span>`;}const im=EXIMG[v];return im?`<img class="${cls}" loading="lazy" src="${IMGBASE}${im[0]}" alt="">`:`<span class="${cls} rs-emo">🏋️</span>`;}
+function rsChartsHTML(){return `<div class="rs-card" id="rsCharts"><h3>📈 Gráficas</h3><div id="rsPick"></div><div id="rsNav"></div><div id="rsChart"></div></div>`;}
+function rsDrawPicker(){const v=rsChartSel;const g=rsGroupOf(v);const L=rsGroupList(g);
+  document.getElementById('rsPick').innerHTML=`<div class="rs-gt">${RS_GROUPS.map(([n,c])=>`<button data-g="${n}" class="${n===g?'on':''}" style="${n===g?'background:'+c:''}">${n}</button>`).join('')}</div>
+   <div class="rs-pills" id="rsPills">${L.map(x=>`<button data-v="${x}" class="${x===v?'on':''}${rsCount(x)?'':' empty'}">${rsThumb(x,'rs-th')}<span>${esc(rsLabel(x))}</span></button>`).join('')}</div>`;
+  const i=L.indexOf(v);
+  document.getElementById('rsNav').innerHTML=`<div class="rs-nav3" id="rsNav3"><button id="rsPv" aria-label="Anterior">‹</button><div class="rs-n3">${rsThumb(v,'rs-th2')}<div><b>${esc(rsLabel(v))}</b><span>${i+1} de ${L.length} · desliza para cambiar</span></div></div><button id="rsNx" aria-label="Siguiente">›</button></div>`;
+  const pk=document.getElementById('rsPick');
+  pk.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{const l=rsGroupList(b.dataset.g);rsSelect(l.find(x=>rsCount(x))||l[0]);});
+  pk.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>rsSelect(b.dataset.v));
+  const on=pk.querySelector('.rs-pills .on');if(on){const pl=document.getElementById('rsPills');pl.scrollLeft=on.offsetLeft-pl.clientWidth/2+on.offsetWidth/2;}
+  const step=d=>rsSelect(L[(i+d+L.length)%L.length]);
+  document.getElementById('rsPv').onclick=()=>step(-1);document.getElementById('rsNx').onclick=()=>step(1);
+  let x0=null;const n3=document.getElementById('rsNav3');n3.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;},{passive:true});
+  n3.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>40)step(dx<0?1:-1);});}
+function rsSelect(v){rsChartSel=v;rsDrawPicker();rsDrawChart(v);}
+function rsDrawChart(v){rsChartSel=v;const box=document.getElementById('rsChart');if(!box)return;let html;
+  if(v.startsWith('act:')){const a=RS_ACT.find(x=>x.k===v.slice(4));const E=rsActExpo(a);html=E.length?rsActCombo(a,E):'<div class="rs-hint" style="padding:10px 0">Aún no lo has registrado.</div>';}
+  else{const it=rsItemById(v);const E=rsExpo(v,it.type||'weight');const rg=rangeOf(it);
+    html=`<div class="rs-cap">${E.length} ${E.length===1?'vez':'veces'}${rg?` · rango ${rg.lo}-${rg.hi} ${it.type==='time'?'s':'reps'}`:''}</div>`+(E.length?rsCombo(it,E):'<div class="rs-hint" style="padding:10px 0">Aún no lo has registrado.</div>');}
+  box.innerHTML=html;const s=box.querySelector('.rs-scr');if(s)s.scrollLeft=s.scrollWidth;
+  box.querySelectorAll('.rs-bar').forEach(r=>r.addEventListener('click',()=>{box.querySelectorAll('.rs-chip.on').forEach(c=>c.classList.remove('on'));const c=box.querySelector(`.rs-chip[data-c="${r.dataset.c}"]`);if(c)c.classList.add('on');}));}
+function rsBindCharts(){if(!document.getElementById('rsCharts'))return;if(!rsChartSel)rsChartSel=rsDefaultChart();rsSelect(rsChartSel);
+  viewEl.querySelectorAll('.rs-go').forEach(r=>r.onclick=()=>{rsSelect(r.dataset.go);document.getElementById('rsCharts').scrollIntoView({behavior:'smooth',block:'start'});});}
 function renderResumen(){
   const now=new Date();const ws=new Date(now);ws.setDate(now.getDate()-((now.getDay()+6)%7));ws.setHours(0,0,0,0);
   const mk=`${now.getFullYear()}-${pad(now.getMonth()+1)}`;
@@ -1180,7 +1230,7 @@ function renderResumen(){
     const d=new Date(dt+'T12:00');if(d>=ws&&d<=now&&sess.length)weekDays++;
     if(dt.startsWith(mk)){const mt=(data.days[dt].meta)||{};Object.values(mt).forEach(mm=>{monthMin+=parseInt(mm.dur,10)||0;monthKcal+=parseInt(mm.kcal,10)||0;});}});
   const stats=[[weekDays,'días esta semana'],[monthStr,'fuerza este mes'],[monthPool,'piscina este mes'],[monthExtra,'abs, pádel, agarre y cardio este mes'],[monthMin,'min este mes'],[monthKcal,'kcal este mes']];
-  let h=rsPlanHTML(stats)+rsWeekHTML()+`<div class="rs-h2">Ejercicios</div><div class="rs-hint" style="margin:4px 2px 0">Toca un ejercicio para ver su gráfica con todas las series.</div>`+rsSessionsHTML()+rsCardioHTML()+rsMusclesHTML();
+  let h=rsPlanHTML(stats)+rsWeekHTML()+`<div class="rs-h2">Ejercicios</div><div class="rs-hint" style="margin:4px 2px 0">Toca un ejercicio para verlo en la sección 📈 Gráficas, abajo del todo.</div>`+rsSessionsHTML()+rsCardioHTML()+rsMusclesHTML()+rsChartsHTML();
   h+=`<div class="backup"><h3>Exportar para compartir</h3>
     <p>Texto legible con todos tus días (solo series de trabajo con su RIR, tiempo, calorías y pulsaciones) para pasárselo a alguien.</p>
     <textarea id="txtBox" readonly>${esc(buildReport())}</textarea>
@@ -1192,7 +1242,7 @@ function renderResumen(){
     <div class="bbtns"><button id="copyBtn">Copiar</button><button id="dlBtn">Descargar</button></div>
     <p>Pega aquí una copia para restaurar:</p><textarea id="impBox" placeholder='{"days":...}'></textarea>
     <div class="bbtns"><button id="impBtn">Restaurar copia</button></div><div class="bmsg" id="bmsg"></div></div>`;
-  viewEl.innerHTML=h;rsBind();rsBindCardio();
+  viewEl.innerHTML=h;rsBindCharts();
   const copyFrom=async(id,cb)=>{const t=document.getElementById(id);try{await navigator.clipboard.writeText(t.value);cb('Copiado ✓');}catch(e){t.select();try{document.execCommand('copy');cb('Copiado ✓');}catch(_){cb('No se pudo copiar',1);}}};
   const dlFrom=(id,name,type,cb)=>{try{const b=new Blob([document.getElementById(id).value],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);cb('Descargando ✓');}catch(e){cb('No se pudo; usa Copiar',1);}};
   document.getElementById('txtCopy').onclick=()=>copyFrom('txtBox',tmsg);
