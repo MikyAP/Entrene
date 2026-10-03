@@ -44,6 +44,7 @@
   details.proto summary::after{content:'▾';margin-left:auto;color:var(--muted)}
   details.proto[open] summary::after{content:'▴'}
   .proto-body{font-size:12.8px;color:#D3D9E0;padding:0 0 12px;line-height:1.5}
+  details.wu{border-color:#FF9F3C55} details.wu summary{color:#FFB25C} .wu ul{margin:4px 0 8px;padding-left:18px} .wu li{margin:3px 0} .wu p{margin:6px 0}
   .proto-body p{margin:0 0 8px} .proto-body b{color:var(--text)}
   .ex{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0}
   .ex.star{border-color:rgba(245,197,66,.45)}
@@ -340,7 +341,7 @@ const SESSIONS={
    FACEPULL,
  ]},
  D:{name:'Pierna 2 · glúteo e isquios',items:[
-   {id:'hipthrust',star:1,name:'Hip thrust',scheme:'3-4 × 8-12',rest:150,q:'hip thrust con barra',p:['glutes'],s:['hamstrings'],cue:'Empuja con los talones, aprieta el glúteo arriba, sin arquear la lumbar.'},
+   {id:'hipthrust',star:1,name:'Hip thrust en máquina',scheme:'3-4 × 8-12',rest:150,q:'hip thrust en máquina técnica',p:['glutes'],s:['hamstrings'],cue:'En máquina (la misma del curl femoral). Ajusta el apoyo para que quede justo bajo los omóplatos y el rodillo o cinturón sobre la cadera. Pies al ancho de cadera, rodillas a 90° arriba. Empuja con los talones, sube hasta que cadera y tronco queden en línea, aprieta el glúteo 1 s y baja controlado. Barbilla hacia el pecho y sin arquear la lumbar al final. Apunta el peso que marque la máquina.'},
    {id:'legpress',star:1,name:'Prensa de piernas',base:75.7,wlabel:'Discos (kg)',scheme:'3 × 8-12',rest:150,q:'prensa de piernas técnica',p:['quads','glutes'],s:['hamstrings'],cue:'La máquina vacía ya pesa 75,7 kg (starting resistance): apunta SOLO los discos que cargues. Empuja con los talones. No bloquees de golpe las rodillas al estirar.'},
    {id:'lunge',name:'Zancadas',scheme:'2 × 8-12 / pierna',rest:105,q:'zancadas con mancuernas',p:['quads','glutes'],s:['hamstrings'],cue:'Paso largo, rodilla de atrás hacia el suelo, tronco recto.'},
    {id:'legcurl',name:'Curl femoral',scheme:'3 × 10-15',rest:105,q:'curl femoral tumbado máquina',p:['hamstrings'],s:[],cue:'Lleva el talón al glúteo sin despegar la cadera y baja lento.'},
@@ -410,7 +411,7 @@ const EXIMG={
 const IMGBASE='https://exercise-dataset.com/images/flat/';
 const IMGALT={
   chestpress:'Press de pecho en máquina',seatedrow:'Remo sentado en polea',incline:'Press inclinado con mancuernas',pulldown:'Jalón al pecho',barbellcurl:'Curl con barra',pushdown:'Tríceps en polea',latraise:'Elevaciones laterales',wcrunch:'Crunch con peso (tumbado)',
-  squat:'Sentadilla con mancuernas',rdl:'Peso muerto rumano',legext:'Extensión de cuádriceps',legcurl:'Curl femoral',calf:'Gemelos',legraise:'Elevación de piernas',shoulderpress:'Press de hombro en máquina',neutralpulldown:'Jalón con agarre neutro',row:'Remo con mancuerna a una mano',pecdeck:'Aperturas en máquina',dbfly:'Aperturas con mancuernas en banco',hammercurl:'Curl martillo',ohtriceps:'Extensión de tríceps por encima de la cabeza',hipthrust:'Hip thrust',legpress:'Prensa de piernas',lunge:'Zancadas',facepull:'Face pull en polea',sideplank:'Plancha lateral',plank:'Plancha frontal',declinecrunch:'Crunch en banco declinado',polcrunch:'Crunch en polea de rodillas',hangknee:'Elevación de rodillas colgado',revcrunch:'Crunch inverso',deadbug:'Dead bug',pallof:'Pallof press en polea',bicycle:'Crunch bicicleta'
+  squat:'Sentadilla con mancuernas',rdl:'Peso muerto rumano',legext:'Extensión de cuádriceps',legcurl:'Curl femoral',calf:'Gemelos',legraise:'Elevación de piernas',shoulderpress:'Press de hombro en máquina',neutralpulldown:'Jalón con agarre neutro',row:'Remo con mancuerna a una mano',pecdeck:'Aperturas en máquina',dbfly:'Aperturas con mancuernas en banco',hammercurl:'Curl martillo',ohtriceps:'Extensión de tríceps por encima de la cabeza',hipthrust:'Hip thrust en máquina',legpress:'Prensa de piernas',lunge:'Zancadas',facepull:'Face pull en polea',sideplank:'Plancha lateral',plank:'Plancha frontal',declinecrunch:'Crunch en banco declinado',polcrunch:'Crunch en polea de rodillas',hangknee:'Elevación de rodillas colgado',revcrunch:'Crunch inverso',deadbug:'Dead bug',pallof:'Pallof press en polea',bicycle:'Crunch bicicleta'
 };
 function demoHTML(it){
   const imgs=EXIMG[it.id]; if(!imgs)return '';
@@ -704,6 +705,33 @@ function sessStatsHTML(sid){const mm=getMeta(activeDate,sid);
     <div class="sf"><label>Puls. media (ppm)</label><input data-meta="hr" inputmode="numeric" value="${esc(mm.hr||'')}" aria-label="Pulsaciones medias" placeholder="—"></div></div>`;}
 const ABS_BLOCKS=[{t:'Bloque 1 · Crunch o elevación',h:'Elige uno · 3 series · el que mejor hace crecer el abdomen',cats:['crunch','elev']},{t:'Bloque 2 · Estabilidad u oblicuos',h:'Elige uno · 2-3 series',cats:['estab','obl']}];
 function absVisible(){const loc=data.absLoc||'gym';return SESSIONS.ABS.items.filter(it=>!isHidden('ABS',it.id)&&(it.loc==='both'||it.loc===loc||filled(recOf(activeDate,'ABS',it.id))));}
+/* ===== CALENTAMIENTO por sesión ===== */
+const WU_MOB={torso:['Círculos de brazos: 10 hacia delante y 10 hacia atrás.','Abrir y cerrar los brazos en cruz (como un abrazo) × 10.','1 serie de <b>face pull muy ligera × 15</b> (o gomas si hay) para despertar la espalda alta y el hombro.'],
+ pierna:['Balanceos de pierna adelante-atrás × 10 y de lado × 10, cada pierna (agarrado a algo).','10 sentadillas sin peso, lentas y profundas.','10 puentes de glúteo en el suelo, apretando 1 s arriba.']};
+function wuRound(v,id){const inc=Math.min(incOf(id)||1,2.5);return Math.max(0,Math.round(v/inc)*inc);}
+function wuTarget(it){const type=it.type||'weight';if(type!=='weight')return null;const prev=prevRecord(current,it.id,activeDate);if(!prev)return null;
+  if(mixedWeights(prev.rec))return maxW(prev.rec);const nw=nextWeight(refItem(it,prev),type,prev.rec);return nw?nw.w:maxW(prev.rec);}
+function wuFmt(v){return String(Math.round(v*10)/10).replace('.',',');}
+function wuSets(it,full){const t=wuTarget(it);const u=it.base?' kg de discos':' kg';
+  if(!t)return full?'la primera con la mitad del peso que vayas a usar × 10, la segunda con unas tres cuartas partes × 5':'una serie con la mitad del peso × 8';
+  if(it.id==='legpress')return full?`máquina sola (sin discos) × 10, luego ${wuFmt(wuRound(t*0.5,it.id))}${u} × 5`:`máquina sola × 8`;
+  if(it.id==='rdl'&&t>=14)return full?`barra sola (9 kg) × 10, luego ${wuFmt(wuRound(t*0.7,it.id))} kg × 5`:`barra sola × 8`;
+  const a=wuRound(t*0.5,it.id),b=wuRound(t*0.75,it.id);
+  if(!full)return `${a?wuFmt(a)+u:'sin peso'} × 8`;
+  if(it.id==='squat'&&t<=14)return `sin peso × 10, luego ${wuFmt(Math.max(a,1))}${u} × 8`;
+  return `${wuFmt(a)}${u} × 10, luego ${wuFmt(b)}${u} × 5`;}
+function warmupHTML(sid){const S=SESSIONS[sid];const leg=sid==='B'||sid==='D';const stars=S.items.filter(it=>it.star);
+  const open=!sessionHasWork(activeDate,sid);
+  const hc=S.items.find(it=>it.id==='legcurl');
+  let h=`<details class="proto wu"${open?' open':''}><summary>🔥 Calentamiento · 5-8 min</summary><div class="proto-body">
+   <p><b>1 · General:</b> el paseo hasta el gimnasio vale si vas a buen paso y llegas caliente. Si no, 3-5 min de bici o cinta suave.</p>
+   <p><b>2 · Movilidad (${leg?'pierna':'torso'}):</b></p><ul>${WU_MOB[leg?'pierna':'torso'].map(x=>`<li>${x}</li>`).join('')}</ul>
+   <p><b>3 · Series de aproximación</b> (márcalas como <b>C</b> tocando el número de la serie, así no cuentan):</p><ul>`;
+  stars.forEach((it,i)=>{const t=wuTarget(it);h+=`<li><b>${esc(it.name)}</b>${t?` <span style="color:var(--muted)">(hoy ~${wuFmt(t)}${it.base?' kg de discos':' kg'})</span>`:''}: ${wuSets(it,i===0)}.</li>`;});
+  if(hc)h+=`<li><b>Curl femoral:</b> antes de sus series, 1 serie muy ligera × 15, aunque ya vengas caliente. Es el músculo que te ha avisado.</li>`;
+  h+=`</ul><p>El resto de ejercicios ya los coges calientes: directamente a las series de trabajo.</p>
+   <p style="color:var(--muted)">Nada de estiramientos largos (más de 30-60 s quieto) antes de entrenar: restan fuerza. Déjalos para la pestaña Post.</p></div></details>`;
+  return h;}
 function renderEntreno(){
   const S=SESSIONS[current];
   {const n=sessNumber(activeDate,current);curPhase=phaseOf(n||planStatus().done+1);}
@@ -724,7 +752,7 @@ function renderEntreno(){
     const hid=S.items.filter(it=>isHidden(current,it.id));
     if(hid.length){h+=`<div class="hidden-sec"><h4>Ocultos (${hid.length})</h4>`+hid.map(it=>`<div class="hidden-row"><span>${it.name}</span><button data-show="${it.id}">Mostrar</button></div>`).join('')+`</div>`;}
     h+=noteHTML()+`<div class="save-note">Editas el día de arriba. <b>Se guarda solo.</b></div>`;viewEl.innerHTML=h;bindEntreno();return;}
-  else h+=protoHTML();
+  else h+=protoHTML()+(PLAN.includes(current)?warmupHTML(current):'');
   const main=S.items.filter(it=>!it.opt&&!isHidden(current,it.id));
   const opt=S.items.filter(it=>it.opt&&!isHidden(current,it.id));
   const hidden=S.items.filter(it=>isHidden(current,it.id));
