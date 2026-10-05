@@ -985,6 +985,7 @@ const BODY=[
   {k:'resid_kg',l:'Masa residual',u:'kg',d:0},
   {k:'icc',l:'Índice cintura-cadera',u:'',d:-1}]},
  {grp:'Sumatorio de pliegues',f:[
+  {k:'sum3',l:'Σ 3 pliegues (tronco)',u:'mm',d:-1,h:'Abdominal + supraespinal + cresta ilíaca: la grasa de la barriga. Se calcula sola con esos 3 pliegues.'},
   {k:'sum6',l:'Σ 6 pliegues',u:'mm',d:-1,h:'El dato más fiable para comparar entre visitas.'},
   {k:'sum8',l:'Σ 8 pliegues',u:'mm',d:-1}]},
  {grp:'Pliegues (mm)',f:[
@@ -998,10 +999,10 @@ const BODY=[
   {k:'ecto',l:'Ectomorfia',u:'',d:0,h:'Componente de delgadez.'}]}];
 const BODY_F=BODY.flatMap(g=>g.f);
 const BODY_TXT=[{k:'formula',l:'Fórmula de % grasa',ph:'p. ej. Faulkner, Yuhasz, Withers…'},{k:'centro',l:'Centro / quién mide',ph:'p. ej. INDYA'},{k:'nota',l:'Notas del dietista',ph:'Lo que te comente'}];
-const SUM6=['pl_tri','pl_sub','pl_sup','pl_abd','pl_mus','pl_pie'],SUM8=['pl_tri','pl_sub','pl_bic','pl_cre','pl_sup','pl_abd','pl_mus','pl_pie'];
+const SUM3=['pl_abd','pl_sup','pl_cre'],SUM6=['pl_tri','pl_sub','pl_sup','pl_abd','pl_mus','pl_pie'],SUM8=['pl_tri','pl_sub','pl_bic','pl_cre','pl_sup','pl_abd','pl_mus','pl_pie'];
 /* valor guardado o, para los sumatorios, calculado a partir de los pliegues */
 function bodyVal(e,k){if(!e)return NaN;const v=numW(e[k]);if(!isNaN(v))return v;
-  const ks=k==='sum6'?SUM6:k==='sum8'?SUM8:null;if(!ks)return NaN;const xs=ks.map(x=>numW(e[x]));return xs.some(isNaN)?NaN:Math.round(xs.reduce((a,b)=>a+b,0)*10)/10;}
+  const ks=k==='sum3'?SUM3:k==='sum6'?SUM6:k==='sum8'?SUM8:null;if(!ks)return NaN;const xs=ks.map(x=>numW(e[x]));return xs.some(isNaN)?NaN:Math.round(xs.reduce((a,b)=>a+b,0)*10)/10;}
 function fmtN(v){return String(Math.round(v*100)/100).replace('.',',');}
 function bodyDelta(f,dv){const r=Math.round(dv*100)/100;const cls=!r||!f.d?'':((r>0)===(f.d>0)?'dn-good':'dn-bad');return `<span class="${cls}">${r>0?'+':''}${fmtN(r)}${f.u?' '+f.u:''}</span>`;}
 function bodyFormHTML(date){const e=(data.body||{})[date]||{};
@@ -1017,7 +1018,7 @@ function bodyHTML(){const b=data.body||{};const ds=Object.keys(b).sort();const t
   const last=b[ds[ds.length-1]];
   const rows=BODY_F.map(f=>{const pts=ds.map(d=>bodyVal(b[d],f.k)).filter(v=>!isNaN(v));if(!pts.length)return'';
     const lv=pts[pts.length-1];const bits=[];if(pts.length>1)bits.push(`${bodyDelta(f,lv-pts[pts.length-2])} vs anterior`);if(pts.length>2)bits.push(`${bodyDelta(f,lv-pts[0])} desde el inicio`);
-    const calc=(f.k==='sum6'||f.k==='sum8')&&isNaN(numW(last[f.k]))&&!isNaN(bodyVal(last,f.k))?' (calculado)':'';
+    const calc=(f.k==='sum3'||f.k==='sum6'||f.k==='sum8')&&isNaN(numW(last[f.k]))&&!isNaN(bodyVal(last,f.k))?' (calculado)':'';
     return `<div class="meas-row" style="align-items:center"><span class="nm">${f.l}${calc}<br><span style="font-size:11.5px;color:var(--muted)">${bits.join(' · ')||'primer análisis'}</span></span>${sparkSVG(pts)}<span class="vl"><b>${fmtN(lv)}${f.u?' '+f.u:''}</b></span></div>`;}).join('');
   const forms=[...new Set(ds.map(d=>(b[d].formula||'').trim().toLowerCase()).filter(Boolean))];
   const cens=[...new Set(ds.map(d=>(b[d].centro||'').trim().toLowerCase()).filter(Boolean))];
@@ -1042,7 +1043,7 @@ function wireBody(){const di=document.getElementById('bcDate');if(!di)return;
   viewEl.querySelectorAll('[data-bcdel]').forEach(x=>x.onclick=()=>{if(!confirm('¿Borrar este análisis?'))return;delete data.body[x.dataset.bcdel];flush();renderMedidas();});}
 function bodyReport(){const b=data.body||{};const ds=Object.keys(b).sort();if(!ds.length)return'';
   let o='\nANÁLISIS CORPORAL (antropometría)\n'+'-'.repeat(33)+'\n';
-  ds.forEach(d=>{const e=b[d];const parts=BODY_F.map(f=>{const v=bodyVal(e,f.k);if(isNaN(v))return'';const c=(f.k==='sum6'||f.k==='sum8')&&isNaN(numW(e[f.k]))?' (calculado)':'';return f.l+' '+fmtN(v)+(f.u?' '+f.u:'')+c;}).filter(Boolean);
+  ds.forEach(d=>{const e=b[d];const parts=BODY_F.map(f=>{const v=bodyVal(e,f.k);if(isNaN(v))return'';const c=(f.k==='sum3'||f.k==='sum6'||f.k==='sum8')&&isNaN(numW(e[f.k]))?' (calculado)':'';return f.l+' '+fmtN(v)+(f.u?' '+f.u:'')+c;}).filter(Boolean);
     BODY_TXT.forEach(f=>{if(e[f.k])parts.push(f.l+': '+e[f.k]);});
     o+=new Date(d+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})+': '+parts.join(' · ')+'\n';});
   return o;}
