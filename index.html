@@ -559,9 +559,11 @@ function prOf(id,type,before){let best=null;
   return type==='weight'?`${best.a} kg × ${best.b}`:type==='time'?`${best.a} s`:`${best.a} reps`;}
 /* ===== AVISOS Y SUGERENCIAS (solo informan; nunca cambian nada) ===== */
 function rangeOf(it){const seg=(it.scheme.split('×')[1]||'');const n=(seg.match(/\d+/g)||[]).map(Number);if(!n.length)return null;return{lo:n[0],hi:n.length>1?n[1]:n[0]};}
-const INC={latraise:1,hammercurl:2,incline:2,row:2,dbfly:2,squat:2,lunge:2,rdl:2,ohtriceps:2,gripR:7,gripL:7};
+const INC={latraise:1,hammercurl:1,incline:1,row:1,dbfly:1,ohtriceps:1,barbellcurl:1,squat:2,lunge:2,rdl:2,gripR:7,gripL:7};
 function incOf(id){return INC[id]||2.5;}
-function rirGoal(it){return curPhase===1?'RIR ~3':(it.star?'RIR 2-3':'RIR 1-2');}
+/* ejercicios a llevar con más margen (historial de molestias) */
+const CAUTIOUS={legcurl:1};
+function rirGoal(it){return curPhase===1?'RIR ~3':((it.star||CAUTIOUS[it.id])?'RIR 2-3':'RIR 1-2');}
 function numW(x){return parseFloat(String(x===undefined?'':x).replace(',','.'));}
 function repsOf(s,type){return parseInt(type==='weight'?s.b:s.a,10);}
 function rirOf(s){const v=parseInt(s.r,10);return isNaN(v)?null:v;}
@@ -575,7 +577,7 @@ function analyze(it,type,rec){const r=rangeOf(it);const ws=workSets(rec).filter(
   out.low=ws.length>=2&&(reps.every(x=>x>=r.hi+3)||(rirs.length===ws.length&&rirs.every(v=>v>=4)&&reps.every(x=>x>=r.lo)));
   out.high=reps.some(x=>x<r.lo);
   const min=rirs.length?Math.min(...rirs):null;const zeros=rirs.filter(v=>v===0).length;
-  out.fail=curPhase===1?(min!==null&&min<=1):(it.star?(min!==null&&min<=1):zeros>=2);
+  out.fail=curPhase===1?(min!==null&&min<=1):((it.star||CAUTIOUS[it.id])?(min!==null&&min<=1):zeros>=2);
   return out;}
 function adviceList(it,type,rec,prev){const a=analyze(it,type,rec);const r=rangeOf(it);const L=[];if(!a.n)return L;
   if(a.low)L.push(type==='weight'?'↑ El peso se queda corto: la próxima vez sube claramente.':'↑ Te sobra: añade dificultad (más lento o con algo de peso).');
@@ -584,12 +586,23 @@ function adviceList(it,type,rec,prev){const a=analyze(it,type,rec);const r=range
   if(type==='weight'&&prev&&!a.low){const pw=maxW(prev.rec),tw=maxW(rec);if(pw&&tw&&tw-pw>=2&&tw>pw*1.3)L.push(`⚠ Subida grande respecto a la última vez (${pw} → ${tw} kg): mejor subidas pequeñas.`);}
   return L;}
 function adviceInner(it,type,rec){return adviceList(it,type,rec,prevRecord(current,it.id,activeDate)).map(x=>`<div>${x}</div>`).join('');}
+/* Memoria: peso más bajo con el que, en las últimas 6 semanas, no llegaste al mínimo de reps */
+function failCeil(it,type){if(type!=='weight')return null;const r=rangeOf(it);if(!r)return null;let ceil=null,when=null;
+  const from=shiftDate(activeDate,-42);
+  Object.keys(data.days).filter(d=>d<activeDate&&d>=from).forEach(d=>{ALLS.forEach(k=>{const rec=((data.days[d]||{})[k]||{})[it.id];
+    workSets(rec).forEach(s=>{const wv=numW(s.a),rp=repsOf(s,type);if(!isNaN(wv)&&wv>0&&!isNaN(rp)&&rp<r.lo&&(ceil===null||wv<ceil)){ceil=wv;when=d;}});});});
+  return ceil===null?null:{w:ceil,d:when};}
+/* Subidas prudentes: como mucho ~20% (25% si te sobró mucho) y nunca por encima de un peso con el que ya fallaste */
+function capUp(it,type,w,w2,big){const inc=incOf(it.id);let lim=w+Math.max(inc,w*(big?0.25:0.2));let out=Math.min(w2,lim);
+  out=w+Math.floor((out-w)/inc+1e-9)*inc;if(out<=w)out=w+inc;
+  const c=failCeil(it,type);let note='';if(c&&c.w>w&&out>c.w){out=c.w;note=` · como mucho ${String(c.w).replace('.',',')} kg: el ${new Date(c.d+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'numeric'})} no llegaste al mínimo con ese peso`;}
+  return{w:roundW(out),note};}
 function nextWeight(it,type,rec){const a=analyze(it,type,rec);const w=maxW(rec);if(!w)return null;const inc=incOf(it.id);
-  if(a.low)return{w:roundW(w+(inc>=5?1:2)*inc),why:'te sobró la última vez'};
+  if(a.low){const c=capUp(it,type,w,w+(inc>=5?1:2)*inc,true);return{w:c.w,why:'te sobró la última vez'+c.note};}
   if(a.high){const r=rangeOf(it);const reps=workSets(rec).map(s=>repsOf(s,type)).filter(x=>!isNaN(x));const mn=Math.min(...reps);const big=r&&r.lo-mn>=2;
     return{w:roundW(Math.max(inc,big?Math.min(w-inc,w*0.88):w-inc)),why:big?'te quedaste lejos del mínimo: baja algo más':'no llegaste al mínimo'};}
   if(a.top&&a.fail)return{w,why:'llegaste al tope pero muy justo: repite peso y sube cuando lo hagas con RIR 2-3'};
-  if(a.top)return{w:roundW(w+inc),why:'hiciste todas en el tope'};
+  if(a.top){const c=capUp(it,type,w,w+inc,false);return{w:c.w,why:'hiciste todas en el tope'+c.note};}
   if(a.fail)return{w,why:'mismo peso, para 1-2 repeticiones antes del fallo'};
   return{w,why:'mismo peso, intenta sumar repeticiones'};}
 function targetHTML(it,type,prev){const r=rangeOf(it);if(!r)return'';
