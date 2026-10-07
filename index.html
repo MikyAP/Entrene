@@ -88,8 +88,14 @@
   .tot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px} .tot-t{background:var(--panel2);border-radius:10px;padding:10px 6px;text-align:center;min-width:0}
   .tot-t b{display:block;font-size:20px;font-variant-numeric:tabular-nums;line-height:1.15} .tot-t b small{font-size:11px;color:var(--muted);font-weight:600} .tot-t span{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.25}
   .tot-body{width:100%;max-width:340px;height:auto;display:block;margin:14px auto 4px} .tot-mus{font-size:12px;color:var(--muted);text-align:center;line-height:1.6} .tot-mus b{color:var(--text)}
-  details.dly>summary{font-size:13px;gap:8px} .dly-d{min-width:58px;font-weight:700} details.dly .rs-dots{display:flex;gap:3px;flex-wrap:wrap} details.dly .rs-when{text-align:right}
-  .dly-body{padding:0 12px 12px} .dly-body .scard{margin:4px 0 12px} .dly-line{font-size:13px;padding:6px 2px;border-top:1px solid var(--line)} .dly-note{font-size:12px;color:var(--muted);padding:8px 2px;border-top:1px solid var(--line);white-space:pre-wrap}
+  .dly-strip{display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x proximity;padding:2px 0 8px;scrollbar-width:none} .dly-strip::-webkit-scrollbar{display:none}
+  .dly-chip{flex:0 0 auto;scroll-snap-align:center;min-width:52px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;color:var(--text);padding:6px 6px 5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font:inherit}
+  .dly-chip b{font-size:13px} .dly-cw{font-size:10px;color:var(--muted)} .dly-cd{display:flex;gap:2px;min-height:6px} .dly-cd i{width:6px;height:6px;border-radius:50%}
+  .dly-chip.on{border-color:var(--work);background:rgba(255,77,94,.14)}
+  .dly-nav{display:flex;align-items:center;gap:8px;margin:4px 0 8px} .dly-arr{flex:0 0 40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:22px;cursor:pointer} .dly-arr:disabled{opacity:.3}
+  .dly-title{flex:1;text-align:center;line-height:1.3} .dly-title b{display:block;font-size:14px} .dly-title small{color:var(--muted);font-size:12px}
+  .dly-body{min-height:60px} .dly-body .scard{margin:0 0 8px} .dly-line{font-size:13px;padding:7px 2px;border-top:1px solid var(--line)} .dly-note{font-size:12px;color:var(--muted);padding:8px 2px;border-top:1px solid var(--line);white-space:pre-wrap}
+  .heat-leg{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--muted);margin:2px 0 10px;flex-wrap:wrap} .heat-leg i{width:16px;height:16px;border-radius:4px;display:inline-block} .heat-leg span{margin:0 2px} .heat-leg .hl-gap{width:10px}
   .review-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0}
   .review-card h3{margin:0 0 8px;font-size:15px}
   .review-card ul{margin:4px 0 10px;padding-left:18px} .review-card li{font-size:13px;margin:5px 0;color:#D3D9E0;line-height:1.45}
@@ -754,14 +760,18 @@ function rsTotalsHTML(){const T=totalsData();if(!T.days.length)return'';const st
   const body=`<svg viewBox="0 0 760 720" class="tot-body" role="img" aria-label="Músculos trabajados desde el principio">${bodySVG('F',rel,20,0,660)}${bodySVG('B',rel,410,0,660)}<text x="185" y="705" fill="#98A1AE" font-size="26" text-anchor="middle" font-family="system-ui,sans-serif">Delante</text><text x="575" y="705" fill="#98A1AE" font-size="26" text-anchor="middle" font-family="system-ui,sans-serif">Detrás</text></svg>`;
   return `<div class="rs-card"><h3>🏁 Desde el principio</h3><div class="rs-subt" style="margin:-6px 0 10px">Desde el ${since} · ${span} días</div>
    <div class="tot-grid">${tiles.map(([v,l])=>`<div class="tot-t"><b>${v}</b><span>${l}</span></div>`).join('')}</div>
-   ${body}<div class="tot-mus">Series por músculo: ${top}</div>
+   ${body}<div class="heat-leg"><span>Sin series</span><i style="background:${HEAT[0]}"></i><span class="hl-gap"></span><span>Menos</span>${[1,2,3,4].map(l=>`<i style="background:${HEAT[l]}"></i>`).join('')}<span>Más series</span></div><div class="tot-mus">Series por músculo: ${top}</div>
    <div class="rs-hint">Kilos movidos = peso × repeticiones de todas las series de trabajo (fuerza y abdominales; el gripper no cuenta). Los colores van de menos a más series dentro de tu propio total.</div></div>`;}
-function rsDailyHTML(){const days=Object.keys(data.days).sort().reverse().filter(dt=>daySessions(dt).length);if(!days.length)return'';
-  const rows=days.map(dt=>{const ss=daySessions(dt);const st=statsOf(dayItems(dt));const cl0=cardioLines(dt);const cl=cl0.some(x=>x.k!=='GRIP')?cl0.filter(x=>x.k!=='GRIP'):cl0;
-    const right=st.sets?`${st.sets} series${st.kg?` · ${fmtInt(st.kg)} kg`:''}`:cl.map(x=>`${x.icon} ${x.txt.split(' · ')[0]}`).join(' · ');
-    const dd=new Date(dt+'T12:00');const lbl=cap(dd.toLocaleDateString('es-ES',{weekday:'short'}).replace('.',''))+' '+dd.getDate()+'/'+(dd.getMonth()+1);
-    return `<details class="rs-ses dly" data-dt="${dt}"><summary><span class="dly-d">${lbl}</span><span class="rs-dots">${ss.map(k=>`<span class="rs-dot" style="background:${SCOL[k]||'var(--L)'}">${RS_DOT[k]||k}</span>`).join('')}</span><span class="rs-when">${esc(right)}</span><span class="rs-chev">›</span></summary><div class="dly-body"></div></details>`;}).join('');
-  return `<div class="rs-h2">Día a día</div><div class="rs-hint" style="margin:4px 2px 0">Toca un día para ver su tarjeta, con el muñeco y los números.</div>${rows}`;}
+function dlyDays(){return Object.keys(data.days).sort().filter(dt=>daySessions(dt).length);}
+function dlySummary(dt){const st=statsOf(dayItems(dt));const cl0=cardioLines(dt);const cl=cl0.some(x=>x.k!=='GRIP')?cl0.filter(x=>x.k!=='GRIP'):cl0;
+  return st.sets?`${st.sets} series${st.kg?` · ${fmtInt(st.kg)} kg`:''}`:cl.map(x=>`${x.icon} ${x.txt.split(' · ')[0]}`).join(' · ');}
+function rsDailyHTML(){const days=dlyDays();if(!days.length)return'';
+  const chips=days.map(dt=>{const dd=new Date(dt+'T12:00');const ss=daySessions(dt);
+    return `<button class="dly-chip" data-dly="${dt}"><span class="dly-cw">${cap(dd.toLocaleDateString('es-ES',{weekday:'short'}).replace('.',''))}</span><b>${dd.getDate()}/${dd.getMonth()+1}</b><span class="dly-cd">${ss.map(k=>`<i style="background:${SCOL[k]||'var(--L)'}"></i>`).join('')}</span></button>`;}).join('');
+  return `<div class="rs-card dly-wrap"><h3>📅 Día a día</h3>
+   <div class="dly-strip">${chips}</div>
+   <div class="dly-nav"><button class="dly-arr" data-dstep="-1" aria-label="Día anterior">‹</button><div class="dly-title"></div><button class="dly-arr" data-dstep="1" aria-label="Día siguiente">›</button></div>
+   <div class="dly-body"></div><div class="rs-hint" style="text-align:center">Desliza la tarjeta o usa ‹ › para cambiar de día.</div></div>`;}
 function dailyBodyHTML(dt){let h='';const d=data.days[dt]||{};
   PLAN.filter(k=>sessionHasWork(dt,k)).forEach(k=>h+=sessionCardHTML(dt,k));
   ['PUSH','PULL','LEGS'].filter(k=>sessionHasWork(dt,k)).forEach(k=>{const s=statsOf(dayItems(dt,[k]));h+=`<div class="dly-line"><b>${LEGACY[k].name}</b> · ${s.sets} series · ${fmtInt(s.reps)} reps · ${fmtInt(s.kg)} kg</div>`;});
@@ -769,8 +779,20 @@ function dailyBodyHTML(dt){let h='';const d=data.days[dt]||{};
   cardioLines(dt).forEach(x=>h+=`<div class="dly-line">${x.icon} <b>${x.name}</b> · ${esc(x.txt)}</div>`);
   if(d.note)h+=`<div class="dly-note">📝 ${esc(d.note)}</div>`;
   return h||'<div class="dly-line">Sin datos.</div>';}
-function rsBindDaily(){viewEl.querySelectorAll('details.dly').forEach(el=>el.addEventListener('toggle',()=>{if(!el.open)return;const b=el.querySelector('.dly-body');if(b.dataset.done)return;
-  b.innerHTML=dailyBodyHTML(el.dataset.dt);b.dataset.done=1;bindSessionCard(b);}));}
+function rsBindDaily(){const w=viewEl.querySelector('.dly-wrap');if(!w)return;const days=dlyDays();let cur=days.length-1;
+  const body=w.querySelector('.dly-body'),title=w.querySelector('.dly-title'),strip=w.querySelector('.dly-strip');
+  const show=i=>{cur=Math.max(0,Math.min(days.length-1,i));const dt=days[cur];const dd=new Date(dt+'T12:00');
+    title.innerHTML=`<b>${cap(dd.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'}))}</b><small>${esc(dlySummary(dt))}</small>`;
+    body.innerHTML=dailyBodyHTML(dt);bindSessionCard(body);
+    w.querySelectorAll('.dly-chip').forEach(c=>c.classList.toggle('on',c.dataset.dly===dt));
+    const on=w.querySelector('.dly-chip.on');if(on)strip.scrollLeft=on.offsetLeft-strip.clientWidth/2+on.clientWidth/2;
+    w.querySelector('[data-dstep="-1"]').disabled=cur===0;w.querySelector('[data-dstep="1"]').disabled=cur===days.length-1;};
+  w.querySelectorAll('.dly-chip').forEach(c=>c.onclick=()=>show(days.indexOf(c.dataset.dly)));
+  w.querySelectorAll('[data-dstep]').forEach(b=>b.onclick=()=>show(cur+(+b.dataset.dstep)));
+  let x0=null,y0=null;body.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
+  body.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;x0=null;
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)show(cur+(dx<0?1:-1));},{passive:true});
+  show(cur);}
 
 function mixedWeights(rec){const ws=workSets(rec).map(s=>parseFloat(String(s.a||'').replace(',','.'))).filter(v=>!isNaN(v));return new Set(ws).size>1;}
 function isHidden(sid,id){return !!data.hidden[sid+'|'+id];}
