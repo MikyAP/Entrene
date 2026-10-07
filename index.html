@@ -85,6 +85,11 @@
   .scard{margin:12px 0} .scard-img svg{width:100%;height:auto;display:block;border-radius:16px;border:1px solid var(--line)}
   .scard-btns{display:flex;gap:8px;margin-top:8px} .scard-btns button{flex:1;min-height:44px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer}
   .scard-msg{font-size:12px;color:var(--muted);min-height:16px;margin-top:4px;text-align:center} .scard-msg.err{color:var(--work)}
+  .tot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px} .tot-t{background:var(--panel2);border-radius:10px;padding:10px 6px;text-align:center;min-width:0}
+  .tot-t b{display:block;font-size:20px;font-variant-numeric:tabular-nums;line-height:1.15} .tot-t b small{font-size:11px;color:var(--muted);font-weight:600} .tot-t span{display:block;font-size:10.5px;color:var(--muted);margin-top:3px;line-height:1.25}
+  .tot-body{width:100%;max-width:340px;height:auto;display:block;margin:14px auto 4px} .tot-mus{font-size:12px;color:var(--muted);text-align:center;line-height:1.6} .tot-mus b{color:var(--text)}
+  details.dly>summary{font-size:13px;gap:8px} .dly-d{min-width:58px;font-weight:700} details.dly .rs-dots{display:flex;gap:3px;flex-wrap:wrap} details.dly .rs-when{text-align:right}
+  .dly-body{padding:0 12px 12px} .dly-body .scard{margin:4px 0 12px} .dly-line{font-size:13px;padding:6px 2px;border-top:1px solid var(--line)} .dly-note{font-size:12px;color:var(--muted);padding:8px 2px;border-top:1px solid var(--line);white-space:pre-wrap}
   .review-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0}
   .review-card h3{margin:0 0 8px;font-size:15px}
   .review-card ul{margin:4px 0 10px;padding-left:18px} .review-card li{font-size:13px;margin:5px 0;color:#D3D9E0;line-height:1.45}
@@ -647,7 +652,8 @@ function sidesOf(it){return /\/\s*(lado|pierna)/.test(it.scheme)?2:1;}
 function cardItems(dt,sid){const out=[];const add=(k,it)=>{const rec=((data.days[dt]||{})[k]||{})[it.id];if(workFilled(rec))out.push({k,it,rec});};
   (SESSIONS[sid].items||[]).forEach(it=>add(sid,it));
   if(SESSIONS.ABS)SESSIONS.ABS.items.forEach(it=>add('ABS',it));return out;}
-function cardStats(dt,sid){const items=cardItems(dt,sid);const mus={};let sets=0,reps=0,kg=0;
+function cardStats(dt,sid){return statsOf(cardItems(dt,sid));}
+function statsOf(items){const mus={};let sets=0,reps=0,kg=0;
   items.forEach(({it,rec})=>{const type=it.type||'weight';const ws=workSets(rec);const n=ws.length;sets+=n;const sd=sidesOf(it);
     (it.p||[]).forEach(m=>mus[m]=(mus[m]||0)+n);(it.s||[]).forEach(m=>mus[m]=(mus[m]||0)+n*0.5);
     ws.forEach(s=>{if(type==='time')return;const r=parseInt(type==='weight'?s.b:s.a,10)||0;reps+=r*sd;
@@ -705,16 +711,66 @@ function sessionCardSVG(dt,sid){const st=cardStats(dt,sid);const mm=getMeta(dt,s
   const H=Math.max(1350,Math.ceil(ly+Math.min(rec.length,4)*46+20));
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 ${H}" width="1080" height="${H}" ${F}>`+v.replace('__H__',H)+'</svg>';}
 function sessionCardHTML(dt,sid){return `<div class="scard"><div class="scard-img">${sessionCardSVG(dt,sid)}</div>
-  <div class="scard-btns"><button data-scard="share">📤 Compartir</button><button data-scard="save">💾 Guardar imagen</button></div><div class="scard-msg" id="scardMsg"></div></div>`;}
+  <div class="scard-btns"><button data-scard="share" data-dt="${dt}" data-sid="${sid}">📤 Compartir</button><button data-scard="save" data-dt="${dt}" data-sid="${sid}">💾 Guardar imagen</button></div><div class="scard-msg"></div></div>`;}
 async function sessionCardBlob(dt,sid){const svg=sessionCardSVG(dt,sid);const img=new Image();img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
   await new Promise((ok,ko)=>{img.onload=ok;img.onerror=ko;});const c=document.createElement('canvas');const H=+(svg.match(/height="(\d+)"/)||[0,1350])[1];c.width=1080;c.height=H;c.getContext('2d').drawImage(img,0,0);
   return new Promise(r=>c.toBlob(r,'image/png'));}
-function bindSessionCard(){document.querySelectorAll('[data-scard]').forEach(b=>b.onclick=async()=>{const m=document.getElementById('scardMsg');
-  try{const blob=await sessionCardBlob(activeDate,current);const name=`entreno-${activeDate}-${current}.png`;const file=new File([blob],name,{type:'image/png'});
+function bindSessionCard(root){(root||document).querySelectorAll('[data-scard]').forEach(b=>b.onclick=async()=>{const m=b.closest('.scard').querySelector('.scard-msg');
+  const dt=b.dataset.dt||activeDate,sid=b.dataset.sid||current;
+  try{const blob=await sessionCardBlob(dt,sid);const name=`entreno-${dt}-${sid}.png`;const file=new File([blob],name,{type:'image/png'});
     if(b.dataset.scard==='share'&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:'Mi entreno'});return;}
     const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
     if(m)m.textContent=b.dataset.scard==='share'?'Este navegador no deja compartir directamente: la he descargado.':'Imagen descargada.';}
   catch(e){if(e&&e.name==='AbortError')return;if(m){m.textContent='No se pudo crear la imagen.';m.classList.add('err');}}});}
+
+/* ===== RESUMEN: total desde el principio y día a día ===== */
+const STR_KEYS=['A','B','C','D','PUSH','PULL','LEGS'];
+function itemFor(k,id){return ((SESSIONS[k]&&SESSIONS[k].items)||[]).find(x=>x.id===id)||EX[id]||{id,name:id,scheme:'3',p:[],s:[]};}
+function dayItems(dt,keys){const d=data.days[dt]||{};const out=[];(keys||[...STR_KEYS,'ABS']).forEach(k=>{const s=d[k];if(!s||typeof s!=='object')return;
+  Object.keys(s).forEach(id=>{const rec=s[id];if(workFilled(rec))out.push({k,it:itemFor(k,id),rec});});});return out;}
+function cardioLines(dt){const d=data.days[dt]||{};const L=[];
+  RS_ACT.forEach(a=>{if(!daySessions(dt).includes(a.k))return;const mm=getMeta(dt,a.k)||{};const v=rsNum(a.get(d));const p=[];
+    if(v!==null)p.push(a.k==='PADEL'?`${rsFmt(v)} ${v==1?'partido':'partidos'}`:`${rsFmt(v)} ${a.u}`);
+    if(mm.dur)p.push(`${mm.dur} min`);const lw=rsNum((d[a.k]||{}).lastre);if(lw)p.push(`lastre ${rsFmt(lw)} kg`);
+    L.push({k:a.k,icon:a.icon,name:a.name,txt:p.join(' · ')||'registrado'});});
+  const g=dayItems(dt,['GRIP']);if(g.length){const n=g.reduce((t,x)=>t+workSets(x.rec).length,0);L.push({k:'GRIP',icon:'✊',name:'Gripper',txt:`${n} series`});}
+  return L;}
+function totalsData(){const days=Object.keys(data.days).sort().filter(dt=>daySessions(dt).length);
+  const all=[];let strength=0,mins=0,prs=0;const best={};
+  days.forEach(dt=>{const its=dayItems(dt);all.push(...its);strength+=STR_KEYS.filter(k=>sessionHasWork(dt,k)).length;
+    Object.values((data.days[dt]||{}).meta||{}).forEach(mm=>mins+=parseInt(mm.dur,10)||0);
+    its.forEach(({it,rec})=>{const type=it.type||'weight';const now=bestSet(rec,type);if(!now)return;const o=best[it.id];
+      if(o&&(now.a>o.a||(type==='weight'&&now.a===o.a&&now.b>o.b)))prs++;
+      if(!o||now.a>o.a||(type==='weight'&&now.a===o.a&&now.b>o.b))best[it.id]=now;});});
+  const cardio=RS_ACT.map(a=>{const E=rsActExpo(a);return{a,n:E.length,main:E.reduce((t,e)=>t+(e.main||0),0)};}).filter(x=>x.n);
+  return{days,first:days[0],strength,mins,prs,cardio,st:statsOf(all)};}
+function rsTotalsHTML(){const T=totalsData();if(!T.days.length)return'';const st=T.st;
+  const since=new Date(T.first+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'long'});const span=daysBetween(T.first,todayKey())+1;
+  const tiles=[[T.days.length,'días entrenados'],[T.strength,'sesiones de fuerza'],[fmtInt(st.sets),'series'],[fmtInt(st.reps),'repeticiones'],[fmtInt(st.kg),'kg movidos'],[T.prs,'récords batidos']];
+  if(T.mins)tiles.push([fmtInt(T.mins),'minutos apuntados']);
+  T.cardio.forEach(c=>{const u=c.a.k==='PADEL'?(c.main==1?'partido':'partidos'):c.a.u;tiles.push([c.main?`${rsFmt(Math.round(c.main*10)/10)} <small>${u}</small>`:c.n,`${c.a.icon} ${c.a.name} · ${c.n} ${c.n==1?'día':'días'}`]);});
+  const mx=Math.max(1,...Object.values(st.mus));const rel={};Object.entries(st.mus).forEach(([k,v])=>{const r=v/mx;rel[k]=r>=0.85?7:r>=0.6?5:r>=0.35?3:1;});
+  const top=Object.entries(st.mus).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>`${LBL[k]||k} <b>${fmtDec(v)}</b>`).join(' · ');
+  const body=`<svg viewBox="0 0 760 720" class="tot-body" role="img" aria-label="Músculos trabajados desde el principio">${bodySVG('F',rel,20,0,660)}${bodySVG('B',rel,410,0,660)}<text x="185" y="705" fill="#98A1AE" font-size="26" text-anchor="middle" font-family="system-ui,sans-serif">Delante</text><text x="575" y="705" fill="#98A1AE" font-size="26" text-anchor="middle" font-family="system-ui,sans-serif">Detrás</text></svg>`;
+  return `<div class="rs-card"><h3>🏁 Desde el principio</h3><div class="rs-subt" style="margin:-6px 0 10px">Desde el ${since} · ${span} días</div>
+   <div class="tot-grid">${tiles.map(([v,l])=>`<div class="tot-t"><b>${v}</b><span>${l}</span></div>`).join('')}</div>
+   ${body}<div class="tot-mus">Series por músculo: ${top}</div>
+   <div class="rs-hint">Kilos movidos = peso × repeticiones de todas las series de trabajo (fuerza y abdominales; el gripper no cuenta). Los colores van de menos a más series dentro de tu propio total.</div></div>`;}
+function rsDailyHTML(){const days=Object.keys(data.days).sort().reverse().filter(dt=>daySessions(dt).length);if(!days.length)return'';
+  const rows=days.map(dt=>{const ss=daySessions(dt);const st=statsOf(dayItems(dt));const cl0=cardioLines(dt);const cl=cl0.some(x=>x.k!=='GRIP')?cl0.filter(x=>x.k!=='GRIP'):cl0;
+    const right=st.sets?`${st.sets} series${st.kg?` · ${fmtInt(st.kg)} kg`:''}`:cl.map(x=>`${x.icon} ${x.txt.split(' · ')[0]}`).join(' · ');
+    const dd=new Date(dt+'T12:00');const lbl=cap(dd.toLocaleDateString('es-ES',{weekday:'short'}).replace('.',''))+' '+dd.getDate()+'/'+(dd.getMonth()+1);
+    return `<details class="rs-ses dly" data-dt="${dt}"><summary><span class="dly-d">${lbl}</span><span class="rs-dots">${ss.map(k=>`<span class="rs-dot" style="background:${SCOL[k]||'var(--L)'}">${RS_DOT[k]||k}</span>`).join('')}</span><span class="rs-when">${esc(right)}</span><span class="rs-chev">›</span></summary><div class="dly-body"></div></details>`;}).join('');
+  return `<div class="rs-h2">Día a día</div><div class="rs-hint" style="margin:4px 2px 0">Toca un día para ver su tarjeta, con el muñeco y los números.</div>${rows}`;}
+function dailyBodyHTML(dt){let h='';const d=data.days[dt]||{};
+  PLAN.filter(k=>sessionHasWork(dt,k)).forEach(k=>h+=sessionCardHTML(dt,k));
+  ['PUSH','PULL','LEGS'].filter(k=>sessionHasWork(dt,k)).forEach(k=>{const s=statsOf(dayItems(dt,[k]));h+=`<div class="dly-line"><b>${LEGACY[k].name}</b> · ${s.sets} series · ${fmtInt(s.reps)} reps · ${fmtInt(s.kg)} kg</div>`;});
+  if(!PLAN.some(k=>sessionHasWork(dt,k))){const a=statsOf(dayItems(dt,['ABS']));if(a.sets)h+=`<div class="dly-line"><b>Abdominales</b> · ${a.sets} series · ${fmtInt(a.reps)} reps</div>`;}
+  cardioLines(dt).forEach(x=>h+=`<div class="dly-line">${x.icon} <b>${x.name}</b> · ${esc(x.txt)}</div>`);
+  if(d.note)h+=`<div class="dly-note">📝 ${esc(d.note)}</div>`;
+  return h||'<div class="dly-line">Sin datos.</div>';}
+function rsBindDaily(){viewEl.querySelectorAll('details.dly').forEach(el=>el.addEventListener('toggle',()=>{if(!el.open)return;const b=el.querySelector('.dly-body');if(b.dataset.done)return;
+  b.innerHTML=dailyBodyHTML(el.dataset.dt);b.dataset.done=1;bindSessionCard(b);}));}
 
 function mixedWeights(rec){const ws=workSets(rec).map(s=>parseFloat(String(s.a||'').replace(',','.'))).filter(v=>!isNaN(v));return new Set(ws).size>1;}
 function isHidden(sid,id){return !!data.hidden[sid+'|'+id];}
@@ -1366,7 +1422,7 @@ function renderResumen(){
     const d=new Date(dt+'T12:00');if(d>=ws&&d<=now&&sess.length)weekDays++;
     if(dt.startsWith(mk)){const mt=(data.days[dt].meta)||{};Object.values(mt).forEach(mm=>{monthMin+=parseInt(mm.dur,10)||0;monthKcal+=parseInt(mm.kcal,10)||0;});}});
   const stats=[[weekDays,'días esta semana'],[monthStr,'fuerza este mes'],[monthPool,'piscina este mes'],[monthExtra,'abs, pádel, agarre y cardio este mes'],[monthMin,'min este mes'],[monthKcal,'kcal este mes']];
-  let h=rsPlanHTML(stats)+rsWeekHTML()+`<div class="rs-h2">Ejercicios</div><div class="rs-hint" style="margin:4px 2px 0">Toca un ejercicio para verlo en la sección 📈 Gráficas, abajo del todo.</div>`+rsSessionsHTML()+rsCardioHTML()+rsMusclesHTML()+rsChartsHTML();
+  let h=rsPlanHTML(stats)+rsWeekHTML()+rsTotalsHTML()+rsDailyHTML()+`<div class="rs-h2">Ejercicios</div><div class="rs-hint" style="margin:4px 2px 0">Toca un ejercicio para verlo en la sección 📈 Gráficas, abajo del todo.</div>`+rsSessionsHTML()+rsCardioHTML()+rsMusclesHTML()+rsChartsHTML();
   h+=`<div class="backup"><h3>Exportar para compartir</h3>
     <p>Texto legible con todos tus días (solo series de trabajo con su RIR, tiempo, calorías y pulsaciones) para pasárselo a alguien.</p>
     <textarea id="txtBox" readonly>${esc(buildReport())}</textarea>
@@ -1378,7 +1434,7 @@ function renderResumen(){
     <div class="bbtns"><button id="copyBtn">Copiar</button><button id="dlBtn">Descargar</button></div>
     <p>Pega aquí una copia para restaurar:</p><textarea id="impBox" placeholder='{"days":...}'></textarea>
     <div class="bbtns"><button id="impBtn">Restaurar copia</button></div><div class="bmsg" id="bmsg"></div></div>`;
-  viewEl.innerHTML=h;rsBindCharts();
+  viewEl.innerHTML=h;rsBindCharts();rsBindDaily();
   const copyFrom=async(id,cb)=>{const t=document.getElementById(id);try{await navigator.clipboard.writeText(t.value);cb('Copiado ✓');}catch(e){t.select();try{document.execCommand('copy');cb('Copiado ✓');}catch(_){cb('No se pudo copiar',1);}}};
   const dlFrom=(id,name,type,cb)=>{try{const b=new Blob([document.getElementById(id).value],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);cb('Descargando ✓');}catch(e){cb('No se pudo; usa Copiar',1);}};
   document.getElementById('txtCopy').onclick=()=>copyFrom('txtBox',tmsg);
