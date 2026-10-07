@@ -318,13 +318,13 @@ const SESSIONS={
    {id:'seatedrow',star:1,name:'Remo sentado en polea',scheme:'3 × 8-12',rest:150,q:'remo sentado en polea',p:['upperback','lats'],s:['biceps','reardelts'],cue:'Tira hacia el abdomen, pecho fuera y junta los omóplatos. Sin balancear el tronco.'},
    {id:'incline',name:'Press inclinado con mancuernas',scheme:'3 × 8-12',rest:105,q:'press inclinado con mancuernas',p:['chest'],s:['delts','triceps'],cue:'Banco a 30-45°. Mismo peso en las series de trabajo; nada de saltos grandes entre series.'},
    {id:'pulldown',name:'Jalón al pecho',scheme:'3 × 8-12',rest:105,q:'jalón al pecho polea',p:['lats'],s:['biceps','upperback'],cue:'Lleva la barra al pecho apretando la espalda. No te eches muy hacia atrás.'},
-   {id:'barbellcurl',name:'Curl con barra',scheme:'3 × 8-12',rest:105,q:'curl de bíceps con barra',p:['biceps'],s:['forearms'],cue:'Codos fijos a los lados, sin balancear. La barra corta pesa 9 kg: apunta barra + discos.'},
+   {id:'barbellcurl',name:'Curl con barra',scheme:'3 × 8-12',rest:105,q:'curl de bíceps con barra',p:['biceps'],s:['forearms'],cue:'Codos fijos a los lados, sin balancear. La barra corta pesa 9 kg: apunta barra + discos. Con discos de 1,25 los pesos van de 2,5 en 2,5 (9, 11,5, 14, 16,5…).'},
    {id:'pushdown',name:'Tríceps en polea (pushdown)',scheme:'3 × 10-15',rest:105,q:'extensión de tríceps en polea',p:['triceps'],s:[],cue:'Codos pegados al cuerpo, extiende del todo y controla la subida.'},
    LATRAISE, FACEPULL
  ]},
  B:{name:'Pierna 1 · cuádriceps',items:[
    {id:'squat',star:1,name:'Sentadilla con mancuernas',total:1,wlabel:'Total (kg)',scheme:'3-4 × 6-10',rest:150,q:'sentadilla con mancuernas',p:['quads','glutes'],s:['hamstrings'],cue:'Una mancuerna en cada mano (a los lados o sobre los hombros: elige una forma y repítela siempre). Pies al ancho de hombros, pecho arriba, baja hasta al menos paralelo y sube empujando con todo el pie. Apunta el peso TOTAL: la suma de las dos mancuernas (2 de 5 kg = 10 kg).'},
-   {id:'rdl',star:1,name:'Peso muerto rumano (barra o mancuernas)',scheme:'3 × 6-10',rest:150,q:'peso muerto rumano',p:['hamstrings','glutes'],s:['lowerback'],warn:1,cue:'Con barra o mancuernas, lo que tengas libre: apunta siempre el peso total. Bisagra de cadera y espalda RECTA siempre. Baja pegando el peso a las piernas hasta notar el estiramiento.'},
+   {id:'rdl',star:1,name:'Peso muerto rumano (barra o mancuernas)',scheme:'3 × 6-10',rest:150,q:'peso muerto rumano',p:['hamstrings','glutes'],s:['lowerback'],warn:1,cue:'Con barra o mancuernas, lo que tengas libre: apunta siempre el peso total. Con la barra corta (9 kg) los pesos van de 2,5 en 2,5 (19, 21,5, 24, 26,5…). Bisagra de cadera y espalda RECTA siempre. Baja pegando el peso a las piernas hasta notar el estiramiento.'},
    {id:'legext',name:'Extensión de cuádriceps',scheme:'2-3 × 10-15',rest:105,q:'extensión de cuádriceps máquina',p:['quads'],s:[],cue:'Sube extendiendo, aprieta arriba y baja controlado.'},
    {id:'legcurl',name:'Curl femoral',scheme:'2-3 × 10-15',rest:105,q:'curl femoral tumbado máquina',p:['hamstrings'],s:[],cue:'Lleva el talón al glúteo sin despegar la cadera y baja lento.'},
    {id:'calf',name:'Gemelos',scheme:'3 × 12-20',rest:75,q:'elevación de gemelos de pie máquina',p:['calves'],s:[],cue:'Sube de puntillas al máximo, pausa arriba y baja notando el estiramiento.'},
@@ -559,8 +559,13 @@ function prOf(id,type,before){let best=null;
   return type==='weight'?`${best.a} kg × ${best.b}`:type==='time'?`${best.a} s`:`${best.a} reps`;}
 /* ===== AVISOS Y SUGERENCIAS (solo informan; nunca cambian nada) ===== */
 function rangeOf(it){const seg=(it.scheme.split('×')[1]||'');const n=(seg.match(/\d+/g)||[]).map(Number);if(!n.length)return null;return{lo:n[0],hi:n.length>1?n[1]:n[0]};}
-const INC={latraise:1,hammercurl:1,incline:1,row:1,dbfly:1,ohtriceps:1,barbellcurl:1,squat:2,lunge:2,rdl:2,gripR:7,gripL:7};
-function incOf(id){return INC[id]||2.5;}
+const INC={latraise:1,hammercurl:1,incline:1,row:1,dbfly:1,ohtriceps:1,squat:2,lunge:2,gripR:7,gripL:7};
+/* Barra corta de 9 kg + discos (el más pequeño, 1,25 kg por lado): solo se pueden montar 9, 11,5, 14, 16,5, 19, 21,5, 24… */
+const PLATES={barbellcurl:{bar:9,step:2.5},rdl:{bar:9,step:2.5}};
+function incOf(id){return PLATES[id]?PLATES[id].step:(INC[id]||2.5);}
+function snapDown(id,v){const p=PLATES[id];if(!p)return v;if(v<=p.bar)return p.bar;return p.bar+Math.floor((v-p.bar)/p.step+1e-9)*p.step;}
+function snapUp(id,v){const p=PLATES[id];if(!p)return v;if(v<=p.bar)return p.bar;return p.bar+Math.ceil((v-p.bar)/p.step-1e-9)*p.step;}
+function snapNear(id,v){const p=PLATES[id];if(!p)return v;if(v<=p.bar)return p.bar;return p.bar+Math.round((v-p.bar)/p.step)*p.step;}
 /* ejercicios a llevar con más margen (historial de molestias) */
 const CAUTIOUS={legcurl:1};
 function rirGoal(it){return curPhase===1?'RIR ~3':((it.star||CAUTIOUS[it.id])?'RIR 2-3':'RIR 1-2');}
@@ -593,14 +598,16 @@ function failCeil(it,type){if(type!=='weight')return null;const r=rangeOf(it);if
     workSets(rec).forEach(s=>{const wv=numW(s.a),rp=repsOf(s,type);if(!isNaN(wv)&&wv>0&&!isNaN(rp)&&rp<r.lo&&(ceil===null||wv<ceil)){ceil=wv;when=d;}});});});
   return ceil===null?null:{w:ceil,d:when};}
 /* Subidas prudentes: como mucho ~20% (25% si te sobró mucho) y nunca por encima de un peso con el que ya fallaste */
-function capUp(it,type,w,w2,big){const inc=incOf(it.id);let lim=w+Math.max(inc,w*(big?0.25:0.2));let out=Math.min(w2,lim);
-  out=w+Math.floor((out-w)/inc+1e-9)*inc;if(out<=w)out=w+inc;
-  const c=failCeil(it,type);let note='';if(c&&c.w>w&&out>c.w){out=c.w;note=` · como mucho ${String(c.w).replace('.',',')} kg: el ${new Date(c.d+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'numeric'})} no llegaste al mínimo con ese peso`;}
+function capUp(it,type,w,w2,big){const inc=incOf(it.id),pl=PLATES[it.id];let lim=w+Math.max(inc,w*(big?0.25:0.2));let out=Math.min(w2,lim);
+  if(pl){out=snapDown(it.id,out);if(out<=w)out=snapUp(it.id,w+0.01);}
+  else{out=w+Math.floor((out-w)/inc+1e-9)*inc;if(out<=w)out=w+inc;}
+  const c=failCeil(it,type);let note='';if(c&&c.w>w&&out>c.w){out=pl?Math.max(w,snapDown(it.id,c.w)):c.w;note=` · como mucho ${String(c.w).replace('.',',')} kg: el ${new Date(c.d+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'numeric'})} no llegaste al mínimo con ese peso`;}
   return{w:roundW(out),note};}
 function nextWeight(it,type,rec){const a=analyze(it,type,rec);const w=maxW(rec);if(!w)return null;const inc=incOf(it.id);
   if(a.low){const c=capUp(it,type,w,w+(inc>=5?1:2)*inc,true);return{w:c.w,why:'te sobró la última vez'+c.note};}
   if(a.high){const r=rangeOf(it);const reps=workSets(rec).map(s=>repsOf(s,type)).filter(x=>!isNaN(x));const mn=Math.min(...reps);const big=r&&r.lo-mn>=2;
-    return{w:roundW(Math.max(inc,big?Math.min(w-inc,w*0.88):w-inc)),why:big?'te quedaste lejos del mínimo: baja algo más':'no llegaste al mínimo'};}
+    let dn=Math.max(inc,big?Math.min(w-inc,w*0.88):w-inc);if(PLATES[it.id])dn=Math.min(snapNear(it.id,dn),Math.max(PLATES[it.id].bar,snapDown(it.id,w-0.01)));
+    return{w:roundW(dn),why:big?'te quedaste lejos del mínimo: baja algo más':'no llegaste al mínimo'};}
   if(a.top&&a.fail)return{w,why:'llegaste al tope pero muy justo: repite peso y sube cuando lo hagas con RIR 2-3'};
   if(a.top){const c=capUp(it,type,w,w+inc,false);return{w:c.w,why:'hiciste todas en el tope'+c.note};}
   if(a.fail)return{w,why:'mismo peso, para 1-2 repeticiones antes del fallo'};
@@ -721,7 +728,7 @@ function absVisible(){const loc=data.absLoc||'gym';return SESSIONS.ABS.items.fil
 /* ===== CALENTAMIENTO por sesión ===== */
 const WU_MOB={torso:['Círculos de brazos: 10 hacia delante y 10 hacia atrás.','Abrir y cerrar los brazos en cruz (como un abrazo) × 10.','1 serie de <b>face pull muy ligera × 15</b> (o gomas si hay) para despertar la espalda alta y el hombro.'],
  pierna:['Balanceos de pierna adelante-atrás × 10 y de lado × 10, cada pierna (agarrado a algo).','10 sentadillas sin peso, lentas y profundas.','10 puentes de glúteo en el suelo, apretando 1 s arriba.']};
-function wuRound(v,id){const inc=Math.min(incOf(id)||1,2.5);return Math.max(0,Math.round(v/inc)*inc);}
+function wuRound(v,id){if(PLATES[id])return snapNear(id,v);const inc=Math.min(incOf(id)||1,2.5);return Math.max(0,Math.round(v/inc)*inc);}
 function wuTarget(it){const type=it.type||'weight';if(type!=='weight')return null;const prev=prevRecord(current,it.id,activeDate);if(!prev)return null;
   if(mixedWeights(prev.rec))return maxW(prev.rec);const nw=nextWeight(refItem(it,prev),type,prev.rec);return nw?nw.w:maxW(prev.rec);}
 function wuFmt(v){return String(Math.round(v*10)/10).replace('.',',');}
