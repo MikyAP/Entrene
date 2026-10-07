@@ -51,7 +51,7 @@
   .ex.up{border-color:rgba(53,198,122,.6)}
   .ex.opt{border-style:dashed}
   .ex-top{display:flex;gap:12px}
-  .fig-wrap{display:flex;flex-direction:column;align-items:center} .fig-cap{font-size:10px;color:var(--muted);font-weight:600;margin-top:2px} .figs{display:flex;gap:2px;flex:0 0 auto} .fig{width:50px;height:auto;display:block}
+  .fig-wrap{display:flex;flex-direction:column;align-items:center} .fig-cap{font-size:10px;color:var(--muted);font-weight:600;margin-top:2px} .figs{display:flex;gap:2px;flex:0 0 auto} .fig{width:50px;height:auto;display:block} .fig2{width:64px;height:auto;display:block}
   .demo-pair{display:flex;gap:8px;margin:10px 0 0}
   .demo-shot{display:block;flex:1;min-width:0;text-decoration:none}
   .demo-shot img{display:block;width:100%;height:150px;object-fit:contain;background:#fff;border:1px solid var(--line);border-radius:10px}
@@ -395,6 +395,9 @@ const EXIMG={
   incline:['incline-db-press-start.webp','incline-db-press-peak.webp'],
   pulldown:['lat-pulldown-start.webp','lat-pulldown-peak.webp'],
   barbellcurl:['barbell-curl-start.webp','barbell-curl-peak.webp'],
+  shrug:['db-shrug-start.webp','db-shrug-peak.webp'],
+  adductor:['hip-adduction-start.webp','hip-adduction-peak.webp'],
+  abductor:['hip-abduction-start.webp','hip-abduction-peak.webp'],
   pushdown:['tricep-pushdown-start.webp','tricep-pushdown-peak.webp'],
   latraise:['lateral-raise-start.webp','lateral-raise-peak.webp'],
   wcrunch:['crunches-start.webp','crunches-peak.webp'],
@@ -797,6 +800,18 @@ function rsBindDaily(){const w=viewEl.querySelector('.dly-wrap');if(!w)return;co
     if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)show(cur+(dx<0?1:-1));},{passive:true});
   show(cur);}
 
+
+/* Muñeco pequeño de cada ejercicio: mismo mapa anatómico que la tarjeta, definido una sola vez y reutilizado con <use> */
+let _FIGS=null;
+function figsHTML(){if(_FIGS)return _FIGS;
+  if(!document.getElementById('bm-defs')){let d='<svg id="bm-defs" width="0" height="0" style="position:absolute;width:0;height:0" aria-hidden="true"><defs>';
+    ['F','B'].forEach(side=>{Object.keys(BMAP_D[side]).forEach(slug=>{d+=`<g id="bm-${side}-${slug}">${BMAP_D[side][slug].map(x=>`<path d="${x}"/>`).join('')}</g>`;});});
+    d+=`<path id="bm-OF" d="${BMAP_D.OF}"/><path id="bm-OB" d="${BMAP_D.OB}"/></defs></svg>`;document.body.insertAdjacentHTML('afterbegin',d);}
+  const one=side=>{const vb=side==='F'?'40 150 645 1215':'764 150 645 1215';let g=`<svg class="fig2" viewBox="${vb}" aria-hidden="true"><use href="#bm-O${side}" fill="#20252D" stroke="#4A5260" stroke-width="6"/>`;
+    Object.keys(BMAP_D[side]).forEach(slug=>{const ks=(BODY_MAP[side][slug])||[];
+      g+=BODY_SKIN[slug]?`<use href="#bm-${side}-${slug}" fill="${slug==='hair'?'#2B3039':'#4A5260'}"/>`:`<use href="#bm-${side}-${slug}" class="m ${ks.map(k=>'m-'+k).join(' ')}"/>`;});
+    return g+'</svg>';};
+  _FIGS=`<div class="figs"><div class="fig-wrap">${one('F')}<span class="fig-cap">Delante</span></div><div class="fig-wrap">${one('B')}<span class="fig-cap">Detrás</span></div></div>`;return _FIGS;}
 function mixedWeights(rec){const ws=workSets(rec).map(s=>parseFloat(String(s.a||'').replace(',','.'))).filter(v=>!isNaN(v));return new Set(ws).size>1;}
 function isHidden(sid,id){return !!data.hidden[sid+'|'+id];}
 function lastMeta(sid){const ds=Object.keys(data.days).sort();let out=null;ds.forEach(dt=>{const mm=(data.days[dt].meta||{})[sid];if(mm&&(mm.dur||mm.kcal||mm.hr))out={dur:mm.dur,kcal:mm.kcal,hr:mm.hr,date:dt};});return out;}
@@ -1000,7 +1015,7 @@ function exHTML(it){
   return `<div class="ex${it.star?' star':''}${up?' up':''}${it.opt?' opt':''}" data-p="${it.p.join(' ')}" data-s="${it.s.join(' ')}" data-id="${it.id}" data-type="${type}">
     <div class="ex-head">${it.star?'<span class="star-badge">⭐ PRINCIPAL</span>':''}<div class="ex-name">${it.name}${up?'<span class="up-badge">↑ sube peso</span>':''}</div><span class="scheme">${it.scheme}</span>${(()=>{const pr=prOf(it.id,type,activeDate);return pr?`<span class="pr-badge" title="Mejor marca">🏆 ${pr}</span>`:'';})()}</div>
     ${demoHTML(it)}
-    <div class="ex-mus">${FIGS}<div class="badges">${badges}</div></div>
+    <div class="ex-mus">${figsHTML()}<div class="badges">${badges}</div></div>
     <div class="last">${lastLine}</div>
     <div class="target">${targetHTML(it,type,prev)}</div>
     <div class="wwarn cue warn${mixed?'':' hide'}">⚠ Has utilizado pesos diferentes entre series. Comprueba que no sea un ajuste accidental.</div>
