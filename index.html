@@ -6,7 +6,7 @@
 <title>Mi entreno — Poli Malilla</title>
 <style>
   :root{--ink:#14161B;--panel:#1E222B;--panel2:#262C37;--line:#333B47;--text:#EEF1F4;--muted:#98A1AE;
-    --work:#FF4D5E;--sec:#F49AA1;--rest:#39414D;--good:#35C67A;--star:#F5C542;
+    --work:#FF4D5E;--sec:#96404B;--rest:#39414D;--good:#35C67A;--star:#F5C542;
     --A:#FF4D5E;--B:#FF9F3C;--C:#8A6BFF;--D:#2FBFA0;--P:#2C9AD0;--G:#C98A5B;--R:#7AC74F;--W:#C2A57C;--X:#E86FB0;--Y:#D7E34A;--L:#6B7483;--r:14px;}
   *{box-sizing:border-box} html,body{margin:0}
   body{background:var(--ink);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%;padding:0 0 96px;line-height:1.4}
@@ -107,7 +107,7 @@
   .scheme{display:inline-block;font-variant-numeric:tabular-nums;font-weight:700;font-size:13px;color:var(--work);background:rgba(255,77,94,.12);padding:2px 8px;border-radius:7px}
   .badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
   .bdg{font-size:11.5px;padding:2px 7px;border-radius:6px;font-weight:600;background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
-  .bdg.p{color:#fff;background:rgba(255,77,94,.9);border-color:transparent} .bdg.s{color:#F49AA1;border-color:rgba(244,154,161,.4)}
+  .bdg.p{color:#fff;background:rgba(255,77,94,.9);border-color:transparent} .bdg.s{color:#fff;background:var(--sec);border-color:transparent}
   .cue{font-size:13px;color:var(--muted);margin:11px 0 0;padding:9px 11px;background:var(--panel2);border-radius:9px;border-left:3px solid var(--line)}
   .cue.warn{border-left-color:var(--work);color:#F6C7CB}
   .rec{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
@@ -656,7 +656,8 @@ const BMAP_D={"F":{"chest":["M272.9 422.8c-18.9-17.1-22-57-12.6-78.7 5.5-12.9 26
 const BODY_MAP={F:{chest:['chest'],obliques:['obliques'],abs:['abs'],biceps:['biceps'],triceps:['triceps'],trapezius:['traps'],deltoids:['delts'],quadriceps:['quads'],calves:['calves'],forearm:['forearms'],adductors:['adductors']},
  B:{trapezius:['traps','upperback'],deltoids:['reardelts'],'upper-back':['lats','upperback'],triceps:['triceps'],'lower-back':['lowerback'],forearm:['forearms'],gluteal:['glutes'],hamstring:['hamstrings'],calves:['calves'],adductors:['adductors']}};
 const BODY_SKIN={head:1,hair:1,hands:1,feet:1,ankles:1,knees:1,neck:1};
-const HEAT=['#3A414D','#6E3A44','#A8424F','#E04A5B','#FF8A95'];
+/* misma regla en toda la app: cuanto más rojo e intenso, más trabajo (el tono más alto = rojo del músculo principal) */
+const HEAT=['#3A414D','#5E3239','#96404B','#C9434F','#FF4D5E'];
 function heatLevel(v){return !v?0:v<2?1:v<4?2:v<6.5?3:4;}
 /* Kilos: mancuernas apuntadas por unidad cuentan ×2; prensa suma la máquina; "/ lado" o "/ pierna" cuenta los dos lados */
 const KG_MULT={shrug:2,incline:2,dbfly:2,hammercurl:2,latraise:2,row:2,lunge:2};
