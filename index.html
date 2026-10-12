@@ -97,6 +97,8 @@
   .dly-body{min-height:60px} .dly-body .scard{margin:0 0 8px} .dly-line{font-size:13px;padding:7px 2px;border-top:1px solid var(--line)} .dly-note{font-size:12px;color:var(--muted);padding:8px 2px;border-top:1px solid var(--line);white-space:pre-wrap}
   .heat-leg{display:flex;align-items:center;justify-content:center;gap:4px;font-size:11px;color:var(--muted);margin:2px 0 10px;flex-wrap:wrap} .heat-leg i{width:16px;height:16px;border-radius:4px;display:inline-block} .heat-leg span{margin:0 2px} .heat-leg .hl-gap{width:10px}
   .away{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 2px 10px;padding:8px 11px;border:1px dashed var(--line);border-radius:10px;font-size:13px;color:var(--text);cursor:pointer} .away input{width:18px;height:18px;accent-color:var(--work)} .away small{color:var(--muted);font-size:11.5px;flex-basis:100%;margin-left:26px} .away.on{border-style:solid;border-color:var(--star);background:rgba(245,197,66,.08)}
+  .stepsrow{display:flex;align-items:center;gap:10px;margin:6px 2px 8px;font-size:13px;color:var(--muted)} .stepsrow input{width:110px;min-height:36px;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--text);font-size:15px;text-align:center;font-variant-numeric:tabular-nums} .stepsrow input:focus{outline:2px solid var(--W);border-color:var(--W)}
+  .steps-bars{width:100%;height:auto;display:block;margin:12px 0 2px}
   .review-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0}
   .review-card h3{margin:0 0 8px;font-size:15px}
   .review-card ul{margin:4px 0 10px;padding-left:18px} .review-card li{font-size:13px;margin:5px 0;color:#D3D9E0;line-height:1.45}
@@ -549,6 +551,7 @@ function daySessions(dt){const d=data.days[dt]||{};const out=ALLS.filter(k=>(d[k
    Solo si nunca se ha hecho en el plan nuevo se muestra, como referencia, el plan antiguo (PUSH/PULL/LEGS). */
 const HIST_POOL=['A','B','C','D','ABS'];
 /* Días en otro gimnasio: cuentan para el plan, el total y el muñeco, pero NO para pesos recomendados, memoria de fallos, récords ni gráficas */
+function stepsOf(dt){const v=parseInt(String(((data.days[dt]||{}).steps)||'').replace(/\D/g,''),10);return isNaN(v)?null:v;}
 function isAway(dt){return !!(data.days[dt]&&data.days[dt].away);}
 function homeDays(){return Object.keys(data.days).filter(d=>!isAway(d));}
 function prevRecord(sid,id,before){const ds=homeDays().filter(d=>d<before).sort().reverse();
@@ -761,6 +764,20 @@ function totalsData(){const days=Object.keys(data.days).sort().filter(dt=>daySes
       if(!o||now.a>o.a||(type==='weight'&&now.a===o.a&&now.b>o.b))best[it.id]=now;});});
   const cardio=RS_ACT.map(a=>{const E=rsActExpo(a);return{a,n:E.length,main:E.reduce((t,e)=>t+(e.main||0),0)};}).filter(x=>x.n);
   return{days,first:days[0],strength,mins,prs,cardio,st:statsOf(all)};}
+
+/* Pasos: media semanal (solo días apuntados) y barras de los últimos 28 días */
+function rsStepsHTML(){const t=todayKey();const monday=rsAdd(t,-((new Date(t+'T12:00').getDay()+6)%7));
+  const avg=(from,to)=>{const v=[];for(let dt=from;dt<=to;dt=rsAdd(dt,1)){const s=stepsOf(dt);if(s)v.push(s);}return v.length?{m:Math.round(v.reduce((a,b)=>a+b,0)/v.length),n:v.length}:null;};
+  const cur=avg(monday,t),prev=avg(rsAdd(monday,-7),rsAdd(monday,-1));
+  const days=[];for(let i=27;i>=0;i--)days.push(rsAdd(t,-i));const vals=days.map(stepsOf);
+  if(!vals.some(v=>v)&&!cur&&!prev)return `<div class="rs-card"><h3>👟 Pasos</h3><div class="rs-hint" style="margin:0">Apunta los pasos del reloj arriba en Entreno ("👟 Pasos del día") y aquí verás tu media semanal.</div></div>`;
+  const mx=Math.max(1,...vals.map(v=>v||0));const W=280,H=70,bw=W/28;
+  let bars='';vals.forEach((v,i)=>{if(!v)return;const h=Math.max(2,v/mx*(H-4));const wk=days[i]>=monday;bars+=`<rect x="${(i*bw+1).toFixed(1)}" y="${(H-h).toFixed(1)}" width="${(bw-2).toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${wk?'var(--W)':'var(--line)'}"><title>${rsDD(days[i])}: ${fmtInt(v)} pasos</title></rect>`;});
+  const tr=cur&&prev?(cur.m>prev.m*1.05?'<span class="rs-tr rs-up">↑</span>':cur.m<prev.m*0.95?'<span class="rs-tr rs-dn">↓</span>':'<span class="rs-tr rs-fl">→</span>'):'';
+  return `<div class="rs-card"><h3>👟 Pasos <span class="rs-subt">del reloj · orientativo</span></h3>
+   <div class="tot-grid" style="grid-template-columns:1fr 1fr"><div class="tot-t"><b>${cur?fmtInt(cur.m):'—'} ${tr}</b><span>media esta semana${cur?` (${cur.n} ${cur.n==1?'día':'días'})`:''}</span></div><div class="tot-t"><b>${prev?fmtInt(prev.m):'—'}</b><span>media semana pasada</span></div></div>
+   <svg viewBox="0 0 ${W} ${H}" class="steps-bars" role="img" aria-label="Pasos de los últimos 28 días">${bars}</svg>
+   <div class="rs-hint">Últimos 28 días; en color, esta semana. Los días de gimnasio el reloj suele sumar algún paso de más por el movimiento de los brazos.</div></div>`;}
 function rsTotalsHTML(){const T=totalsData();if(!T.days.length)return'';const st=T.st;
   const since=new Date(T.first+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'long'});const span=daysBetween(T.first,todayKey())+1;
   const tiles=[[T.days.length,'días entrenados'],[T.strength,'sesiones de fuerza'],[fmtInt(st.sets),'series'],[fmtInt(st.reps),'repeticiones'],[fmtInt(st.kg),'kg movidos'],[T.prs,'récords batidos']];
@@ -788,6 +805,7 @@ function dailyBodyHTML(dt){let h='';const d=data.days[dt]||{};
   ['PUSH','PULL','LEGS'].filter(k=>sessionHasWork(dt,k)).forEach(k=>{const s=statsOf(dayItems(dt,[k]));h+=`<div class="dly-line"><b>${LEGACY[k].name}</b> · ${s.sets} series · ${fmtInt(s.reps)} reps · ${fmtInt(s.kg)} kg</div>`;});
   if(!PLAN.some(k=>sessionHasWork(dt,k))){const a=statsOf(dayItems(dt,['ABS']));if(a.sets)h+=`<div class="dly-line"><b>Abdominales</b> · ${a.sets} series · ${fmtInt(a.reps)} reps</div>`;}
   cardioLines(dt).forEach(x=>h+=`<div class="dly-line">${x.icon} <b>${x.name}</b> · ${esc(x.txt)}</div>`);
+  if(stepsOf(dt))h+=`<div class="dly-line">👟 <b>${fmtInt(stepsOf(dt))}</b> pasos</div>`;
   if(d.note)h+=`<div class="dly-note">📝 ${esc(d.note)}</div>`;
   return h||'<div class="dly-line">Sin datos.</div>';}
 function rsBindDaily(){const w=viewEl.querySelector('.dly-wrap');if(!w)return;const days=dlyDays();let cur=days.length-1;
@@ -942,7 +960,7 @@ function warmupHTML(sid){const S=SESSIONS[sid];const leg=sid==='B'||sid==='D';co
 function renderEntreno(){
   const S=SESSIONS[current];
   {const n=sessNumber(activeDate,current);curPhase=phaseOf(n||planStatus().done+1);}
-  let h=`<div id="status">${statusHTML()}</div>`+dateBar();
+  let h=`<div id="status">${statusHTML()}</div>`+dateBar()+`<div class="stepsrow"><label for="stepsIn">👟 Pasos del día</label><input id="stepsIn" inputmode="numeric" placeholder="—" value="${stepsOf(activeDate)??''}" aria-label="Pasos del día según el reloj"></div>`;
   h+=`<div class="subtabs">`+SKEYS.map(k=>`<button class="tab ${TABCLS[k]} ${k===current?'on '+TABCLS[k]:''}" data-sess="${k}">${SNAME[k]}</button>`).join('')+`</div>`;
   h+=`<div class="sessname" style="color:${SCOL[current]}">${S.name}</div>`;
   if(PLAN.includes(current)||S.abs)h+=`<label class="away${isAway(activeDate)?' on':''}"><input type="checkbox" id="awayChk"${isAway(activeDate)?' checked':''}> 📍 Otro gimnasio <small>${isAway(activeDate)?'este día no se usa para pesos, récords ni gráficas':'márcalo si hoy entrenas con otras máquinas'}</small></label>`;
@@ -1061,6 +1079,7 @@ function bindEntreno(){
   if(nb)nb.addEventListener('input',e=>{data.days[activeDate]=data.days[activeDate]||{};const v=e.target.value;if(v)data.days[activeDate].note=v;else delete data.days[activeDate].note;queueSave();});
   viewEl.querySelectorAll('[data-finish]').forEach(b=>b.onclick=()=>{flush();setDone(activeDate,current,b.dataset.finish==='1');renderEntreno();});
   bindSessionCard();
+  const si=document.getElementById('stepsIn');if(si)si.addEventListener('input',()=>{data.days[activeDate]=data.days[activeDate]||{};const v=parseInt(si.value.replace(/\D/g,''),10);if(!isNaN(v)&&v>0)data.days[activeDate].steps=v;else delete data.days[activeDate].steps;queueSave();});
   const aw=document.getElementById('awayChk');if(aw)aw.onchange=()=>{data.days[activeDate]=data.days[activeDate]||{};if(aw.checked)data.days[activeDate].away=1;else delete data.days[activeDate].away;flush();renderEntreno();};
   viewEl.querySelectorAll('[data-show]').forEach(b=>b.onclick=()=>{delete data.hidden[current+'|'+b.dataset.show];queueSave();renderEntreno();});
   viewEl.querySelectorAll('.ex').forEach(card=>{
@@ -1109,6 +1128,7 @@ function dayPreview(dt){
     inner+=`<div class="cp-sess" style="color:${SCOL[sid]}">${sessName(sid)}${sn?' · sesión '+sn:(PLAN.includes(sid)?' · sin finalizar':'')}${mb.length?` · ${mb.join(' · ')}`:''}</div>`;
     Object.keys(s).forEach(id=>{const r=s[id];if(!workFilled(r))return;const def=EX[id]||{name:id};inner+=`<div class="cp-ex"><span>${def.name}</span><span>${esc(fmtWork(r,def.type||'weight',false))}</span></div>`;});
   });
+  if(stepsOf(dt))inner+=`<div class="cp-sess" style="color:var(--muted)">👟 ${fmtInt(stepsOf(dt))} pasos</div>`;
   if(d.post)inner+=`<div class="cp-sess" style="color:var(--good)">✓ Recuperación / estiramientos</div>`;
   if(d.note)inner+=`<div class="cp-note">📝 ${esc(d.note)}</div>`;
   if(!inner)inner=`<p class="cp-empty">Nada registrado este día.</p>`;
@@ -1293,7 +1313,7 @@ function buildReport(){
   let out='SEGUIMIENTO DE ENTRENAMIENTO\n'+'='.repeat(32)+'\n(solo series de trabajo; el calentamiento no se incluye)\n\n';
   let any=false;
   days.forEach(dt=>{
-    const d=data.days[dt];const sess=daySessions(dt);if(!sess.length&&!d.post&&!d.note)return;any=true;
+    const d=data.days[dt];const sess=daySessions(dt);if(!sess.length&&!d.post&&!d.note&&!stepsOf(dt))return;any=true;
     const dd=new Date(dt+'T12:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
     const hd=dd.toUpperCase()+(isAway(dt)?' (OTRO GIMNASIO: otras máquinas, pesos no comparables)':'');out+=hd+'\n'+'-'.repeat(hd.length)+'\n';
     sess.forEach(sid=>{
@@ -1307,6 +1327,7 @@ function buildReport(){
         out+='  - '+def.name+(def.star?' [principal]':'')+(def.base?' (solo discos; la máquina suma '+String(def.base).replace('.',',')+' kg)':'')+(def.total?' (peso total: suma de las dos mancuernas)':'')+': '+fmtWork(r,def.type||'weight',true)+'\n';});
     });
     if(d.post)out+='Recuperación / estiramientos: hecho\n';
+    if(stepsOf(dt))out+='Pasos (reloj): '+fmtInt(stepsOf(dt))+'\n';
     if(d.note)out+='Nota: '+d.note+'\n';
     out+='\n';
   });
@@ -1469,7 +1490,7 @@ function renderResumen(){
     const d=new Date(dt+'T12:00');if(d>=ws&&d<=now&&sess.length)weekDays++;
     if(dt.startsWith(mk)){const mt=(data.days[dt].meta)||{};Object.values(mt).forEach(mm=>{monthMin+=parseInt(mm.dur,10)||0;monthKcal+=parseInt(mm.kcal,10)||0;});}});
   const stats=[[weekDays,'días esta semana'],[monthStr,'fuerza este mes'],[monthPool,'piscina este mes'],[monthExtra,'abs, pádel, agarre y cardio este mes'],[monthMin,'min este mes'],[monthKcal,'kcal este mes']];
-  let h=rsPlanHTML(stats)+rsWeekHTML()+rsTotalsHTML()+rsDailyHTML()+`<div class="rs-h2">Ejercicios</div><div class="rs-hint" style="margin:4px 2px 0">Toca un ejercicio para verlo en la sección 📈 Gráficas, abajo del todo.</div>`+rsSessionsHTML()+rsCardioHTML()+rsMusclesHTML()+rsChartsHTML();
+  let h=rsPlanHTML(stats)+rsWeekHTML()+rsStepsHTML()+rsTotalsHTML()+rsDailyHTML()+`<div class="rs-h2">Ejercicios</div><div class="rs-hint" style="margin:4px 2px 0">Toca un ejercicio para verlo en la sección 📈 Gráficas, abajo del todo.</div>`+rsSessionsHTML()+rsCardioHTML()+rsMusclesHTML()+rsChartsHTML();
   h+=`<div class="backup"><h3>Exportar para compartir</h3>
     <p>Texto legible con todos tus días (solo series de trabajo con su RIR, tiempo, calorías y pulsaciones) para pasárselo a alguien.</p>
     <textarea id="txtBox" readonly>${esc(buildReport())}</textarea>
