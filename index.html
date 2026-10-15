@@ -348,6 +348,8 @@ const SESSIONS={
    {id:'legcurl',name:'Curl femoral',scheme:'2-3 × 10-15',rest:105,q:'curl femoral tumbado máquina',p:['hamstrings'],s:[],cue:'Lleva el talón al glúteo sin despegar la cadera y baja lento.'},
    {id:'adductor',name:'Aductores en máquina',scheme:'2 × 12-15',rest:75,q:'máquina de aductores técnica',p:['adductors'],s:[],cue:'Sentado con la espalda apoyada, almohadillas en la cara interna de las rodillas. Cierra las piernas, aprieta 1 s y abre despacio hasta notar el estiramiento, sin dejar que las placas choquen. Rango cómodo: no abras más de lo que controlas. Apunta el peso que marque la máquina.'},
    {id:'calf',name:'Gemelos',scheme:'3 × 12-20',rest:75,q:'elevación de gemelos de pie máquina',p:['calves'],s:[],cue:'Sube de puntillas al máximo, pausa arriba y baja notando el estiramiento.'},
+   {id:'wristcurl',name:'Curl de muñeca con barra',scheme:'2 × 15-20',rest:60,q:'curl de muñeca con barra sentado',p:['forearms'],s:[],cue:'En superserie con el curl invertido: haz una serie de cada uno seguidas y luego descansa. Sentado, antebrazos apoyados en los muslos (o en el banco) con las palmas hacia arriba y las muñecas por fuera de las rodillas. Deja que la barra baje hasta las yemas de los dedos, ciérrala y sube flexionando solo la muñeca; el antebrazo no se mueve. Sin rebotes. Barra corta de 9 kg: para empezar, la barra sola. Si molesta el codo por dentro, para.'},
+   {id:'reversecurl',name:'Curl invertido con barra',scheme:'2 × 12-15',rest:75,q:'curl invertido con barra agarre prono',p:['forearms'],s:['biceps'],cue:'Va justo después del curl de muñeca (superserie). De pie, agarre por encima (palmas hacia abajo) a la anchura de los hombros. Sube con los codos pegados y las muñecas rectas, sin que se doblen hacia abajo, y baja en 2 s. Moverás bastante menos que en el curl normal: es normal. Barra corta de 9 kg: para empezar, unos 11,5 kg (barra + 1,25 por lado).'},
 
  ]},
  C:{name:'Torso 2 · hombro y espalda vertical',items:[
@@ -403,6 +405,8 @@ const EXIMG={
   preachercurl:['barbell-preacher-curl-start.webp','barbell-preacher-curl-peak.webp'],
   shrug:['db-shrug-start.webp','db-shrug-peak.webp'],
   adductor:['hip-adduction-start.webp','hip-adduction-peak.webp'],
+  wristcurl:['barbell-wrist-curl-start.webp','barbell-wrist-curl-peak.webp'],
+  reversecurl:['reverse-curl-start.webp','reverse-curl-peak.webp'],
   abductor:['hip-abduction-start.webp','hip-abduction-peak.webp'],
   pushdown:['tricep-pushdown-start.webp','tricep-pushdown-peak.webp'],
   latraise:['lateral-raise-start.webp','lateral-raise-peak.webp'],
@@ -591,7 +595,7 @@ function prOf(id,type,before){let best=null;
 function rangeOf(it){const seg=(it.scheme.split('×')[1]||'');const n=(seg.match(/\d+/g)||[]).map(Number);if(!n.length)return null;return{lo:n[0],hi:n.length>1?n[1]:n[0]};}
 const INC={shrug:2,latraise:1,hammercurl:1,incline:1,row:1,dbfly:1,ohtriceps:1,squat:2,lunge:2,gripR:7,gripL:7};
 /* Barra corta de 9 kg + discos (el más pequeño, 1,25 kg por lado): solo se pueden montar 9, 11,5, 14, 16,5, 19, 21,5, 24… */
-const PLATES={barbellcurl:{bar:9,step:2.5},rdl:{bar:9,step:2.5}};
+const PLATES={barbellcurl:{bar:9,step:2.5},rdl:{bar:9,step:2.5},wristcurl:{bar:9,step:2.5},reversecurl:{bar:9,step:2.5}};
 function incOf(id){return PLATES[id]?PLATES[id].step:(INC[id]||2.5);}
 function snapDown(id,v){const p=PLATES[id];if(!p)return v;if(v<=p.bar)return p.bar;return p.bar+Math.floor((v-p.bar)/p.step+1e-9)*p.step;}
 function snapUp(id,v){const p=PLATES[id];if(!p)return v;if(v<=p.bar)return p.bar;return p.bar+Math.ceil((v-p.bar)/p.step-1e-9)*p.step;}
@@ -786,7 +790,7 @@ function rsTotalsHTML(){const T=totalsData();if(!T.days.length)return'';const st
   if(T.mins)tiles.push([fmtInt(T.mins),'minutos apuntados']);
   T.cardio.forEach(c=>{const u=c.a.k==='PADEL'?(c.main==1?'partido':'partidos'):c.a.u;tiles.push([c.main?`${rsFmt(Math.round(c.main*10)/10)} <small>${u}</small>`:c.n,`${c.a.icon} ${c.a.name} · ${c.n} ${c.n==1?'día':'días'}`]);});
   const mx=Math.max(1,...Object.values(st.mus));const rel={};Object.entries(st.mus).forEach(([k,v])=>{const r=v/mx;rel[k]=r>=0.85?7:r>=0.6?5:r>=0.35?3:1;});
-  const top=Object.entries(st.mus).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,v])=>`${LBL[k]||k} <b>${fmtDec(v)}</b>`).join(' · ');
+  const top=Object.entries(st.mus).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<span style="white-space:nowrap">${LBL[k]||k} <b>${fmtDec(v)}</b></span>`).join(' · ');
   const body=`<svg viewBox="0 0 760 720" class="tot-body" role="img" aria-label="Músculos trabajados desde el principio">${bodySVG('F',rel,20,0,660)}${bodySVG('B',rel,410,0,660)}<text x="185" y="705" fill="#98A1AE" font-size="26" text-anchor="middle" font-family="system-ui,sans-serif">Delante</text><text x="575" y="705" fill="#98A1AE" font-size="26" text-anchor="middle" font-family="system-ui,sans-serif">Detrás</text></svg>`;
   return `<div class="rs-card"><h3>🏁 Desde el principio</h3><div class="rs-subt" style="margin:-6px 0 10px">Desde el ${since} · ${span} días</div>
    <div class="tot-grid">${tiles.map(([v,l])=>`<div class="tot-t"><b>${v}</b><span>${l}</span></div>`).join('')}</div>
@@ -1340,8 +1344,8 @@ function buildReport(){
 /* ===== RESUMEN VISUAL ===== */
 const RS_KS=['A','B','C','D','ABS','GRIP','PUSH','PULL','LEGS'];
 const RS_DOT={A:'A',B:'B',C:'C',D:'D',ABS:'Ab',GRIP:'✊',POOL:'🏊',PADEL:'🎾',RUN:'🏃',WALK:'🚶',PUSH:'E',PULL:'T',LEGS:'P'};
-const RS_MUS={chestpress:'Pecho',incline:'Pecho',dbfly:'Pecho',seatedrow:'Espalda',pulldown:'Espalda',neutralpulldown:'Espalda',row:'Espalda',shoulderpress:'Hombro anterior',latraise:'Hombro lateral',facepull:'Hombro posterior',barbellcurl:'Bíceps',hammercurl:'Bíceps',pushdown:'Tríceps',ohtriceps:'Tríceps',squat:'Cuádriceps',legext:'Cuádriceps',legpress:'Cuádriceps',lunge:'Cuádriceps',rdl:'Isquios',legcurl:'Isquios',hipthrust:'Glúteo',shrug:'Trapecio',adductor:'Aductores',abductor:'Glúteo',preachercurl:'Bíceps',calf:'Gemelos',declinecrunch:'Abdomen',polcrunch:'Abdomen',wcrunch:'Abdomen',hangknee:'Abdomen',legraise:'Abdomen',revcrunch:'Abdomen'};
-const RS_GOAL=[['Pecho',10,1],['Espalda',12,1],['Hombro lateral',6,1],['Hombro anterior',4,0],['Hombro posterior',4,0],['Bíceps',6,1],['Tríceps',6,1],['Cuádriceps',11,0],['Isquios',9,0],['Glúteo',4,0],['Gemelos',6,0],['Trapecio',2,0],['Aductores',2,0],['Abdomen',9,1]];
+const RS_MUS={chestpress:'Pecho',incline:'Pecho',dbfly:'Pecho',seatedrow:'Espalda',pulldown:'Espalda',neutralpulldown:'Espalda',row:'Espalda',shoulderpress:'Hombro anterior',latraise:'Hombro lateral',facepull:'Hombro posterior',barbellcurl:'Bíceps',hammercurl:'Bíceps',pushdown:'Tríceps',ohtriceps:'Tríceps',squat:'Cuádriceps',legext:'Cuádriceps',legpress:'Cuádriceps',lunge:'Cuádriceps',rdl:'Isquios',legcurl:'Isquios',hipthrust:'Glúteo',shrug:'Trapecio',adductor:'Aductores',abductor:'Glúteo',preachercurl:'Bíceps',wristcurl:'Antebrazo',reversecurl:'Antebrazo',calf:'Gemelos',declinecrunch:'Abdomen',polcrunch:'Abdomen',wcrunch:'Abdomen',hangknee:'Abdomen',legraise:'Abdomen',revcrunch:'Abdomen'};
+const RS_GOAL=[['Pecho',10,1],['Espalda',12,1],['Hombro lateral',6,1],['Hombro anterior',4,0],['Hombro posterior',4,0],['Bíceps',6,1],['Tríceps',6,1],['Cuádriceps',11,0],['Isquios',9,0],['Glúteo',4,0],['Gemelos',6,0],['Trapecio',2,0],['Antebrazo',8,0],['Aductores',2,0],['Abdomen',9,1]];
 function rsDD(d){const x=new Date(d+'T12:00');return x.getDate()+'/'+(x.getMonth()+1);}
 function rsFmt(v){return String(Math.round(v*10)/10).replace('.',',');}
 function rsAdd(d,n){const x=new Date(d+'T12:00');x.setDate(x.getDate()+n);return `${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`;}
@@ -1408,12 +1412,13 @@ let rsMusOff=0;
 function rsFirstDay(){const ds=Object.keys(data.days).filter(d=>daySessions(d).length).sort();return ds[0]||todayKey();}
 function rsMusclesHTML(){const t=todayKey();const thisMon=rsAdd(t,-((new Date(t+'T12:00').getDay()+6)%7));const monday=rsAdd(thisMon,-7*rsMusOff);const sunday=rsAdd(monday,6);const cnt={};
   const canBack=rsAdd(monday,-1)>=rsFirstDay();
-  for(let i=0;i<7;i++){const dt=rsAdd(monday,i);if(dt>t)break;const d=data.days[dt]||{};RS_KS.forEach(k=>{Object.entries(d[k]||{}).forEach(([id,r])=>{const m=RS_MUS[id];if(m)cnt[m]=(cnt[m]||0)+workSets(r).length;});});}
+  for(let i=0;i<7;i++){const dt=rsAdd(monday,i);if(dt>t)break;const d=data.days[dt]||{};RS_KS.forEach(k=>{if(k==='GRIP')return;Object.entries(d[k]||{}).forEach(([id,r])=>{const m=RS_MUS[id];if(m)cnt[m]=(cnt[m]||0)+workSets(r).length;});});
+    const g=d.GRIP||{};const gs=Math.max(workSets(g.gripR).length,workSets(g.gripL).length);if(gs)cnt['Antebrazo']=(cnt['Antebrazo']||0)+gs;}
   const ttl=rsMusOff===0?`Series esta semana <span class="rs-subt">(desde el lunes ${rsDD(monday)})</span>`:rsMusOff===1?`Series semana pasada <span class="rs-subt">(${rsDD(monday)} – ${rsDD(sunday)})</span>`:`Series <span class="rs-subt">semana del ${rsDD(monday)} al ${rsDD(sunday)}</span>`;
   return `<div class="rs-card" id="rsMus"><h3>💪 ${ttl}<span class="rs-wknav"><button data-muswk="1" aria-label="Semana anterior"${canBack?'':' disabled'}>‹</button><button data-muswk="-1" aria-label="Semana siguiente"${rsMusOff===0?' disabled':''}>›</button></span></h3>
   ${RS_GOAL.map(([m,g,pr])=>{const c=cnt[m]||0;const col=c>=g*1.5?'var(--rs-warn)':c>=g?'var(--rs-ok)':c>=g/2?'#7FB2FF':'#8a93a0';
     return `<div class="rs-mrow"><span class="${pr?'rs-prio':''}">${pr?'★ ':''}${m}</span><div class="rs-mbar"><i style="width:${Math.min(100,c/g*100)}%;background:${col}"></i></div><span class="rs-n"><b>${c}</b>/${g}</span></div>`;}).join('')}
-  <div class="rs-hint">Series directas frente al objetivo semanal. ★ = tus prioridades. Gris: menos de la mitad · azul: a medias · verde: cumplido · naranja: más de un 50% por encima (vigila que recuperas). El abdomen cuenta solo el bloque 1 de Abs.</div></div>`;}
+  <div class="rs-hint">Series directas frente al objetivo semanal. ★ = tus prioridades. Gris: menos de la mitad · azul: a medias · verde: cumplido · naranja: más de un 50% por encima (vigila que recuperas). El abdomen cuenta solo el bloque 1 de Abs. Antebrazo = curl de muñeca + curl invertido + gripper (cada serie de gripper con las dos manos cuenta como una).</div></div>`;}
 function rsBindMus(){const el=document.getElementById('rsMus');if(!el)return;el.querySelectorAll('[data-muswk]').forEach(b=>b.onclick=()=>{rsMusOff=Math.max(0,rsMusOff+(+b.dataset.muswk));el.outerHTML=rsMusclesHTML();rsBindMus();});}
 function rsSessionsHTML(){const st=planStatus();const stale=staleInfo();
   return ['A','B','C','D','ABS','GRIP'].map(sid=>{const S=SESSIONS[sid];let items=S.items.filter(it=>!it.opt);
