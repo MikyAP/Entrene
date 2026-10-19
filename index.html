@@ -364,6 +364,7 @@ const SESSIONS={
    {id:'shrug',name:'Encogimientos con mancuernas',scheme:'2 × 12-15',rest:75,q:'encogimientos de hombros con mancuernas',p:['traps'],s:['forearms'],cue:'De pie, una mancuerna en cada mano y brazos estirados. Sube los hombros hacia las orejas en línea recta, aprieta 1 s arriba y baja despacio hasta notar el estiramiento. Sin girar los hombros ni doblar los codos. Apunta el peso de cada mancuerna. Si el agarre falla antes que el trapecio, usa una toalla o guante, no correas por ahora.'},
  ]},
  D:{name:'Pierna 2 · glúteo e isquios',items:[
+   {id:'deadhang',opt:1,pre:1,name:'Colgarse de la barra',scheme:'2 × 30-60 s',rest:60,type:'time',q:'colgarse de la barra dead hang activo pasivo',p:['forearms'],s:['lats','upperback'],cue:'Opcional, al EMPEZAR la D como calentamiento de hombros (en la D el agarre casi no trabaja). Nunca antes de la A o la C. Serie 1 PASIVA: cuélgate relajado, brazos estirados, deja que los hombros suban hacia las orejas y respira (estira y da movilidad). Serie 2 ACTIVA: mismo agarre, pero baja los hombros lejos de las orejas y llévalos un poco atrás, aprieta el abdomen; los brazos siguen estirados, no es una dominada. Apunta los segundos. Empieza con 30-45 s y sube hacia 60. Si duele el hombro o la espalda, para. Si lo que falla es el agarre y no el hombro, es normal: no hace falta llegar al fallo.'},
    {id:'hipthrust',star:1,name:'Hip thrust en máquina',scheme:'3-4 × 8-12',rest:150,q:'hip thrust en máquina técnica',p:['glutes'],s:['hamstrings'],cue:'En máquina (la misma del curl femoral). Ajusta el apoyo para que quede justo bajo los omóplatos y el rodillo o cinturón sobre la cadera. Pies al ancho de cadera, rodillas a 90° arriba. Empuja con los talones, sube hasta que cadera y tronco queden en línea, aprieta el glúteo 1 s y baja controlado. Barbilla hacia el pecho y sin arquear la lumbar al final. Apunta el peso que marque la máquina.'},
    {id:'legpress',star:1,name:'Prensa de piernas',base:75.7,wlabel:'Discos (kg)',scheme:'3 × 8-12',rest:150,q:'prensa de piernas técnica',p:['quads','glutes'],s:['hamstrings','adductors'],cue:'La máquina vacía ya pesa 75,7 kg (starting resistance): apunta SOLO los discos que cargues. Empuja con los talones. No bloquees de golpe las rodillas al estirar.'},
    {id:'lunge',name:'Zancadas',scheme:'2 × 8-12 / pierna',rest:105,q:'zancadas con mancuernas',p:['quads','glutes'],s:['hamstrings','adductors'],cue:'Paso largo, rodilla de atrás hacia el suelo, tronco recto.'},
@@ -407,6 +408,7 @@ const EXIMG={
   preachercurl:['barbell-preacher-curl-start.webp','barbell-preacher-curl-peak.webp'],
   shrug:['db-shrug-start.webp','db-shrug-peak.webp'],
   adductor:['hip-adduction-start.webp','hip-adduction-peak.webp'],
+  deadhang:['dead-hang-main.webp','dead-hang-main.webp'],
   wristcurl:['barbell-wrist-curl-start.webp','barbell-wrist-curl-peak.webp'],
   reversecurl:['reverse-curl-start.webp','reverse-curl-peak.webp'],
   abductor:['hip-abduction-start.webp','hip-abduction-peak.webp'],
@@ -448,7 +450,7 @@ const IMGALT={
 function demoHTML(it){
   const imgs=EXIMG[it.id]; if(!imgs)return '';
   const alt=esc(IMGALT[it.id]||it.name);
-  if(it.id==='sideplank'||it.id==='plank') return `<div class="demo-pair"><a class="demo-shot" href="${IMGBASE}${imgs[0]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[0]}" alt="${alt}"><span class="demo-cap">Demostración</span></a></div>`;
+  if(it.id==='sideplank'||it.id==='plank'||it.id==='deadhang') return `<div class="demo-pair"><a class="demo-shot" href="${IMGBASE}${imgs[0]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[0]}" alt="${alt}"><span class="demo-cap">Demostración</span></a></div>`;
   return `<div class="demo-pair"><a class="demo-shot" href="${IMGBASE}${imgs[0]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[0]}" alt="${alt} — inicio"><span class="demo-cap">Inicio</span></a><a class="demo-shot" href="${IMGBASE}${imgs[1]}" target="_blank" rel="noopener"><img loading="lazy" src="${IMGBASE}${imgs[1]}" alt="${alt} — final"><span class="demo-cap">Final</span></a></div>`;
 }
 
@@ -993,10 +995,12 @@ function renderEntreno(){
     h+=noteHTML()+`<div class="save-note">Editas el día de arriba. <b>Se guarda solo.</b></div>`;viewEl.innerHTML=h;bindEntreno();return;}
   else h+=protoHTML()+(PLAN.includes(current)?warmupHTML(current):'');
   const main=S.items.filter(it=>!it.opt&&!isHidden(current,it.id));
-  const opt=S.items.filter(it=>it.opt&&!isHidden(current,it.id));
+  const opt=S.items.filter(it=>it.opt&&!it.pre&&!isHidden(current,it.id));
+  const pre=S.items.filter(it=>it.pre&&!isHidden(current,it.id));
   const hidden=S.items.filter(it=>isHidden(current,it.id));
   let cnt=0;main.forEach(it=>{if(filled(recOf(activeDate,current,it.id)))cnt++;});
   h+=`<div class="meta"><div class="sub">${main.length} ejercicios</div><div class="prog" id="prog"><b>${cnt}</b>/${main.length} registrados</div></div>`;
+  if(pre.length){h+=`<div class="opt-head"><b>Antes de empezar (opcional).</b> Calentamiento de hombros: 2 series, una pasiva y una activa. No cuenta en el progreso de la sesión.</div>`;pre.forEach(it=>{h+=exHTML(it);});}
   main.forEach(it=>{h+=exHTML(it);});
   if(opt.length){
     const arms=armStall();
