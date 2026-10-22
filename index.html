@@ -7,7 +7,7 @@
 <style>
   :root{--ink:#14161B;--panel:#1E222B;--panel2:#262C37;--line:#333B47;--text:#EEF1F4;--muted:#98A1AE;
     --work:#FF4D5E;--sec:#96404B;--rest:#39414D;--good:#35C67A;--text2:#D3D9E0;--base:#2A303A;--line2:#4A5563;--star:#F5C542;
-    --A:#FF4D5E;--B:#FF9F3C;--C:#8A6BFF;--D:#2FBFA0;--P:#2C9AD0;--G:#C98A5B;--R:#7AC74F;--W:#C2A57C;--X:#E86FB0;--Y:#D7E34A;--L:#6B7483;--r:14px;}
+    --A:#FF4D5E;--B:#FF9F3C;--C:#8A6BFF;--D:#2FBFA0;--P:#2C9AD0;--G:#C98A5B;--R:#7AC74F;--W:#C2A57C;--K:#7FD8F5;--X:#E86FB0;--Y:#D7E34A;--L:#6B7483;--r:14px;}
   *{box-sizing:border-box} html,body{margin:0}
   body{background:var(--ink);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-text-size-adjust:100%;padding:0 0 96px;line-height:1.4}
   .wrap{max-width:560px;margin:0 auto;padding:0 14px}
@@ -37,7 +37,7 @@
   .subtabs{display:flex;flex-wrap:wrap;gap:7px;margin:12px 0 2px} .subtabs .tab{flex:1 0 calc(20% - 6px);min-width:0}
   .tab{flex:1;min-height:44px;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:11px;font-size:15px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .08s ease}
   .tab:active{transform:scale(.97)} .tab.on{color:#fff;border-color:transparent}
-  .tab.on.a{background:var(--A)} .tab.on.b{background:var(--B)} .tab.on.c{background:var(--C)} .tab.on.d{background:var(--D);color:#062019} .tab.on.p{background:var(--P)} .tab.on.g{background:var(--G);color:#1a0f05} .tab.on.r{background:var(--R);color:#0f1a08} .tab.on.w{background:var(--W);color:#1a1206} .tab.on.x{background:var(--X);color:#1a0612} .tab.on.y{background:var(--Y);color:#1a1d05}
+  .tab.on.a{background:var(--A)} .tab.on.b{background:var(--B)} .tab.on.c{background:var(--C)} .tab.on.d{background:var(--D);color:#062019} .tab.on.p{background:var(--P)} .tab.on.g{background:var(--G);color:#1a0f05} .tab.on.r{background:var(--R);color:#0f1a08} .tab.on.w{background:var(--W);color:#1a1206} .tab.on.k{background:var(--K);color:#06202a} .tab.on.x{background:var(--X);color:#1a0612} .tab.on.y{background:var(--Y);color:#1a1d05}
   .locsw{display:flex;gap:8px;margin:12px 0 4px} .locsw button{flex:1;min-height:42px;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:11px;font-size:14px;font-weight:700;cursor:pointer} .locsw button.on{background:var(--panel2);color:var(--text);border-color:var(--X)}
   .absblk{margin:18px 2px 6px;font-size:13px;font-weight:800;color:var(--X)} .absblk span{display:block;font-size:11.5px;font-weight:500;color:var(--muted);margin-top:2px}
   .sessname{font-size:14px;font-weight:700;margin:12px 2px 0}
@@ -439,6 +439,7 @@ const SESSIONS={
  PADEL:{name:'Pádel',cardio:true},
  RUN:{name:'Correr',cardio:true},
  WALK:{name:'Andar',cardio:true},
+ BIKE:{name:'Bici / elíptica',cardio:true},
  ABS:{name:'Abdominales · en casa o extra',abs:true,items:[
    Object.assign({},DECLINE,{loc:'gym',cat:'crunch'}),
    {id:'polcrunch',loc:'gym',cat:'crunch',name:'Crunch en polea de rodillas',scheme:'3 × 10-15',rest:75,q:'crunch en polea de rodillas técnica',p:['abs'],s:['obliques'],cue:'De rodillas frente a la polea alta, cuerda sujeta junto a la cabeza. Enrolla el tronco llevando los codos hacia los muslos: la cadera no se mueve, solo se dobla la espalda. Sube despacio sin soltar la tensión. Apunta el peso de la polea.'},
@@ -450,7 +451,8 @@ const SESSIONS={
    {id:'deadbug',loc:'both',cat:'estab',name:'Dead bug',scheme:'2-3 × 8-12 / lado',rest:60,type:'reps',q:'dead bug ejercicio abdominal técnica',p:['abs'],s:['obliques'],cue:'Tumbado boca arriba, brazos al techo y rodillas a 90° por encima de la cadera. Pega la zona lumbar al suelo y NO la despegues: estira a la vez un brazo hacia atrás y la pierna contraria hacia delante, despacio, y vuelve. Alterna lados. Si la lumbar se despega, no bajes tanto la pierna.'},
    Object.assign({},SIDEPLANK,{loc:'both',cat:'obl',scheme:'2-3 × 20-45 s / lado'}),
    {id:'pallof',loc:'gym',cat:'obl',name:'Pallof press en polea',scheme:'2-3 × 10-12 / lado',rest:60,q:'pallof press polea técnica',p:['obliques'],s:['abs'],cue:'Polea a la altura del pecho y tú de lado a la máquina. Agarre con las dos manos pegado al pecho; estira los brazos al frente sin dejar que el tronco gire hacia la polea, aguanta 2 s y vuelve. Todas las reps de un lado y luego el otro. Peso ligero: el truco es no girar. Apunta el peso de la polea.'},
-   {id:'bicycle',loc:'casa',cat:'obl',name:'Bicicleta (crunch cruzado)',scheme:'2-3 × 12-20 / lado',rest:60,type:'reps',q:'crunch bicicleta abdominales técnica',p:['obliques'],s:['abs'],cue:'Tumbado, manos junto a la cabeza sin tirar del cuello. Lleva el codo hacia la rodilla contraria girando el tronco (no solo el codo) mientras estiras la otra pierna sin tocar el suelo. Despacio y controlado: cuenta las reps de cada lado.'}
+   {id:'bicycle',loc:'casa',cat:'obl',name:'Bicicleta (crunch cruzado)',scheme:'2-3 × 12-20 / lado',rest:60,type:'reps',q:'crunch bicicleta abdominales técnica',p:['obliques'],s:['abs'],cue:'Tumbado, manos junto a la cabeza sin tirar del cuello. Lleva el codo hacia la rodilla contraria girando el tronco (no solo el codo) mientras estiras la otra pierna sin tocar el suelo. Despacio y controlado: cuenta las reps de cada lado.'},
+   {id:'heeltouch',loc:'casa',cat:'obl',name:'Toques de talón',scheme:'2-3 × 15-20 / lado',rest:60,type:'reps',q:'toques de talón heel touches abdominales oblicuos',p:['obliques'],s:['abs'],cue:'Tumbado boca arriba, rodillas dobladas y pies en el suelo algo separados. Despega un poco los hombros y la cabeza del suelo (como el inicio de un crunch) y mantenlos ahí TODA la serie. Inclina el tronco de lado, sin girarlo, hasta tocar con la mano el talón de ese lado; vuelve al centro y al otro lado. Despacio, sin tirar del cuello ni dejar caer los hombros. Cuenta las reps de un lado. Para hacerlo más difícil: pies un poco más lejos del cuerpo.'}
  ]},
  GRIP:{name:'Agarre · en casa',grip:true,items:[
    {id:'gripR',name:'Gripper · mano derecha',scheme:'3 × 10-15',rest:60,wlabel:'Resist. (kg)',q:'hand grip ejercicio antebrazo',p:['forearms'],s:[],cue:'Cierra del todo, aprieta 1-2 s y abre despacio. Apunta los kg aproximados según el cuadradito (≈7 kg por cuadradito desde 10). Sube un cuadradito cuando hagas 3 × 15 con facilidad.'},
@@ -503,7 +505,8 @@ const EXIMG={
   revcrunch:['reverse-crunches-start.webp','reverse-crunches-peak.webp'],
   deadbug:['dead-bug-start.webp','dead-bug-peak.webp'],
   pallof:['cable-pallof-press-start.webp','cable-pallof-press-peak.webp'],
-  bicycle:['bicycle-crunch-start.webp','bicycle-crunch-peak.webp']
+  bicycle:['bicycle-crunch-start.webp','bicycle-crunch-peak.webp'],
+  heeltouch:['heel-touches-start.webp','heel-touches-peak.webp']
 };
 const IMGBASE='https://exercise-dataset.com/images/flat/';
 /* Ilustraciones propias (no existen en exercise-dataset): van dentro del archivo */
@@ -521,12 +524,12 @@ function demoHTML(it){
   return `<div class="demo-pair"><a class="demo-shot" href="${imgSrc(imgs[0])}" target="_blank" rel="noopener"><img loading="lazy" src="${imgSrc(imgs[0])}" alt="${alt} — inicio"><span class="demo-cap">Inicio</span></a><a class="demo-shot" href="${imgSrc(imgs[1])}" target="_blank" rel="noopener"><img loading="lazy" src="${imgSrc(imgs[1])}" alt="${alt} — final"><span class="demo-cap">Final</span></a></div>`;
 }
 
-const SKEYS=['A','B','C','D','ABS','POOL','PADEL','GRIP','RUN','WALK'];
+const SKEYS=['A','B','C','D','ABS','POOL','PADEL','GRIP','RUN','WALK','BIKE'];
 const LEGACY={PUSH:{name:'Empuje (plan anterior)'},PULL:{name:'Tirón (plan anterior)'},LEGS:{name:'Pierna (plan anterior)'}};
 const ALLS=['A','B','C','D','PUSH','PULL','LEGS','ABS','GRIP'];
-const SNAME={A:'A',B:'B',C:'C',D:'D',ABS:'Abs',POOL:'🏊',PADEL:'🎾',GRIP:'✊',RUN:'🏃',WALK:'🚶'};
-const TABCLS={A:'a',B:'b',C:'c',D:'d',ABS:'x',POOL:'p',PADEL:'y',GRIP:'g',RUN:'r',WALK:'w'};
-const SCOL={A:'var(--A)',B:'var(--B)',C:'var(--C)',D:'var(--D)',ABS:'var(--X)',POOL:'var(--P)',PADEL:'var(--Y)',GRIP:'var(--G)',RUN:'var(--R)',WALK:'var(--W)',PUSH:'var(--L)',PULL:'var(--L)',LEGS:'var(--L)'};
+const SNAME={A:'A',B:'B',C:'C',D:'D',ABS:'Abs',POOL:'🏊',PADEL:'🎾',GRIP:'✊',RUN:'🏃',WALK:'🚶',BIKE:'🚴'};
+const TABCLS={A:'a',B:'b',C:'c',D:'d',ABS:'x',POOL:'p',PADEL:'y',GRIP:'g',RUN:'r',WALK:'w',BIKE:'k'};
+const SCOL={A:'var(--A)',B:'var(--B)',C:'var(--C)',D:'var(--D)',ABS:'var(--X)',POOL:'var(--P)',PADEL:'var(--Y)',GRIP:'var(--G)',RUN:'var(--R)',WALK:'var(--W)',BIKE:'var(--K)',PUSH:'var(--L)',PULL:'var(--L)',LEGS:'var(--L)'};
 const EX={};
 Object.values(SESSIONS).forEach(S=>(S.items||[]).forEach(it=>{if(!EX[it.id]||EX[it.id].opt)EX[it.id]=it;}));
 [{id:'cablecrunch',name:'Crunch en polea'},{id:'cablefly',name:'Aperturas en polea'},{id:'pecdeck',name:'Aperturas en máquina'},{id:'dips',name:'Fondos de banco'},{id:'pullover',name:'Pullover en polea'},{id:'backext',name:'Hiperextensiones'},{id:'plank',name:'Plancha',type:'time'},{id:'crunch',name:'Crunch',type:'reps'}].forEach(e=>{if(!EX[e.id])EX[e.id]=e;});
@@ -547,7 +550,12 @@ const CARDIO={
  WALK:{icon:'🚶',name:'Andar',fields:[{k:'km',label:'Distancia (km)',fmt:v=>v+' km'},{k:'lastre',label:'Lastre (kg)',fmt:v=>'lastre '+v+' kg'}],tips:[
    '<b>Con chaleco:</b> empieza con poco peso y súbelo poco a poco, como en las pesas.',
    'Espalda recta y paso normal: si te hace encorvarte, sobra peso.',
-   'Con lastre carga las piernas: mejor no la víspera de B o D.']}};
+   'Con lastre carga las piernas: mejor no la víspera de B o D.']},
+ BIKE:{icon:'🚴',name:'Bici / elíptica',fields:[{k:'km',label:'Distancia (km)',fmt:v=>v+' km'},{k:'nivel',label:'Resistencia (nivel)',fmt:v=>'nivel '+v}],tips:[
+   '<b>Para la resistencia:</b> ritmo con el que puedas hablar en frases completas (unas 120-135 pulsaciones). Mejor seguido y suave que más fuerte con pausas.',
+   '<b>Después de A o C:</b> 20 min, puedes ir algo más alegre. <b>Después de B o D:</b> muy suave, con poca resistencia; si acabas muy cargado, 10 min.',
+   '<b>Cómo ver que mejoras:</b> misma máquina y mismo nivel → más km en 20 min o menos pulsaciones. Apunta siempre la máquina en la nota si cambias (bici o elíptica).',
+   'Para que no aburra: un capítulo o un podcast, o tramos de 5 min suave / 5 min algo más alegre.']}};
 function cardioBits(dt,k){const c=(data.days[dt]||{})[k]||{};const mm=getMeta(dt,k);const b=[];
   CARDIO[k].fields.forEach(f=>{if(c[f.k])b.push(f.fmt(c[f.k]));});
   if(mm.dur)b.push(mm.dur+' min');if(mm.kcal)b.push(mm.kcal+' kcal');if(mm.hr)b.push(mm.hr+' ppm');return b;}
@@ -622,7 +630,7 @@ function getMeta(dt,sid){return (data.days[dt]&&data.days[dt].meta&&data.days[dt
 function setMeta(dt,sid,f,v){data.days[dt]=data.days[dt]||{};data.days[dt].meta=data.days[dt].meta||{};data.days[dt].meta[sid]=data.days[dt].meta[sid]||{};if(v)data.days[dt].meta[sid][f]=v;else delete data.days[dt].meta[sid][f];queueSave();}
 function daySessions(dt){const d=data.days[dt]||{};const out=ALLS.filter(k=>(d[k]&&Object.values(d[k]).some(filled))||metaHasData(dt,k));
   if((d.POOL&&d.POOL.largos)||metaHasData(dt,'POOL'))out.push('POOL');
-  ['PADEL','RUN','WALK'].forEach(k=>{const c=d[k];if((c&&Object.values(c).some(v=>v!==''&&v!=null))||metaHasData(dt,k))out.push(k);});return out;}
+  ['PADEL','RUN','WALK','BIKE'].forEach(k=>{const c=d[k];if((c&&Object.values(c).some(v=>v!==''&&v!=null))||metaHasData(dt,k))out.push(k);});return out;}
 /* "Anterior" = la última vez que hiciste ESE ejercicio, en cualquier sesión del plan (A/B/C/D/Abs).
    Ej.: gemelos del B toma como referencia los del D si fueron más recientes.
    Solo si nunca se ha hecho en el plan nuevo se muestra, como referencia, el plan antiguo (PUSH/PULL/LEGS). */
@@ -1092,8 +1100,8 @@ function sheetOpen(html,ready){const ov=document.createElement('div');ov.classNa
   ov.onclick=e=>{if(e.target===ov)ov.remove();};ov.querySelector('.cfg-close').onclick=()=>ov.remove();if(ready)ready(ov);}
 function bindHero(){
   viewEl.querySelectorAll('[data-hs]').forEach(b=>b.onclick=()=>{current=b.dataset.hs;renderEntreno();updateRestBar();});
-  const a=viewEl.querySelector('[data-hact]');if(a)a.onclick=()=>{const L=['POOL','PADEL','ABS','RUN','WALK'];
-    sheetOpen(`<h3>Actividad</h3><p>Cardio, piscina y abs extra o en casa.</p><div class="act-l">${L.map(k=>`<button data-s="${k}" class="${k===current?'on':''}"><span class="act-e" style="background:${SCOL[k]}">${SNAME[k]}</span>${SESSIONS[k].name}</button>`).join('')}</div>`,
+  const a=viewEl.querySelector('[data-hact]');if(a)a.onclick=()=>{const L=['POOL','PADEL','BIKE','RUN','WALK','ABS'];
+    sheetOpen(`<h3>Actividad</h3><p>Cardio, deportes y abs extra o en casa.</p><div class="act-l">${L.map(k=>`<button data-s="${k}" class="${k===current?'on':''}"><span class="act-e" style="background:${SCOL[k]}">${SNAME[k]}</span>${SESSIONS[k].name}</button>`).join('')}</div>`,
       ov=>ov.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{current=b.dataset.s;ov.remove();renderEntreno();updateRestBar();}));};
   const p=viewEl.querySelector('[data-hplan]');if(p)p.onclick=()=>sheetOpen(`<h3>Plan</h3><div class="plan-sh">${statusHTML()}</div>${PLAN.includes(current)?warmupHTML(current):''}${protoHTML()}`);
   const w=viewEl.querySelector('[data-haway]');if(w)w.onclick=()=>{data.days[activeDate]=data.days[activeDate]||{};if(isAway(activeDate))delete data.days[activeDate].away;else data.days[activeDate].away=1;queueSave();renderEntreno();};}
@@ -1494,8 +1502,8 @@ function buildReport(){
 }
 /* ===== RESUMEN VISUAL ===== */
 const RS_KS=['A','B','C','D','ABS','GRIP','PUSH','PULL','LEGS'];
-const RS_DOT={A:'A',B:'B',C:'C',D:'D',ABS:'Ab',GRIP:'✊',POOL:'🏊',PADEL:'🎾',RUN:'🏃',WALK:'🚶',PUSH:'E',PULL:'T',LEGS:'P'};
-const RS_MUS={chestpress:'Pecho',incline:'Pecho',dbfly:'Pecho',seatedrow:'Espalda',pulldown:'Espalda',neutralpulldown:'Espalda',row:'Espalda',shoulderpress:'Hombro anterior',latraise:'Hombro lateral',facepull:'Hombro posterior',barbellcurl:'Bíceps',hammercurl:'Bíceps',pushdown:'Tríceps',ohtriceps:'Tríceps',squat:'Cuádriceps',legext:'Cuádriceps',legpress:'Cuádriceps',lunge:'Cuádriceps',rdl:'Isquios',legcurl:'Isquios',hipthrust:'Glúteo',shrug:'Trapecio',adductor:'Aductores',abductor:'Glúteo medio',preachercurl:'Bíceps',wristcurl:'Antebrazo',reversecurl:'Antebrazo',calf:'Gemelos',seatedcalf:'Sóleo',tibialis:'Tibial',backext:'Lumbar',extrot:'Rotadores',serratuspunch:'Serrato',benchrevcrunch:'Abdomen',woodchop:'Oblicuos',pallof:'Oblicuos',sideplank:'Oblicuos',bicycle:'Oblicuos',declinecrunch:'Abdomen',polcrunch:'Abdomen',wcrunch:'Abdomen',hangknee:'Abdomen',legraise:'Abdomen',revcrunch:'Abdomen'};
+const RS_DOT={A:'A',B:'B',C:'C',D:'D',ABS:'Ab',GRIP:'✊',POOL:'🏊',PADEL:'🎾',RUN:'🏃',WALK:'🚶',BIKE:'🚴',PUSH:'E',PULL:'T',LEGS:'P'};
+const RS_MUS={chestpress:'Pecho',incline:'Pecho',dbfly:'Pecho',seatedrow:'Espalda',pulldown:'Espalda',neutralpulldown:'Espalda',row:'Espalda',shoulderpress:'Hombro anterior',latraise:'Hombro lateral',facepull:'Hombro posterior',barbellcurl:'Bíceps',hammercurl:'Bíceps',pushdown:'Tríceps',ohtriceps:'Tríceps',squat:'Cuádriceps',legext:'Cuádriceps',legpress:'Cuádriceps',lunge:'Cuádriceps',rdl:'Isquios',legcurl:'Isquios',hipthrust:'Glúteo',shrug:'Trapecio',adductor:'Aductores',abductor:'Glúteo medio',preachercurl:'Bíceps',wristcurl:'Antebrazo',reversecurl:'Antebrazo',calf:'Gemelos',seatedcalf:'Sóleo',tibialis:'Tibial',backext:'Lumbar',extrot:'Rotadores',serratuspunch:'Serrato',benchrevcrunch:'Abdomen',woodchop:'Oblicuos',pallof:'Oblicuos',sideplank:'Oblicuos',bicycle:'Oblicuos',heeltouch:'Oblicuos',declinecrunch:'Abdomen',polcrunch:'Abdomen',wcrunch:'Abdomen',hangknee:'Abdomen',legraise:'Abdomen',revcrunch:'Abdomen'};
 const RS_GOAL=[['Pecho',10,1],['Espalda',12,1],['Hombro lateral',8,1],['Hombro anterior',4,0],['Hombro posterior',4,0],['Rotadores',4,0],['Serrato',2,0],['Bíceps',8,1],['Tríceps',8,1],['Antebrazo',8,0],['Trapecio',2,0],['Lumbar',2,0],['Cuádriceps',11,0],['Isquios',9,0],['Glúteo',4,0],['Glúteo medio',4,0],['Aductores',4,0],['Gemelos',6,0],['Sóleo',3,0],['Tibial',4,0],['Abdomen',9,1],['Oblicuos',6,0]];
 function rsDD(d){const x=new Date(d+'T12:00');return x.getDate()+'/'+(x.getMonth()+1);}
 function rsFmt(v){return String(Math.round(v*10)/10).replace('.',',');}
@@ -1548,7 +1556,7 @@ function rsWeekHTML(){const t=todayKey();const monday=rsAdd(t,-((new Date(t+'T12
   [[monday,'Esta'],[rsAdd(monday,-7),'Pasada']].forEach(([m,l])=>{h+=`<span class="rs-wl">${l}</span>`;for(let i=0;i<7;i++){const dt=rsAdd(m,i);const ss=dt>t?[]:daySessions(dt);
     h+=`<div class="rs-day${dt===t?' today':''}${dt>t?' fut':''}"><span class="d">${new Date(dt+'T12:00').getDate()}</span><div class="rs-dots">${ss.map(k=>`<span class="rs-dot" style="background:${SCOL[k]||'var(--L)'}">${RS_DOT[k]||k}</span>`).join('')}</div></div>`;}});
   const str=[0,1,2,3,4,5,6].map(i=>rsAdd(monday,i)).filter(d=>d<=t&&daySessions(d).some(k=>PLAN.includes(k)||LEGACY[k])).length;
-  h+=`</div><div class="rs-leg">${[['A','A'],['B','B'],['C','C'],['D','D'],['ABS','Abs'],['POOL','Piscina'],['PADEL','Pádel'],['GRIP','Agarre'],['RUN','Correr'],['WALK','Andar']].map(([k,l])=>`<span><i style="background:${SCOL[k]}"></i>${l}</span>`).join('')}</div>
+  h+=`</div><div class="rs-leg">${[['A','A'],['B','B'],['C','C'],['D','D'],['ABS','Abs'],['POOL','Piscina'],['PADEL','Pádel'],['GRIP','Agarre'],['RUN','Correr'],['WALK','Andar'],['BIKE','Bici']].map(([k,l])=>`<span><i style="background:${SCOL[k]}"></i>${l}</span>`).join('')}</div>
   <div class="rs-wksum">Esta semana: <b>${str} ${str===1?'día':'días'} de fuerza</b> · objetivo 4-5</div></div>`;return h;}
 function rsPlanHTML(stats){const st=planStatus();const n=st.today.length?st.done:st.done+1;const ph=phaseOf(n);const stale=staleInfo();const done=st.done;
   const bar=ph===1?{a:done,b:8,txt:`${done} de 8 sesiones`,next:'Después: Progresión (sesiones 9-24)'}:ph===2?{a:done-8,b:16,txt:`${done-8} de 16 sesiones`,next:'Después: Revisión (sesión 25+)'}:{a:1,b:1,txt:`${done} sesiones`,next:'Toca revisar el plan'};
@@ -1567,7 +1575,7 @@ function rsMusCount(from,to){const cnt={};Object.keys(data.days).filter(dt=>dt>=
     const g=d.GRIP||{};const gs=Math.max(workSets(g.gripR).length,workSets(g.gripL).length);if(gs)cnt['Antebrazo']=(cnt['Antebrazo']||0)+gs;});return cnt;}
 function rsCol(c,g){return c>=g*1.5?'var(--rs-warn)':c>=g?'var(--rs-ok)':c>=g/2?'#7FB2FF':'#8a93a0';}
 function rsMusclesHTML(){const t=todayKey();const tabs=`<div class="rs-mtabs">${[['wk','Semana'],['all','Desde el inicio']].map(([k,l])=>`<button data-musmode="${k}" class="${rsMusMode===k?'on':''}">${l}</button>`).join('')}</div>`;
-  const hint=`Gris: menos de la mitad · azul: a medias · verde: cumplido · naranja: más de un 50% por encima (vigila que recuperas). ★ = tus prioridades. Abdomen = crunch y elevaciones; Oblicuos = leñador, Pallof, plancha lateral y bicicleta. Antebrazo = curl de muñeca + curl invertido + gripper (cada serie de gripper con las dos manos cuenta como una). Sóleo = gemelo sentado · Glúteo medio = abductores · Rotadores = rotación externa en polea.`;
+  const hint=`Gris: menos de la mitad · azul: a medias · verde: cumplido · naranja: más de un 50% por encima (vigila que recuperas). ★ = tus prioridades. Abdomen = crunch y elevaciones; Oblicuos = leñador, Pallof, plancha lateral, bicicleta y toques de talón. Antebrazo = curl de muñeca + curl invertido + gripper (cada serie de gripper con las dos manos cuenta como una). Sóleo = gemelo sentado · Glúteo medio = abductores · Rotadores = rotación externa en polea.`;
   if(rsMusMode==='all'){const from=rsFirstDay();const days=Math.round((new Date(t+'T12:00')-new Date(from+'T12:00'))/864e5)+1;const wks=Math.max(1,days/7);const cnt=rsMusCount(from,t);
     const tot=Object.values(cnt).reduce((a,b)=>a+b,0);
     return `<div class="rs-card" id="rsMus"><h3>💪 Series desde el inicio <span class="rs-subt">(desde el ${rsDD(from)} · ${String(Math.round(wks*10)/10).replace('.',',')} semanas)</span></h3>${tabs}
@@ -1600,7 +1608,8 @@ function rsBind(){viewEl.querySelectorAll('details.rs-ex[data-id]').forEach(d=>d
 const RS_ACT=[{k:'POOL',icon:'🏊',name:'Piscina',main:'largos',u:'largos',get:d=>(d.POOL||{}).largos},
  {k:'PADEL',icon:'🎾',name:'Pádel',main:'partidos',u:'partidos',get:d=>(d.PADEL||{}).partidos},
  {k:'RUN',icon:'🏃',name:'Correr',main:'km',u:'km',get:d=>(d.RUN||{}).km},
- {k:'WALK',icon:'🚶',name:'Andar',main:'km',u:'km',get:d=>(d.WALK||{}).km}];
+ {k:'WALK',icon:'🚶',name:'Andar',main:'km',u:'km',get:d=>(d.WALK||{}).km},
+ {k:'BIKE',icon:'🚴',name:'Bici / elíptica',main:'km',u:'km',get:d=>(d.BIKE||{}).km}];
 function rsNum(v){const n=parseFloat(String(v===undefined?'':v).replace(',','.'));return isNaN(n)?null:n;}
 function rsActExpo(a){return Object.keys(data.days).sort().filter(dt=>daySessions(dt).includes(a.k)).map(dt=>{const d=data.days[dt]||{};const mm=getMeta(dt,a.k)||{};
   return{dt,main:rsNum(a.get(d)),dur:rsNum(mm.dur),kcal:rsNum(mm.kcal),hr:rsNum(mm.hr),lastre:rsNum((d[a.k]||{}).lastre)};});}
