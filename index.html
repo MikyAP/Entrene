@@ -197,6 +197,7 @@
   .sumrow .vl b{color:var(--text)}
   .backup{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0}
   .backup h3{margin:0 0 6px;font-size:14px} .backup p{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+  .txt-rg{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px} .txt-len{font-size:11.5px;color:var(--muted);margin:4px 2px 0}
   .backup textarea{width:100%;min-height:70px;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:10px;font-size:12px;padding:8px;font-family:ui-monospace,monospace;resize:vertical}
   .bbtns{display:flex;gap:8px;margin:8px 0} .bbtns button{flex:1;min-height:42px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
   .meas-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 6px}
@@ -1437,7 +1438,7 @@ function wireBody(){const di=document.getElementById('bcDate');if(!di)return;
     const mm=document.getElementById('bcmsg');if(!hasNum){mm.textContent='Rellena al menos un dato numérico';mm.className='bmsg err';return;}
     data.body=data.body||{};data.body[d]=vals;flush();renderMedidas();const d2=document.getElementById('bcDate');if(d2){d2.value=d;d2.onchange();}const m2=document.getElementById('bcmsg');if(m2){m2.textContent='Análisis guardado ✓';m2.className='bmsg';}};
   viewEl.querySelectorAll('[data-bcdel]').forEach(x=>x.onclick=()=>{if(!confirm('¿Borrar este análisis?'))return;delete data.body[x.dataset.bcdel];flush();renderMedidas();});}
-function bodyReport(){const b=data.body||{};const ds=Object.keys(b).sort();if(!ds.length)return'';
+function bodyReport(from){const b=data.body||{};const ds=Object.keys(b).sort().filter(d=>!from||d>=from);if(!ds.length)return'';
   let o='\nANÁLISIS CORPORAL (antropometría)\n'+'-'.repeat(33)+'\n';
   ds.forEach(d=>{const e=b[d];const parts=BODY_F.map(f=>{const v=bodyVal(e,f.k);if(isNaN(v))return'';const c=(f.k==='sum3'||f.k==='sum6'||f.k==='sum8')&&isNaN(numW(e[f.k]))?' (calculado)':'';return f.l+' '+fmtN(v)+(f.u?' '+f.u:'')+c;}).filter(Boolean);
     BODY_TXT.forEach(f=>{if(e[f.k])parts.push(f.l+': '+e[f.k]);});
@@ -1470,13 +1471,20 @@ function renderMedidas(){const m=data.measures||{};const ds=Object.keys(m).sort(
     data.measures=data.measures||{};data.measures[todayKey()]=vals;flush();renderMedidas();const m2=document.getElementById('msmsg');if(m2){m2.textContent='Medidas guardadas ✓';m2.className='bmsg';}};
   viewEl.querySelectorAll('[data-msdel]').forEach(b=>b.onclick=()=>{if(!confirm('¿Borrar esta medición?'))return;delete data.measures[b.dataset.msdel];flush();renderMedidas();});
   updateRestBar();}
-function measuresReport(){const m=data.measures||{};const ds=Object.keys(m).sort();if(!ds.length)return'';
+function measuresReport(from){const m=data.measures||{};const ds=Object.keys(m).sort().filter(d=>!from||d>=from);if(!ds.length)return'';
   let o='\nMEDIDAS (cm)\n'+'-'.repeat(12)+'\n';
   ds.forEach(d=>{const parts=MEAS.filter(f=>m[d][f.k]).map(f=>f.l+' '+String(m[d][f.k]).replace('.',','));if(parts.length)o+=new Date(d+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'})+': '+parts.join(' · ')+'\n';});
   return o;}
-function buildReport(){
-  const days=Object.keys(data.days).sort();
-  let out='SEGUIMIENTO DE ENTRENAMIENTO\n'+'='.repeat(32)+'\n(solo series de trabajo; el calentamiento no se incluye)\n\n';
+function txtHasData(dt){const d=data.days[dt]||{};return !!(daySessions(dt).length||d.post||d.note||stepsOf(dt));}
+function txtFrom(r){if(r==='all')return null;const t=todayKey();
+  if(r==='last'){const ds=Object.keys(data.days).filter(txtHasData).sort();return ds.length?ds[ds.length-1]:t;}
+  return rsAdd(t,-(parseInt(r,10)-1));}
+let txtRange='7';
+const TXT_RANGES=[['last','Último día'],['7','7 días'],['14','14 días'],['30','30 días'],['all','Todo']];
+function buildReport(from){
+  const days=Object.keys(data.days).sort().filter(dt=>!from||dt>=from);
+  const fr=from?new Date(from+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit',year:'numeric'}):'';
+  let out='SEGUIMIENTO DE ENTRENAMIENTO'+(from?' · desde el '+fr:'')+'\n'+'='.repeat(32)+'\n(solo series de trabajo; el calentamiento no se incluye)\n\n';
   let any=false;
   days.forEach(dt=>{
     const d=data.days[dt];const sess=daySessions(dt);if(!sess.length&&!d.post&&!d.note&&!stepsOf(dt))return;any=true;
@@ -1497,14 +1505,14 @@ function buildReport(){
     if(d.note)out+='Nota: '+d.note+'\n';
     out+='\n';
   });
-  const mr=measuresReport()+bodyReport();
-  return any||mr?(out.trim()+'\n'+mr):'Sin datos registrados todavía.';
+  const mr=measuresReport(from)+bodyReport(from);
+  return any||mr?(out.trim()+'\n'+mr):(from?'Sin datos registrados desde el '+fr+'.':'Sin datos registrados todavía.');
 }
 /* ===== RESUMEN VISUAL ===== */
 const RS_KS=['A','B','C','D','ABS','GRIP','PUSH','PULL','LEGS'];
 const RS_DOT={A:'A',B:'B',C:'C',D:'D',ABS:'Ab',GRIP:'✊',POOL:'🏊',PADEL:'🎾',RUN:'🏃',WALK:'🚶',BIKE:'🚴',PUSH:'E',PULL:'T',LEGS:'P'};
-const RS_MUS={chestpress:'Pecho',incline:'Pecho',dbfly:'Pecho',seatedrow:'Espalda',pulldown:'Espalda',neutralpulldown:'Espalda',row:'Espalda',shoulderpress:'Hombro anterior',latraise:'Hombro lateral',facepull:'Hombro posterior',barbellcurl:'Bíceps',hammercurl:'Bíceps',pushdown:'Tríceps',ohtriceps:'Tríceps',squat:'Cuádriceps',legext:'Cuádriceps',legpress:'Cuádriceps',lunge:'Cuádriceps',rdl:'Isquios',legcurl:'Isquios',hipthrust:'Glúteo',shrug:'Trapecio',adductor:'Aductores',abductor:'Glúteo medio',preachercurl:'Bíceps',wristcurl:'Antebrazo',reversecurl:'Antebrazo',calf:'Gemelos',seatedcalf:'Sóleo',tibialis:'Tibial',backext:'Lumbar',extrot:'Rotadores',serratuspunch:'Serrato',benchrevcrunch:'Abdomen',woodchop:'Oblicuos',pallof:'Oblicuos',sideplank:'Oblicuos',bicycle:'Oblicuos',heeltouch:'Oblicuos',declinecrunch:'Abdomen',polcrunch:'Abdomen',wcrunch:'Abdomen',hangknee:'Abdomen',legraise:'Abdomen',revcrunch:'Abdomen'};
-const RS_GOAL=[['Pecho',10,1],['Espalda',12,1],['Hombro lateral',8,1],['Hombro anterior',4,0],['Hombro posterior',4,0],['Rotadores',4,0],['Serrato',2,0],['Bíceps',8,1],['Tríceps',8,1],['Antebrazo',8,0],['Trapecio',2,0],['Lumbar',2,0],['Cuádriceps',11,0],['Isquios',9,0],['Glúteo',4,0],['Glúteo medio',4,0],['Aductores',4,0],['Gemelos',6,0],['Sóleo',3,0],['Tibial',4,0],['Abdomen',9,1],['Oblicuos',6,0]];
+const RS_MUS={chestpress:'Pecho',incline:'Pecho',dbfly:'Pecho',seatedrow:'Espalda',pulldown:'Espalda',neutralpulldown:'Espalda',row:'Espalda',shoulderpress:'Hombro anterior',latraise:'Hombro lateral',facepull:'Hombro posterior',barbellcurl:'Bíceps',hammercurl:'Bíceps',pushdown:'Tríceps',ohtriceps:'Tríceps',squat:'Cuádriceps',legext:'Cuádriceps',legpress:'Cuádriceps',lunge:'Cuádriceps',rdl:'Isquios',legcurl:'Isquios',hipthrust:'Glúteo',shrug:'Trapecio',adductor:'Aductores',abductor:'Glúteo medio',preachercurl:'Bíceps',wristcurl:'Antebrazo',reversecurl:'Antebrazo',calf:'Gemelos',seatedcalf:'Sóleo',tibialis:'Tibial',backext:'Lumbar',extrot:'Rotadores',serratuspunch:'Serrato',benchrevcrunch:'Abdomen',woodchop:'Oblicuos',pallof:'Oblicuos',sideplank:'Oblicuos',bicycle:'Oblicuos',heeltouch:'Oblicuos',plank:'Abdomen',deadbug:'Abdomen',deadhang:'Antebrazo',pecdeck:'Pecho',cablefly:'Pecho',dips:'Tríceps',pullover:'Espalda',cablecrunch:'Abdomen',crunch:'Abdomen',declinecrunch:'Abdomen',polcrunch:'Abdomen',wcrunch:'Abdomen',hangknee:'Abdomen',legraise:'Abdomen',revcrunch:'Abdomen'};
+const RS_GOAL=[['Pecho',10,1],['Espalda',12,1],['Hombro lateral',8,1],['Hombro anterior',4,0],['Hombro posterior',4,0],['Rotadores',4,0],['Serrato',2,0],['Bíceps',8,1],['Tríceps',8,1],['Antebrazo',12,0],['Trapecio',2,0],['Lumbar',2,0],['Cuádriceps',11,0],['Isquios',9,0],['Glúteo',4,0],['Glúteo medio',4,0],['Aductores',4,0],['Gemelos',6,0],['Sóleo',3,0],['Tibial',4,0],['Abdomen',9,1],['Oblicuos',6,0]];
 function rsDD(d){const x=new Date(d+'T12:00');return x.getDate()+'/'+(x.getMonth()+1);}
 function rsFmt(v){return String(Math.round(v*10)/10).replace('.',',');}
 function rsAdd(d,n){const x=new Date(d+'T12:00');x.setDate(x.getDate()+n);return `${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`;}
@@ -1572,10 +1580,10 @@ function rsFirstDay(){const ds=Object.keys(data.days).filter(d=>daySessions(d).l
 /* series directas por músculo entre dos fechas (incluidas) */
 function rsMusCount(from,to){const cnt={};Object.keys(data.days).filter(dt=>dt>=from&&dt<=to).forEach(dt=>{const d=data.days[dt]||{};
     RS_KS.forEach(k=>{if(k==='GRIP')return;Object.entries(d[k]||{}).forEach(([id,r])=>{const m=RS_MUS[id];if(m)cnt[m]=(cnt[m]||0)+workSets(r).length;});});
-    const g=d.GRIP||{};const gs=Math.max(workSets(g.gripR).length,workSets(g.gripL).length);if(gs)cnt['Antebrazo']=(cnt['Antebrazo']||0)+gs;});return cnt;}
+    const g=d.GRIP||{};const gs=Math.max(workSets(g.gripR).length,workSets(g.gripL).length)+Math.max(workSets(g.fingerextR).length,workSets(g.fingerextL).length);if(gs)cnt['Antebrazo']=(cnt['Antebrazo']||0)+gs;});return cnt;}
 function rsCol(c,g){return c>=g*1.5?'var(--rs-warn)':c>=g?'var(--rs-ok)':c>=g/2?'#7FB2FF':'#8a93a0';}
 function rsMusclesHTML(){const t=todayKey();const tabs=`<div class="rs-mtabs">${[['wk','Semana'],['all','Desde el inicio']].map(([k,l])=>`<button data-musmode="${k}" class="${rsMusMode===k?'on':''}">${l}</button>`).join('')}</div>`;
-  const hint=`Gris: menos de la mitad · azul: a medias · verde: cumplido · naranja: más de un 50% por encima (vigila que recuperas). ★ = tus prioridades. Abdomen = crunch y elevaciones; Oblicuos = leñador, Pallof, plancha lateral, bicicleta y toques de talón. Antebrazo = curl de muñeca + curl invertido + gripper (cada serie de gripper con las dos manos cuenta como una). Sóleo = gemelo sentado · Glúteo medio = abductores · Rotadores = rotación externa en polea.`;
+  const hint=`Gris: menos de la mitad · azul: a medias · verde: cumplido · naranja: más de un 50% por encima (vigila que recuperas). ★ = tus prioridades. Abdomen = crunch, elevaciones, plancha frontal y dead bug; Oblicuos = leñador, Pallof, plancha lateral, bicicleta y toques de talón. Antebrazo = curl de muñeca + curl invertido + colgarse + gripper + extensor de dedos (cada serie hecha con las dos manos cuenta como una). Sóleo = gemelo sentado · Glúteo medio = abductores · Rotadores = rotación externa en polea.`;
   if(rsMusMode==='all'){const from=rsFirstDay();const days=Math.round((new Date(t+'T12:00')-new Date(from+'T12:00'))/864e5)+1;const wks=Math.max(1,days/7);const cnt=rsMusCount(from,t);
     const tot=Object.values(cnt).reduce((a,b)=>a+b,0);
     return `<div class="rs-card" id="rsMus"><h3>💪 Series desde el inicio <span class="rs-subt">(desde el ${rsDD(from)} · ${String(Math.round(wks*10)/10).replace('.',',')} semanas)</span></h3>${tabs}
@@ -1680,8 +1688,10 @@ function renderResumen(){
   const stats=[[weekDays,'días esta semana'],[monthStr,'fuerza este mes'],[monthPool,'piscina este mes'],[monthExtra,'abs, pádel, agarre y cardio este mes'],[monthMin,'min este mes'],[monthKcal,'kcal este mes'],[sw.length?fmtInt(Math.round(sw.reduce((a,b)=>a+b,0)/sw.length)):'—','👟 pasos/día de media esta semana']];
   let h=rsPlanHTML(stats)+rsWeekHTML()+rsStepsHTML()+rsTotalsHTML()+rsDailyHTML()+`<div class="rs-h2">Ejercicios</div><div class="rs-hint" style="margin:4px 2px 0">Toca un ejercicio para verlo en la sección 📈 Gráficas, abajo del todo.</div>`+rsSessionsHTML()+rsCardioHTML()+rsMusclesHTML()+rsChartsHTML();
   h+=`<div class="backup"><h3>Exportar para compartir</h3>
-    <p>Texto legible con todos tus días (solo series de trabajo con su RIR, tiempo, calorías y pulsaciones) para pasárselo a alguien.</p>
-    <textarea id="txtBox" readonly>${esc(buildReport())}</textarea>
+    <p>Texto legible (solo series de trabajo con su RIR, tiempo, calorías y pulsaciones) para pasárselo a alguien. Elige cuánto incluir: si es muy largo puede cortarse al pegarlo en un chat.</p>
+    <div class="txt-rg" id="txtRg">${TXT_RANGES.map(([k,l])=>`<button class="chip${txtRange===k?' on':''}" data-rg="${k}">${l}</button>`).join('')}</div>
+    <textarea id="txtBox" readonly>${esc(buildReport(txtFrom(txtRange)))}</textarea>
+    <div class="txt-len" id="txtLen"></div>
     <div class="bbtns"><button id="txtCopy">Copiar texto</button><button id="txtDl">Descargar .txt</button></div>
     <div class="bmsg" id="txtmsg"></div></div>`;
   h+=`<div class="backup"><h3>Copia de seguridad</h3>
@@ -1693,6 +1703,10 @@ function renderResumen(){
   viewEl.innerHTML=h;rsBindCharts();rsBindDaily();rsBindMus();
   const copyFrom=async(id,cb)=>{const t=document.getElementById(id);try{await navigator.clipboard.writeText(t.value);cb('Copiado ✓');}catch(e){t.select();try{document.execCommand('copy');cb('Copiado ✓');}catch(_){cb('No se pudo copiar',1);}}};
   const dlFrom=(id,name,type,cb)=>{try{const b=new Blob([document.getElementById(id).value],{type});const u=URL.createObjectURL(b);const a=document.createElement('a');a.href=u;a.download=name;a.click();URL.revokeObjectURL(u);cb('Descargando ✓');}catch(e){cb('No se pudo; usa Copiar',1);}};
+  const txtUpd=()=>{const tb=document.getElementById('txtBox');tb.value=buildReport(txtFrom(txtRange));const n=tb.value.length;
+    document.getElementById('txtLen').textContent=fmtInt(n)+' caracteres'+(n>12000?' · largo: mejor elige menos días o usa Descargar .txt':'');
+    viewEl.querySelectorAll('#txtRg [data-rg]').forEach(b=>b.classList.toggle('on',b.dataset.rg===txtRange));tmsg('');};
+  viewEl.querySelectorAll('#txtRg [data-rg]').forEach(b=>b.onclick=()=>{txtRange=b.dataset.rg;txtUpd();});txtUpd();
   document.getElementById('txtCopy').onclick=()=>copyFrom('txtBox',tmsg);
   document.getElementById('txtDl').onclick=()=>dlFrom('txtBox','mi-entreno.txt','text/plain',tmsg);
   document.getElementById('copyBtn').onclick=()=>copyFrom('expBox',msg);
