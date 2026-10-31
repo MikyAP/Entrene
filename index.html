@@ -305,6 +305,7 @@
   .lv-hero{display:flex;gap:14px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px} .lv-t1{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em} .lv-t2{font-size:22px;font-weight:800;margin:2px 0 6px}
   .lv-em{position:relative;flex:none} .lv-em svg{width:100%;height:100%;display:block} .lv-em span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:900;color:var(--d);padding-bottom:3px}
   .lv-ladder{display:flex;gap:4px;margin:0 0 6px} .lv-ladder div{flex:1;text-align:center;font-size:10.5px;color:var(--muted)} .lv-ladder i{display:block;height:5px;border-radius:3px;margin-bottom:4px}
+  .lv-body{margin:0 0 6px} .lv-body svg{width:100%;height:auto;display:block;max-width:420px;margin:0 auto} .lv-blg{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 10px;font-size:11px;color:var(--muted);margin:4px 0 8px} .lv-blg span{display:flex;align-items:center;gap:4px} .lv-blg i{width:10px;height:10px;border-radius:3px;display:inline-block}
   .lv-m{border-top:1px solid var(--line)} .lv-m summary{display:flex;gap:12px;padding:10px 0;cursor:pointer;list-style:none} .lv-m summary::-webkit-details-marker{display:none} .lv-m[open] .lv-chev{transform:rotate(90deg)}
   .lv-mi{flex:1;min-width:0} .lv-mt{display:flex;align-items:baseline;gap:8px} .lv-mt span{font-size:12.5px;font-weight:800} .lv-chev{margin-left:auto;color:var(--muted);transition:transform .15s}
   .lv-bar{height:6px;background:var(--panel2);border-radius:4px;margin:6px 0 4px;overflow:hidden} .lv-bar i{display:block;height:100%;border-radius:4px} .lv-hint{font-size:11.5px;color:var(--muted)}
@@ -581,7 +582,7 @@ const CARDIO={
    'Para que no aburra: un capítulo o un podcast, o tramos de 5 min suave / 5 min algo más alegre.']}};
 function cardioBits(dt,k){const c=(data.days[dt]||{})[k]||{};const mm=getMeta(dt,k);const b=[];
   CARDIO[k].fields.forEach(f=>{if(c[f.k])b.push(f.fmt(c[f.k]));});
-  if(mm.dur)b.push(mm.dur+' min');if(mm.kcal)b.push(mm.kcal+' kcal');if(mm.hr)b.push(mm.hr+' ppm');return b;}
+  if(mm.dur)b.push(mm.dur+' min');if(mm.kcal)b.push(mm.kcal+' kcal');if(mm.hr||mm.hrmax)b.push(hrTxt(mm));return b;}
 function cardioHTML(k){const C=CARDIO[k];const c=(data.days[activeDate]||{})[k]||{};
   return `<div class="pool-card"><h3>${C.icon} ${C.name}</h3><ul class="pool-list">${C.tips.map(t=>`<li>${t}</li>`).join('')}</ul>`+
    C.fields.map(f=>`<div class="pool-log">${f.label}: <input data-cf="${f.k}" inputmode="decimal" value="${esc(c[f.k]||'')}" aria-label="${f.label}" placeholder="—"></div>`).join('')+
@@ -651,7 +652,7 @@ function ensureRec(dt,sid,id){data.days[dt]=data.days[dt]||{};data.days[dt][sid]
 function filled(rec){return !!(rec&&rec.sets&&rec.sets.some(s=>s.a||s.b));}
 function workSets(rec){return (rec&&rec.sets?rec.sets:[]).filter(s=>!s.w&&(s.a||s.b));}
 function workFilled(rec){return workSets(rec).length>0;}
-function metaHasData(dt,sid){const mm=(data.days[dt]&&data.days[dt].meta&&data.days[dt].meta[sid])||{};return !!(mm.dur||mm.kcal||mm.hr);}
+function metaHasData(dt,sid){const mm=(data.days[dt]&&data.days[dt].meta&&data.days[dt].meta[sid])||{};return !!(mm.dur||mm.kcal||mm.hr||mm.hrmax);}
 function getMeta(dt,sid){return (data.days[dt]&&data.days[dt].meta&&data.days[dt].meta[sid])||{};}
 function setMeta(dt,sid,f,v){data.days[dt]=data.days[dt]||{};data.days[dt].meta=data.days[dt].meta||{};data.days[dt].meta[sid]=data.days[dt].meta[sid]||{};if(v)data.days[dt].meta[sid][f]=v;else delete data.days[dt].meta[sid][f];queueSave();}
 function daySessions(dt){const d=data.days[dt]||{};const out=ALLS.filter(k=>(d[k]&&Object.values(d[k]).some(filled))||metaHasData(dt,k));
@@ -859,7 +860,7 @@ function sessionCardSVG(dt,sid){const st=cardStats(dt,sid);const mm=getMeta(dt,s
   /* números */
   const ty=my+(chips.length>3?66:26);const tiles=[['SERIES',fmtInt(st.sets)],['REPETICIONES',fmtInt(st.reps)],['KG MOVIDOS',fmtInt(st.kg)],(mm.dur?['MINUTOS',String(mm.dur)]:mm.hr?['PPM MEDIA',String(mm.hr)]:['EJERCICIOS',String(st.items.length)])];
   tiles.forEach(([l,val],i)=>{const x=64+i*244;v+=`<rect x="${x}" y="${ty}" width="220" height="132" rx="20" fill="${TC.panel2}"/><text x="${x+110}" y="${ty+74}" fill="${TC.text}" font-size="50" font-weight="800" text-anchor="middle">${esc(val)}</text><text x="${x+110}" y="${ty+112}" fill="${TC.muted}" font-size="20" font-weight="700" letter-spacing="1.5" text-anchor="middle">${l}</text>`;});
-  let ly=ty+132+50;const extra=[];if(mm.dur&&mm.hr)extra.push(`${mm.hr} ppm de media`);if(mm.kcal)extra.push(`${mm.kcal} kcal`);
+  let ly=ty+132+50;const extra=[];if(mm.dur&&mm.hr)extra.push(`${mm.hr} ppm de media${mm.hrmax?' · máx '+mm.hrmax:''}`);if(mm.kcal)extra.push(`${mm.kcal} kcal`);
   const pd=isAway(dt)?null:prevSameSession(dt,sid);if(pd){const ps=cardStats(pd,sid);if(ps.kg){const d=st.kg-ps.kg;const pc=Math.round(d/ps.kg*100);
     extra.push(`${d>=0?'+':'−'}${fmtInt(Math.abs(d))} kg (${d>=0?'+':'−'}${Math.abs(pc)} %) vs la última ${sid} (${new Date(pd+'T12:00').toLocaleDateString('es-ES',{day:'numeric',month:'numeric'})})`);}}
   if(extra.length){v+=`<text x="540" y="${ly}" fill="${TC.muted}" font-size="26" text-anchor="middle">${esc(extra.join('  ·  '))}</text>`;ly+=52;}
@@ -977,10 +978,10 @@ function figsHTML(){if(_FIGS)return _FIGS;
   _FIGS=`<div class="figs"><div class="fig-wrap">${one('F')}<span class="fig-cap">Delante</span></div><div class="fig-wrap">${one('B')}<span class="fig-cap">Detrás</span></div></div>`;return _FIGS;}
 function mixedWeights(rec){const ws=workSets(rec).map(s=>parseFloat(String(s.a||'').replace(',','.'))).filter(v=>!isNaN(v));return new Set(ws).size>1;}
 function isHidden(sid,id){return !!data.hidden[sid+'|'+id];}
-function lastMeta(sid){const ds=Object.keys(data.days).sort();let out=null;ds.forEach(dt=>{const mm=(data.days[dt].meta||{})[sid];if(mm&&(mm.dur||mm.kcal||mm.hr))out={dur:mm.dur,kcal:mm.kcal,hr:mm.hr,date:dt};});return out;}
+function lastMeta(sid){const ds=Object.keys(data.days).sort();let out=null;ds.forEach(dt=>{const mm=(data.days[dt].meta||{})[sid];if(mm&&(mm.dur||mm.kcal||mm.hr||mm.hrmax))out={dur:mm.dur,kcal:mm.kcal,hr:mm.hr,hrmax:mm.hrmax,date:dt};});return out;}
 function lastPool(){const ds=Object.keys(data.days).sort();let out=null;ds.forEach(dt=>{const p=data.days[dt].POOL;const mm=(data.days[dt].meta||{}).POOL;if((p&&p.largos)||(mm&&(mm.dur||mm.kcal||mm.hr)))out={largos:p&&p.largos,date:dt};});return out;}
 function metaLine(sid,largos){const mm=lastMeta(sid);const parts=[];if(largos)parts.push(`🏊 <b>${largos}</b> largos`);
-  if(mm){if(mm.dur)parts.push(`⏱ <b>${mm.dur}</b> min`);if(mm.kcal)parts.push(`🔥 <b>${mm.kcal}</b> kcal`);if(mm.hr)parts.push(`❤ <b>${mm.hr}</b> ppm`);}
+  if(mm){if(mm.dur)parts.push(`⏱ <b>${mm.dur}</b> min`);if(mm.kcal)parts.push(`🔥 <b>${mm.kcal}</b> kcal`);if(mm.hr)parts.push(`❤ <b>${mm.hr}</b> ppm${mm.hrmax?` · máx <b>${mm.hrmax}</b>`:''}`);else if(mm.hrmax)parts.push(`❤ máx <b>${mm.hrmax}</b> ppm`);}
   if(!parts.length)return'';const dt=(mm&&mm.date)||'';const dd=dt?new Date(dt+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'}):'';
   return `<div class="metaline">${parts.join(' · ')}${dd?` <span style="opacity:.7">(${dd})</span>`:''}</div>`;}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -1080,9 +1081,11 @@ function noteHTML(){const nt=(data.days[activeDate]||{}).note||'';
   return `<div class="note-card"><label>Nota del día (opcional)</label><textarea id="noteBox" placeholder="Cómo te sentiste, molestias, lo que sea…">${esc(nt)}</textarea></div>`;}
 function sessStatsHTML(sid){const mm=getMeta(activeDate,sid);
   return `<div class="sstats">
-    <div class="sf"><label>Duración (min)</label><input data-meta="dur" inputmode="numeric" value="${esc(mm.dur||'')}" aria-label="Duración en minutos" placeholder="—"></div>
-    <div class="sf"><label>Calorías (kcal)</label><input data-meta="kcal" inputmode="numeric" value="${esc(mm.kcal||'')}" aria-label="Calorías" placeholder="—"></div>
-    <div class="sf"><label>Puls. media (ppm)</label><input data-meta="hr" inputmode="numeric" value="${esc(mm.hr||'')}" aria-label="Pulsaciones medias" placeholder="—"></div></div>`;}
+    <div class="sf"><label>Minutos</label><input data-meta="dur" inputmode="numeric" value="${esc(mm.dur||'')}" aria-label="Duración en minutos" placeholder="—"></div>
+    <div class="sf"><label>Kcal</label><input data-meta="kcal" inputmode="numeric" value="${esc(mm.kcal||'')}" aria-label="Calorías" placeholder="—"></div>
+    <div class="sf"><label>Ppm media</label><input data-meta="hr" inputmode="numeric" value="${esc(mm.hr||'')}" aria-label="Pulsaciones medias" placeholder="—"></div>
+    <div class="sf"><label>Ppm máx.</label><input data-meta="hrmax" inputmode="numeric" value="${esc(mm.hrmax||'')}" aria-label="Pulsaciones máximas" placeholder="—"></div></div>`;}
+function hrTxt(mm){return mm.hr?(mm.hrmax?`${mm.hr} ppm (máx ${mm.hrmax})`:`${mm.hr} ppm`):(mm.hrmax?`máx ${mm.hrmax} ppm`:'');}
 const ABS_BLOCKS=[{t:'Bloque 1 · Crunch o elevación',h:'Elige uno · 3 series · el que mejor hace crecer el abdomen',cats:['crunch','elev']},{t:'Bloque 2 · Estabilidad u oblicuos',h:'Elige uno · 2-3 series',cats:['estab','obl']}];
 function absVisible(){const loc=data.absLoc||'gym';return SESSIONS.ABS.items.filter(it=>!isHidden('ABS',it.id)&&(it.loc==='both'||it.loc===loc||filled(recOf(activeDate,'ABS',it.id))));}
 /* ===== CALENTAMIENTO por sesión ===== */
@@ -1327,9 +1330,9 @@ function dayPreview(dt){
   let inner='';
   sess.forEach(sid=>{
     if(CARDIO[sid]){inner+=`<div class="cp-sess" style="color:${SCOL[sid]}">${CARDIO[sid].icon} ${CARDIO[sid].name}</div><div class="cp-ex"><span>${esc(cardioBits(dt,sid).join(' · ')||'—')}</span><span></span></div>`;return;}
-    if(sid==='POOL'){const p=d.POOL||{};const mm=getMeta(dt,'POOL');const bits=[];if(p.largos)bits.push(`${esc(p.largos)} largos`);if(mm.dur)bits.push(`${esc(mm.dur)} min`);if(mm.kcal)bits.push(`${esc(mm.kcal)} kcal`);if(mm.hr)bits.push(`${esc(mm.hr)} ppm`);
+    if(sid==='POOL'){const p=d.POOL||{};const mm=getMeta(dt,'POOL');const bits=[];if(p.largos)bits.push(`${esc(p.largos)} largos`);if(mm.dur)bits.push(`${esc(mm.dur)} min`);if(mm.kcal)bits.push(`${esc(mm.kcal)} kcal`);if(mm.hr||mm.hrmax)bits.push(esc(hrTxt(mm)));
       inner+=`<div class="cp-sess" style="color:${SCOL.POOL}">🏊 Piscina</div><div class="cp-ex"><span>${bits.join(' · ')||'—'}</span><span></span></div>`;return;}
-    const s=d[sid]||{};const mm=getMeta(dt,sid);const mb=[];if(mm.dur)mb.push(`${esc(mm.dur)} min`);if(mm.kcal)mb.push(`${esc(mm.kcal)} kcal`);if(mm.hr)mb.push(`${esc(mm.hr)} ppm`);
+    const s=d[sid]||{};const mm=getMeta(dt,sid);const mb=[];if(mm.dur)mb.push(`${esc(mm.dur)} min`);if(mm.kcal)mb.push(`${esc(mm.kcal)} kcal`);if(mm.hr||mm.hrmax)mb.push(esc(hrTxt(mm)));
     const sn=PLAN.includes(sid)?sessNumber(dt,sid):null;
     inner+=`<div class="cp-sess" style="color:${SCOL[sid]}">${sessName(sid)}${sn?' · sesión '+sn:(PLAN.includes(sid)?' · sin finalizar':'')}${mb.length?` · ${mb.join(' · ')}`:''}</div>`;
     Object.keys(s).forEach(id=>{const r=s[id];if(!workFilled(r))return;const def=EX[id]||{name:id};inner+=`<div class="cp-ex"><span>${def.name}</span><span>${esc(fmtWork(r,def.type||'weight',false,id))}</span></div>`;});
@@ -1531,9 +1534,9 @@ function buildReport(from){
     const hd=dd.toUpperCase()+(isAway(dt)?' (OTRO GIMNASIO: otras máquinas, pesos no comparables)':'');out+=hd+'\n'+'-'.repeat(hd.length)+'\n';
     sess.forEach(sid=>{
       if(CARDIO[sid]){out+=CARDIO[sid].name+': '+(cardioBits(dt,sid).join(' · ')||'—')+'\n';return;}
-      if(sid==='POOL'){const p=d.POOL||{};const mm=getMeta(dt,'POOL');const bits=[];if(p.largos)bits.push(p.largos+' largos');if(mm.dur)bits.push(mm.dur+' min');if(mm.kcal)bits.push(mm.kcal+' kcal');if(mm.hr)bits.push(mm.hr+' ppm');
+      if(sid==='POOL'){const p=d.POOL||{};const mm=getMeta(dt,'POOL');const bits=[];if(p.largos)bits.push(p.largos+' largos');if(mm.dur)bits.push(mm.dur+' min');if(mm.kcal)bits.push(mm.kcal+' kcal');if(mm.hr||mm.hrmax)bits.push(hrTxt(mm));
         out+='Piscina: '+(bits.join(' · ')||'—')+'\n';return;}
-      const mm=getMeta(dt,sid);const mb=[];if(mm.dur)mb.push(mm.dur+' min');if(mm.kcal)mb.push(mm.kcal+' kcal');if(mm.hr)mb.push(mm.hr+' ppm');
+      const mm=getMeta(dt,sid);const mb=[];if(mm.dur)mb.push(mm.dur+' min');if(mm.kcal)mb.push(mm.kcal+' kcal');if(mm.hr||mm.hrmax)mb.push(hrTxt(mm));
       const sn=PLAN.includes(sid)?sessNumber(dt,sid):null;
       out+=sessName(sid)+(sn?' — sesión '+sn+' del plan':(PLAN.includes(sid)?' — sin finalizar':''))+(mb.length?' ('+mb.join(' · ')+')':'')+'\n';
       Object.keys(d[sid]||{}).forEach(id=>{const r=d[sid][id];if(!workFilled(r))return;const def=EX[id]||{name:id};
@@ -1576,6 +1579,19 @@ function lvData(){return LV_MUS.map(([m,ids])=>{const ex=ids.filter(id=>LV_STD[i
   const sc=ex.filter(x=>x.q).map(x=>x.s);return{m,ex,avg:sc.length?sc.reduce((a,b)=>a+b,0)/sc.length:null};});}
 function lvBar(p,c){return `<div class="lv-bar"><i style="width:${Math.max(2,Math.min(100,p*100)).toFixed(0)}%;background:${c}"></i></div>`;}
 function lvDate(dt){return new Date(dt+'T12:00').toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'});}
+
+/* muñeco coloreado por nivel: cada músculo del color de su rango/nivel; gris oscuro = sin datos */
+const LV_KEYS={'Pecho':['chest'],'Espalda':['lats','upperback'],'Hombro':['delts'],'Bíceps':['biceps'],'Tríceps':['triceps'],'Trapecio':['traps'],'Cuádriceps':['quads'],'Isquios':['hamstrings'],'Glúteo':['glutes'],'Aductores':['adductors'],'Gemelos':['calves'],'Antebrazo':['forearms']};
+function lvBodySide(side,col,x,y,h){const s=h/1448,ox=side==='B'?-724*s:0;const D=BMAP_D[side];let g=`<g transform="translate(${x+ox} ${y}) scale(${s})">`;
+  g+=`<path d="${side==='F'?BMAP_D.OF:BMAP_D.OB}" fill="${TC.out}" stroke="${TC.skin}" stroke-width="${2/s}"/>`;
+  Object.keys(D).forEach(slug=>{let fill;if(BODY_SKIN[slug])fill=slug==='hair'?TC.hair:TC.skin;
+    else{const ks=(BODY_MAP[side][slug])||[];const k=ks.find(k=>col[k]);fill=k?col[k]:HEAT[0];}
+    D[slug].forEach(d=>g+=`<path d="${d}" fill="${fill}"/>`);});
+  return g+'</g>';}
+function lvBody(D,mode){const col={};D.forEach(gr=>{if(gr.avg===null)return;const c=mode==='rank'?LV_RK[lvRank(gr.avg).t][1]:LV_LV[Math.min(4,Math.floor(gr.avg))][1];(LV_KEYS[gr.m]||[]).forEach(k=>col[k]=c);});
+  const L=mode==='rank'?LV_RK:LV_LV;
+  return `<div class="lv-body"><svg viewBox="0 0 760 720" role="img" aria-label="Nivel de cada músculo">${lvBodySide('F',col,20,0,660)}${lvBodySide('B',col,410,0,660)}<text x="185" y="708" fill="${TC.muted}" font-size="26" text-anchor="middle" font-family="system-ui,sans-serif">Delante</text><text x="575" y="708" fill="${TC.muted}" font-size="26" text-anchor="middle" font-family="system-ui,sans-serif">Detrás</text></svg>
+    <div class="lv-blg">${L.map(([n,c])=>`<span><i style="background:${c}"></i>${n}</span>`).join('')}<span><i style="background:${HEAT[0]}"></i>Sin datos</span></div></div>`;}
 function renderNivel(){const D=lvData();const all=[];D.forEach(g=>g.ex.forEach(x=>{if(x.q)all.push(x.s);}));
   let h=`<div class="lv-wrap"><div class="lv-tabs">${[['rank','🏆 Rangos'],['real','📊 Niveles reales']].map(([k,l])=>`<button data-lv="${k}" class="${lvMode===k?'on':''}">${l}</button>`).join('')}</div>`;
   if(!all.length){h+=`<div class="lv-card"><p class="lv-hint">Aún no hay datos suficientes. Registra alguna sesión del plan.</p></div></div>`;viewEl.innerHTML=h;lvBind();return;}
@@ -1583,7 +1599,7 @@ function renderNivel(){const D=lvData();const all=[];D.forEach(g=>g.ex.forEach(x
   if(lvMode==='rank'){const g=all.reduce((a,b)=>a+b,0)/all.length;const R=lvRank(g);
     h+=`<div class="lv-card"><div class="lv-hero">${lvEm(R,64)}<div style="flex:1;min-width:0"><div class="lv-t1">Rango general</div><div class="lv-t2" style="color:${LV_RK[R.t][1]}">${lvRL(R)}</div>${lvBar(R.p,LV_RK[R.t][1])}
       <div class="lv-hint">${Math.floor(R.p*100)}% hacia ${lvNext(R)} · Mejor: ${sorted[0].m} · Más flojo: ${sorted[sorted.length-1].m}</div></div></div>
-      <div class="lv-ladder">${LV_RK.map(([n,c])=>`<div><i style="background:${c}"></i>${n}</div>`).join('')}</div>`;
+      ${lvBody(D,'rank')}`;
     D.forEach(gr=>{if(gr.avg===null)return;const r=lvRank(gr.avg);
       h+=`<details class="lv-m"><summary>${lvEm(r,40)}<div class="lv-mi"><div class="lv-mt"><b>${gr.m}</b><span style="color:${LV_RK[r.t][1]}">${lvRL(r)}</span><span class="lv-chev">▸</span></div>${lvBar(r.p,LV_RK[r.t][1])}<div class="lv-hint">${Math.floor(r.p*100)}% hacia ${lvNext(r)}</div></div></summary>
         <div class="lv-ex">${gr.ex.map(x=>{const nm=esc((EX[x.id]||{name:x.id}).name);if(!x.q)return `<div class="lv-exr"><span class="lv-en">${nm}<small>sin datos aún</small></span></div>`;const rr=lvRank(x.s);
@@ -1591,7 +1607,7 @@ function renderNivel(){const D=lvData();const all=[];D.forEach(g=>g.ex.forEach(x
     h+=`<div class="lv-foot">Hierro = principiante · Bronce = novato · Plata = intermedio · Oro = avanzado · Diamante = élite. Cada rango tiene 3 divisiones (III → II → I). Se calcula con tu mejor serie de la última sesión de cada ejercicio. Orientativo: lo que cuenta es tu propia progresión.</div></div>`;}
   else{const cnt=[0,0,0,0,0];all.forEach(s=>cnt[Math.min(4,Math.floor(s))]++);
     h+=`<div class="lv-card"><div class="lv-sub">Tus pesos comparados con lo que haría un novato o un intermedio <b>con tu mismo esquema de repeticiones y RIR</b> (tablas de Strength Level, hombre ~71 kg).</div>
-      <div class="lv-sum">${[2,1,0].map(i=>`<div><b style="color:${LV_LV[i][1]}">${cnt[i]+(i===2?cnt[3]+cnt[4]:0)}</b><span>${i===2?'Intermedio o más':LV_LV[i][0]}</span></div>`).join('')}</div>`;
+      <div class="lv-sum">${[2,1,0].map(i=>`<div><b style="color:${LV_LV[i][1]}">${cnt[i]+(i===2?cnt[3]+cnt[4]:0)}</b><span>${i===2?'Intermedio o más':LV_LV[i][0]}</span></div>`).join('')}</div>${lvBody(D,'real')}`;
     D.forEach(gr=>{if(gr.avg===null)return;const lv=Math.min(4,Math.floor(gr.avg));
       h+=`<details class="lv-m"><summary><div class="lv-bd" style="--c:${LV_LV[lv][1]}">${LV_LV[lv][0][0]}</div><div class="lv-mi"><div class="lv-mt"><b>${gr.m}</b><span style="color:${LV_LV[lv][1]}">${LV_LV[lv][0]}</span><span class="lv-chev">▸</span></div>${lvBar(gr.avg-lv,LV_LV[lv][1])}<div class="lv-hint">${Math.floor((gr.avg-lv)*100)}% hacia ${lv<4?LV_LV[lv+1][0]:'—'}</div></div></summary>
         <div class="lv-ex">${gr.ex.map(x=>{const nm=esc((EX[x.id]||{name:x.id}).name);if(!x.q)return `<div class="lv-exr"><span class="lv-en">${nm}<small>sin datos aún</small></span></div>`;
