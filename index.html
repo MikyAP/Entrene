@@ -198,6 +198,7 @@
   .backup{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin:12px 0}
   .backup h3{margin:0 0 6px;font-size:14px} .backup p{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
   .txt-rg{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px} .txt-len{font-size:11.5px;color:var(--muted);margin:4px 2px 0}
+  .filebtn{flex:1;display:flex;align-items:center;justify-content:center;min-height:42px;border-radius:10px;border:1px solid var(--work);color:var(--work);font-weight:700;font-size:13.5px;cursor:pointer;background:var(--panel2)}
   .backup textarea{width:100%;min-height:70px;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:10px;font-size:12px;padding:8px;font-family:ui-monospace,monospace;resize:vertical}
   .bbtns{display:flex;gap:8px;margin:8px 0} .bbtns button{flex:1;min-height:42px;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;font-size:13px;font-weight:600;cursor:pointer}
   .meas-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 6px}
@@ -1722,7 +1723,9 @@ function renderResumen(){
     <p>Guarda este texto en sitio seguro (notas, email…). Restáuralo aquí si cambias de móvil o se pierden los datos.</p>
     <textarea id="expBox" readonly>${esc(JSON.stringify(data))}</textarea>
     <div class="bbtns"><button id="copyBtn">Copiar</button><button id="dlBtn">Descargar</button></div>
-    <p>Pega aquí una copia para restaurar:</p><textarea id="impBox" placeholder='{"days":...}'></textarea>
+    <p><b>Restaurar desde archivo</b> (lo más fácil en el móvil: elige el .json o .txt de la copia, sin copiar ni pegar):</p>
+    <div class="bbtns"><label class="filebtn">📂 Elegir archivo y restaurar<input type="file" id="impFile" accept=".json,.txt,application/json,text/plain" hidden></label></div>
+    <p>O pega aquí una copia para restaurar:</p><textarea id="impBox" placeholder='{"days":...}'></textarea>
     <div class="bbtns"><button id="impBtn">Restaurar copia</button></div><div class="bmsg" id="bmsg"></div></div>`;
   viewEl.innerHTML=h;rsBindCharts();rsBindDaily();rsBindMus();
   const copyFrom=async(id,cb)=>{const t=document.getElementById(id);try{await navigator.clipboard.writeText(t.value);cb('Copiado ✓');}catch(e){t.select();try{document.execCommand('copy');cb('Copiado ✓');}catch(_){cb('No se pudo copiar',1);}}};
@@ -1735,8 +1738,13 @@ function renderResumen(){
   document.getElementById('txtDl').onclick=()=>dlFrom('txtBox','mi-entreno.txt','text/plain',tmsg);
   document.getElementById('copyBtn').onclick=()=>copyFrom('expBox',msg);
   document.getElementById('dlBtn').onclick=()=>dlFrom('expBox','mi-entreno-backup.json','application/json',msg);
-  document.getElementById('impBtn').onclick=()=>{const v=document.getElementById('impBox').value.trim();if(!v){msg('Pega una copia primero',1);return;}
-    try{const o=JSON.parse(v);if(!o.days)throw 0;data=o;normalize();migratePlan();migrateIds();raw.set(K3,JSON.stringify(data));msg('Datos restaurados ✓');setTimeout(()=>renderResumen(),600);}catch(e){msg('Copia no válida',1);}};
+  const doRestore=(v,src)=>{v=String(v||'').replace(/^\uFEFF/,'').trim();if(!v){msg(src==='file'?'El archivo está vacío':'Pega una copia primero',1);return;}
+    let o;try{o=JSON.parse(v);if(!o||!o.days)throw 0;}catch(e){msg(src==='file'?'Ese archivo no es una copia válida de Mi Entreno':'Copia no válida (¿se ha cortado al pegar? Prueba con «Elegir archivo»)',1);return;}
+    const nd=Object.keys(o.days).length;if(!confirm(`Se sustituirán todos los datos de la app por los de la copia (${nd} días). ¿Seguir?`))return;
+    data=o;normalize();migratePlan();migrateIds();raw.set(K3,JSON.stringify(data));msg(`Datos restaurados ✓ (${nd} días)`);setTimeout(()=>renderResumen(),900);};
+  document.getElementById('impBtn').onclick=()=>doRestore(document.getElementById('impBox').value,'paste');
+  const impF=document.getElementById('impFile');if(impF)impF.onchange=()=>{const f=impF.files&&impF.files[0];if(!f)return;const rd=new FileReader();
+    rd.onload=()=>{doRestore(rd.result,'file');impF.value='';};rd.onerror=()=>msg('No se pudo leer el archivo',1);rd.readAsText(f,'utf-8');};
 }
 function msg(t,err){const m=document.getElementById('bmsg');if(!m)return;m.textContent=t;m.className='bmsg'+(err?' err':'');}
 function tmsg(t,err){const m=document.getElementById('txtmsg');if(!m)return;m.textContent=t;m.className='bmsg'+(err?' err':'');}
