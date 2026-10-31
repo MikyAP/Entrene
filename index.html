@@ -152,7 +152,7 @@
   .stp button:active{background:var(--line)}
   .setctl{display:flex;gap:8px;margin-top:4px}
   .setctl button{flex:1;min-height:38px;background:none;border:1px dashed var(--line);color:var(--muted);border-radius:9px;font-size:12.5px;font-weight:600;cursor:pointer}
-  .setctl button:active{background:var(--panel2)}
+  .setctl button:active{background:var(--panel2)} .setctl button.om-on{border-style:solid;border-color:var(--work);color:var(--work)}
   .last{font-size:12.5px;color:var(--muted);margin:10px 0 0;padding-left:2px} .last b{color:var(--text);font-weight:600}
   .opt-head{margin:20px 2px 4px;padding:11px 12px;border:1px dashed var(--line);border-radius:11px;font-size:12.5px;color:var(--text2);line-height:1.5}
   .opt-head b{color:var(--text)}
@@ -380,7 +380,7 @@ const DECLINE={id:'declinecrunch',name:'Crunch en banco declinado',scheme:'3 × 
 const LEGRAISE={id:'legraise',name:'Elevación de piernas',scheme:'3 × 10-15',rest:75,type:'reps',q:'elevación de piernas abdominales',p:['abs'],s:['obliques'],cue:'Tumbado, manos bajo los glúteos o agarrado al banco. Sube las piernas y al final despega un poco la cadera del suelo enrollando la pelvis. Baja controlado sin que la lumbar se arquee. Sin balanceo.'};
 const SIDEPLANK={id:'sideplank',name:'Plancha lateral',scheme:'2 × 20-45 s / lado',rest:60,type:'time',q:'plancha lateral técnica',p:['obliques'],s:['abs'],cue:'Apoyado en el antebrazo, cuerpo recto de lado y cadera arriba, sin dejar que caiga. Respira normal, sin aguantar el aire. Para cuando la cadera empiece a bajar, aunque no hayas llegado al tiempo. Apunta los segundos por lado. Cuando hagas 45 s en todas las series, pasa a una versión más difícil (pierna de arriba levantada o apoyado en la mano) y vuelve a empezar desde 20 s.'};
 const PLANK={id:'plank',name:'Plancha frontal',scheme:'2 × 30-60 s',rest:60,type:'time',q:'plancha abdominal técnica correcta',p:['abs'],s:['obliques'],cue:'Antebrazos y puntas de los pies, cuerpo recto de cabeza a talones. Aprieta abdomen y glúteo; que la cadera no caiga ni suba. Respira normal, sin aguantar el aire. Para cuando la cadera empiece a caer, aunque no hayas llegado al tiempo. Cuando hagas 60 s en todas las series, pasa a una versión más difícil (pies juntos, codos más adelantados o un disco en la espalda) y vuelve a empezar desde 30 s.'};
-const FACEPULL={id:'facepull',name:'Face pull',scheme:'2 × 12-20',rest:75,q:'face pull en polea',p:['reardelts'],s:['rotators','upperback','traps'],cue:'Polea a la altura de la cara, con cuerda. Tira hacia la cara abriendo los codos hacia fuera y hacia atrás, y aprieta la espalda alta 1 s. Peso ligero y controlado. Si vas justo de tiempo, puedes intercalarlo con las elevaciones laterales (una serie de cada, sin descanso entre ellas).'};
+const FACEPULL={id:'facepullaj',name:'Face pull (polea ajustable)',scheme:'2 × 12-20',rest:75,q:'face pull en polea',p:['reardelts'],s:['rotators','upperback','traps'],cue:'Siempre en una de las 4 POLEAS AJUSTABLES (Matrix G3-MS24): desde el 30/10 se empieza de cero aquí (18 kg). Polea a la altura de la cara, con cuerda. Tira hacia la cara abriendo los codos hacia fuera y hacia atrás, y aprieta la espalda alta 1 s. Peso ligero y controlado. Si vas justo de tiempo, puedes intercalarlo con las elevaciones laterales (una serie de cada, sin descanso entre ellas).'};
 const SESSIONS={
  A:{name:'Torso 1 · pecho y espalda',items:[
    {id:'extrot',pre:1,name:'Rotación externa en polea',scheme:'2 × 12-15 / brazo',rest:45,q:'rotación externa de hombro en polea',p:['rotators'],s:['reardelts'],cue:'Mejor al llegar, antes del primer ejercicio: activa y protege el hombro (manguito rotador) para todo lo que empujas y tiras. Polea a la altura del codo con el agarre de una mano. Ponte de lado a la polea, codo pegado al costado y doblado a 90° (una toalla enrollada entre codo y cuerpo ayuda). Gira el antebrazo hacia FUERA sin despegar el codo, aguanta 1 s y vuelve despacio. Todas las reps con un brazo y luego el otro. Peso MUY ligero (el mínimo o el siguiente): si tiras con el hombro o se despega el codo, sobra peso. Apunta el peso de la polea. Si al llegar la polea está ocupada y quieres aprovechar otra máquina libre: 10-15 círculos de hombro y una serie ligera del primer press, y la rotación cuando se libere la polea.'},
@@ -390,7 +390,7 @@ const SESSIONS={
    {id:'pulldown',name:'Jalón al pecho',scheme:'3 × 8-12',rest:105,q:'jalón al pecho polea',p:['lats'],s:['biceps','upperback','forearms'],cue:'Lleva la barra al pecho apretando la espalda. No te eches muy hacia atrás.'},
    {id:'serratuspunch',name:'Puñetazo al techo (serrato)',scheme:'2 × 12-15',rest:60,q:'serratus punch mancuernas tumbado en banco',p:['serratus'],s:['chest','delts'],cue:'Tumbado en el banco plano, una mancuerna en cada mano y brazos estirados hacia el techo. SIN doblar los codos, empuja las mancuernas hacia arriba separando los omóplatos del banco unos centímetros, aguanta 1 s y baja despacio hasta que los omóplatos vuelvan a juntarse. Recorrido corto: lo que cuenta es notar cómo se separan los omóplatos (el serrato está en el costado, sobre las costillas). Apunta el peso de UNA mancuerna.'},
    {id:'barbellcurl',name:'Curl con barra',scheme:'3 × 8-12',rest:105,q:'curl de bíceps con barra',p:['biceps'],s:['forearms'],cue:'Codos fijos a los lados, sin balancear. La barra corta pesa 9 kg: apunta barra + discos. Con discos de 1,25 los pesos van de 2,5 en 2,5 (9, 11,5, 14, 16,5…).'},
-   {id:'pushdown',name:'Tríceps en polea (pushdown)',scheme:'3 × 10-15',rest:105,q:'extensión de tríceps en polea',p:['triceps'],s:[],cue:'Codos pegados al cuerpo, extiende del todo y controla la subida.'},
+   {id:'pushdownaj',name:'Tríceps en polea (ajustable)',scheme:'3 × 10-15',rest:105,q:'extensión de tríceps en polea',p:['triceps'],s:[],cue:'Siempre en una de las 4 POLEAS AJUSTABLES (Matrix G3-MS24): desde el 30/10 se empieza de cero aquí (18 kg). Codos pegados al cuerpo, extiende del todo y controla la subida.'},
    LATRAISE, FACEPULL,
    {id:'shrug',name:'Encogimientos con mancuernas',scheme:'2 × 12-15',rest:75,q:'encogimientos de hombros con mancuernas',p:['traps'],s:['forearms'],cue:'Al final de la A (desde el 29/10 va en A y C, para trabajar el trapecio 2 días). De pie, una mancuerna en cada mano y brazos estirados. Sube los hombros hacia las orejas en línea recta, aprieta 1 s arriba y baja despacio hasta notar el estiramiento. Sin girar los hombros ni doblar los codos. Apunta el peso de cada mancuerna. Si el agarre falla antes que el trapecio, usa una toalla o guante, no correas por ahora.'}
  ]},
@@ -480,6 +480,7 @@ const EXIMG={
   reversecurl:['reverse-curl-start.webp','reverse-curl-peak.webp'],
   abductor:['hip-abduction-start.webp','hip-abduction-peak.webp'],
   pushdown:['tricep-pushdown-start.webp','tricep-pushdown-peak.webp'],
+  pushdownaj:['tricep-pushdown-start.webp','tricep-pushdown-peak.webp'],
   latraise:['lateral-raise-start.webp','lateral-raise-peak.webp'],
   wcrunch:['crunches-start.webp','crunches-peak.webp'],
   squat:['dumbbell-front-squat-start.webp','dumbbell-front-squat-peak.webp'],
@@ -502,6 +503,7 @@ const EXIMG={
   legpress:['leg-press-start.webp','leg-press-peak.webp'],
   lunge:['lunge-start.webp','lunge-peak.webp'],
   facepull:['face-pull-start.webp','face-pull-peak.webp'],
+  facepullaj:['face-pull-start.webp','face-pull-peak.webp'],
   sideplank:['side-plank-main.webp','side-plank-main.webp'],
   plank:['plank-main.webp','plank-main.webp'],
   declinecrunch:['decline-crunch-start.webp','decline-crunch-peak.webp'],
@@ -520,8 +522,8 @@ CUSTOM_IMG.tibialis=["data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3
 Object.assign(EXIMG,CUSTOM_IMG);
 function imgSrc(f){return f.startsWith('data:')?f:IMGBASE+f;}
 const IMGALT={
-  chestpress:'Press de pecho en máquina',seatedrow:'Remo sentado en polea',incline:'Press inclinado con mancuernas',smithincline:'Press inclinado en multipower',skullcrusher:'Press francés con barra Z',tibialis:'Elevación de tibial contra la pared',pulldown:'Jalón al pecho',barbellcurl:'Curl con barra',pushdown:'Tríceps en polea',latraise:'Elevaciones laterales',wcrunch:'Crunch con peso (tumbado)',
-  squat:'Sentadilla con mancuernas',rdl:'Peso muerto rumano',legext:'Extensión de cuádriceps',legcurl:'Curl femoral',calf:'Gemelos',seatedcalf:'Gemelo sentado',serratuspunch:'Puñetazo al techo (serrato)',extrot:'Rotación externa en polea',woodchop:'Leñador en polea',benchrevcrunch:'Crunch inverso en banco declinado',tibialis:'Elevación de tibial',backext:'Hiperextensiones',legraise:'Elevación de piernas',shoulderpress:'Press de hombro en máquina',neutralpulldown:'Jalón con agarre neutro',row:'Remo con mancuerna a una mano',pecdeck:'Aperturas en máquina',dbfly:'Aperturas con mancuernas en banco',hammercurl:'Curl martillo',ohtriceps:'Extensión de tríceps por encima de la cabeza',hipthrust:'Hip thrust en máquina',legpress:'Prensa de piernas',lunge:'Zancadas',facepull:'Face pull en polea',sideplank:'Plancha lateral',plank:'Plancha frontal',declinecrunch:'Crunch en banco declinado',polcrunch:'Crunch en polea de rodillas',hangknee:'Elevación de rodillas colgado',revcrunch:'Crunch inverso',deadbug:'Dead bug',pallof:'Pallof press en polea',bicycle:'Crunch bicicleta'
+  chestpress:'Press de pecho en máquina',seatedrow:'Remo sentado en polea',incline:'Press inclinado con mancuernas',smithincline:'Press inclinado en multipower',skullcrusher:'Press francés con barra Z',tibialis:'Elevación de tibial contra la pared',pulldown:'Jalón al pecho',barbellcurl:'Curl con barra',pushdown:'Tríceps en polea',pushdownaj:'Tríceps en polea',latraise:'Elevaciones laterales',wcrunch:'Crunch con peso (tumbado)',
+  squat:'Sentadilla con mancuernas',rdl:'Peso muerto rumano',legext:'Extensión de cuádriceps',legcurl:'Curl femoral',calf:'Gemelos',seatedcalf:'Gemelo sentado',serratuspunch:'Puñetazo al techo (serrato)',extrot:'Rotación externa en polea',woodchop:'Leñador en polea',benchrevcrunch:'Crunch inverso en banco declinado',tibialis:'Elevación de tibial',backext:'Hiperextensiones',legraise:'Elevación de piernas',shoulderpress:'Press de hombro en máquina',neutralpulldown:'Jalón con agarre neutro',row:'Remo con mancuerna a una mano',pecdeck:'Aperturas en máquina',dbfly:'Aperturas con mancuernas en banco',hammercurl:'Curl martillo',ohtriceps:'Extensión de tríceps por encima de la cabeza',hipthrust:'Hip thrust en máquina',legpress:'Prensa de piernas',lunge:'Zancadas',facepull:'Face pull en polea',facepullaj:'Face pull en polea',sideplank:'Plancha lateral',plank:'Plancha frontal',declinecrunch:'Crunch en banco declinado',polcrunch:'Crunch en polea de rodillas',hangknee:'Elevación de rodillas colgado',revcrunch:'Crunch inverso',deadbug:'Dead bug',pallof:'Pallof press en polea',bicycle:'Crunch bicicleta'
 };
 function demoHTML(it){
   const imgs=EXIMG[it.id]; if(!imgs)return '';
@@ -538,7 +540,7 @@ const TABCLS={A:'a',B:'b',C:'c',D:'d',ABS:'x',POOL:'p',PADEL:'y',GRIP:'g',RUN:'r
 const SCOL={A:'var(--A)',B:'var(--B)',C:'var(--C)',D:'var(--D)',ABS:'var(--X)',POOL:'var(--P)',PADEL:'var(--Y)',GRIP:'var(--G)',RUN:'var(--R)',WALK:'var(--W)',BIKE:'var(--K)',PUSH:'var(--L)',PULL:'var(--L)',LEGS:'var(--L)'};
 const EX={};
 Object.values(SESSIONS).forEach(S=>(S.items||[]).forEach(it=>{if(!EX[it.id]||EX[it.id].opt)EX[it.id]=it;}));
-[{id:'cablecrunch',name:'Crunch en polea'},{id:'cablefly',name:'Aperturas en polea'},{id:'pecdeck',name:'Aperturas en máquina'},{id:'dips',name:'Fondos de banco'},{id:'pullover',name:'Pullover en polea'},{id:'backext',name:'Hiperextensiones'},{id:'incline',name:'Press inclinado con mancuernas'},{id:'plank',name:'Plancha',type:'time'},{id:'crunch',name:'Crunch',type:'reps'}].forEach(e=>{if(!EX[e.id])EX[e.id]=e;});
+[{id:'cablecrunch',name:'Crunch en polea'},{id:'cablefly',name:'Aperturas en polea'},{id:'pecdeck',name:'Aperturas en máquina'},{id:'dips',name:'Fondos de banco'},{id:'pullover',name:'Pullover en polea'},{id:'backext',name:'Hiperextensiones'},{id:'incline',name:'Press inclinado con mancuernas'},{id:'pushdown',name:'Tríceps en polea (máquina anterior)'},{id:'facepull',name:'Face pull (máquina anterior)'},{id:'plank',name:'Plancha',type:'time'},{id:'crunch',name:'Crunch',type:'reps'}].forEach(e=>{if(!EX[e.id])EX[e.id]=e;});
 if(!EX.wcrunch)EX.wcrunch=CABLECRUNCH; /* ya no está en el plan, pero conserva nombre en el historial */
 const CARDIO={
  PADEL:{icon:'🎾',name:'Pádel',fields:[{k:'partidos',label:'Partidos jugados',fmt:v=>v+(v==1?' partido':' partidos')}],tips:[
@@ -601,7 +603,10 @@ function migratePlan(){ /* plan antiguo Empuje/Tirón/Pierna (A/B/C) -> etiqueta
 /* Ejercicios sustituidos: los registros hechos en sesiones del plan nuevo con el ejercicio antiguo
    pasan a su sustituto (el plan antiguo PUSH/PULL/LEGS no se toca). Idempotente. */
 const RENAMED={pecdeck:'dbfly',cablefly:'dbfly',cablecrunch:'wcrunch'};
+const MACHINE_SWITCH={from:'2026-10-30',map:{pushdown:'pushdownaj',facepull:'facepullaj'}};
 function migrateIds(){let ch=false;
+  Object.keys(data.days).filter(dt=>dt>=MACHINE_SWITCH.from).forEach(dt=>{const d=data.days[dt];['A','B','C','D'].forEach(sid=>{const s=d[sid];if(!s)return;
+    Object.keys(MACHINE_SWITCH.map).forEach(o=>{const n=MACHINE_SWITCH.map[o];if(s[o]&&!s[n]){s[n]=s[o];delete s[o];ch=true;}});});});
   Object.keys(data.days).forEach(dt=>{const d=data.days[dt];['A','B','C','D'].forEach(sid=>{const s=d[sid];if(!s)return;
     Object.keys(RENAMED).forEach(o=>{const n=RENAMED[o];if(s[o]&&!s[n]){s[n]=s[o];delete s[o];ch=true;}});});});
   Object.keys(data.hidden||{}).forEach(h=>{const [sid,id]=h.split('|');if(['A','B','C','D'].includes(sid)&&RENAMED[id]){data.hidden[sid+'|'+RENAMED[id]]=data.hidden[h];delete data.hidden[h];ch=true;}});
@@ -644,11 +649,13 @@ const HIST_POOL=['A','B','C','D','ABS'];
 /* Días en otro gimnasio: cuentan para el plan, el total y el muñeco, pero NO para pesos recomendados, memoria de fallos, récords ni gráficas */
 function stepsOf(dt){const v=parseInt(String(((data.days[dt]||{}).steps)||'').replace(/\D/g,''),10);return isNaN(v)?null:v;}
 function isAway(dt){return !!(data.days[dt]&&data.days[dt].away);}
+/* registro para historial: ignora los marcados como 'otra máquina hoy' (cuentan en series, no en gráficas/récords/pesos) */
+function hrec(dt,k,id){const r=((data.days[dt]||{})[k]||{})[id];return r&&r.om?undefined:r;}
 function homeDays(){return Object.keys(data.days).filter(d=>!isAway(d));}
 function prevRecord(sid,id,before){const ds=homeDays().filter(d=>d<before).sort().reverse();
   const ks=HIST_POOL.includes(sid)?[sid,...HIST_POOL.filter(k=>k!==sid)]:[sid];
-  for(const d of ds){for(const k of ks){const r=((data.days[d]||{})[k]||{})[id];if(workFilled(r))return{date:d,rec:r,sid:k,other:k!==sid};}}
-  for(const d of ds){for(const k of ['PUSH','PULL','LEGS']){const r=((data.days[d]||{})[k]||{})[id];if(workFilled(r))return{date:d,rec:r,sid:k,legacy:true};}}
+  for(const d of ds){for(const k of ks){const r=hrec(d,k,id);if(workFilled(r))return{date:d,rec:r,sid:k,other:k!==sid};}}
+  for(const d of ds){for(const k of ['PUSH','PULL','LEGS']){const r=hrec(d,k,id);if(workFilled(r))return{date:d,rec:r,sid:k,legacy:true};}}
   return null;}
 function fmtSet(s,type,long,id){
   const rir=(s.r!==undefined&&s.r!=='')?(long?` (RIR ${s.r})`:` @${s.r}`):'';
@@ -670,7 +677,7 @@ function needUp(it,type,prev){if(type==='time'||!prev||prev.legacy)return false;
 /* Mejor marca histórica del ejercicio (todas las sesiones, plan antiguo incluido), sin contar el día que estás viendo ni calentamientos.
    Peso: la serie de más peso y, con ese peso, la de más repeticiones. */
 function prOf(id,type,before){let best=null;
-  homeDays().filter(d=>d<before).forEach(dt=>{ALLS.forEach(k=>{const r=((data.days[dt]||{})[k]||{})[id];
+  homeDays().filter(d=>d<before).forEach(dt=>{ALLS.forEach(k=>{const r=hrec(dt,k,id);
     workSets(r).forEach(x=>{const a=parseFloat(String(x.a||'').replace(',','.'))||0,b=parseInt(x.b,10)||0;
       if(type==='weight'){if(!a||!b)return;if(!best||a>best.a||(a===best.a&&b>best.b))best={a,b};}
       else{if(!a)return;if(!best||a>best.a)best={a};}});});});
@@ -713,7 +720,7 @@ function adviceInner(it,type,rec){return adviceList(it,type,rec,prevRecord(curre
 /* Memoria: peso más bajo con el que, en las últimas 6 semanas, no llegaste al mínimo de reps */
 function failCeil(it,type){if(type!=='weight')return null;const r=rangeOf(it);if(!r)return null;let ceil=null,when=null;
   const from=shiftDate(activeDate,-42);
-  homeDays().filter(d=>d<activeDate&&d>=from).forEach(d=>{ALLS.forEach(k=>{const rec=((data.days[d]||{})[k]||{})[it.id];
+  homeDays().filter(d=>d<activeDate&&d>=from).forEach(d=>{ALLS.forEach(k=>{const rec=hrec(d,k,it.id);
     workSets(rec).forEach(s=>{const wv=numW(s.a),rp=repsOf(s,type);if(!isNaN(wv)&&wv>0&&!isNaN(rp)&&rp<r.lo&&(ceil===null||wv<ceil)){ceil=wv;when=d;}});});});
   return ceil===null?null:{w:ceil,d:when};}
 /* Subidas prudentes: como mucho ~20% (25% si te sobró mucho) y nunca por encima de un peso con el que ya fallaste */
@@ -799,9 +806,9 @@ function statsOf(items){const mus={};let sets=0,reps=0,kg=0;
   return{items,mus,sets,reps,kg:Math.round(kg)};}
 function bestSet(rec,type){let b=null;workSets(rec).forEach(x=>{const a=numW(x.a),r=parseInt(x.b,10)||0;
   if(type==='weight'){if(isNaN(a)||!r)return;if(!b||a>b.a||(a===b.a&&r>b.b))b={a,b:r};}else{if(isNaN(a)||!a)return;if(!b||a>b.a)b={a};}});return b;}
-function bestBefore(id,type,before){let b=null;homeDays().filter(d=>d<before).forEach(dt=>ALLS.forEach(k=>{const r=((data.days[dt]||{})[k]||{})[id];
+function bestBefore(id,type,before){let b=null;homeDays().filter(d=>d<before).forEach(dt=>ALLS.forEach(k=>{const r=hrec(dt,k,id);
   const x=bestSet(r,type);if(x&&(!b||x.a>b.a||(type==='weight'&&x.a===b.a&&x.b>b.b)))b=x;}));return b;}
-function cardRecords(dt,items){const out=[];if(isAway(dt))return out;items.forEach(({it,rec})=>{const type=it.type||'weight';const now=bestSet(rec,type);const old=bestBefore(it.id,type,dt);
+function cardRecords(dt,items){const out=[];if(isAway(dt))return out;items.forEach(({it,rec})=>{if(rec&&rec.om)return;const type=it.type||'weight';const now=bestSet(rec,type);const old=bestBefore(it.id,type,dt);
   if(!now||!old)return;if(now.a>old.a||(type==='weight'&&now.a===old.a&&now.b>old.b))out.push({it,now,type});});return out;}
 function prevSameSession(dt,sid){return homeDays().filter(d=>d<dt&&sessionHasWork(d,sid)).sort().pop()||null;}
 function fmtInt(n){return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,'.');}
@@ -1015,9 +1022,9 @@ function statusHTML(){const st=planStatus();const todays=st.today.map(x=>x.sid);
   return h+'</div>';}
 function updStatus(){const el=document.getElementById('status');if(el)el.innerHTML=statusHTML();}
 /* Brazos: señal informativa de estancamiento (nunca activa nada) */
-const ARMS=[{sid:'A',id:'barbellcurl'},{sid:'C',id:'hammercurl'},{sid:'A',id:'pushdown'},{sid:'C',id:'ohtriceps'}];
+const ARMS=[{sid:'A',id:'barbellcurl'},{sid:'C',id:'hammercurl'},{sid:'A',id:'pushdownaj'},{sid:'C',id:'ohtriceps'}];
 /* Solo sesiones de la fase de progresión (sesión 9 en adelante): en calibración bajar peso tras pasarse es normal, no estancamiento */
-function exposures(sid,id){return homeDays().sort().filter(dt=>{const n=sessNumber(dt,sid);return n&&n>=9;}).map(dt=>((data.days[dt]||{})[sid]||{})[id]).filter(workFilled);}
+function exposures(sid,id){return homeDays().sort().filter(dt=>{const n=sessNumber(dt,sid);return n&&n>=9;}).map(dt=>hrec(dt,sid,id)).filter(workFilled);}
 function expScore(rec){const ws=workSets(rec).filter(s=>s.a&&s.b);if(!ws.length)return null;const mx=Math.max(...ws.map(s=>parseFloat(s.a)||0));
   return{mx,reps:ws.filter(s=>(parseFloat(s.a)||0)===mx).reduce((t,s)=>t+(parseInt(s.b,10)||0),0)};}
 function beats(a,b){return b.mx>a.mx||(b.mx===a.mx&&b.reps>a.reps);}
@@ -1226,7 +1233,8 @@ function exHTML(it){
     <div class="wwarn cue warn${mixed?'':' hide'}">⚠ Has utilizado pesos diferentes entre series. Comprueba que no sea un ajuste accidental.</div>
     <div class="sets">${head}${rows}</div>
     <div class="advice">${adviceList(it,type,rec,prev).map(x=>`<div>${x}</div>`).join('')}</div>
-    <div class="setctl"><button data-act="del">− Serie</button><button data-act="add">＋ Serie</button><button data-act="hide">Ocultar</button></div>
+    <div class="setctl"><button data-act="del">− Serie</button><button data-act="add">＋ Serie</button><button data-act="hide">Ocultar</button><button data-act="om" class="${rec&&rec.om?'om-on':''}">${rec&&rec.om?'✓ Otra máquina':'Otra máquina'}</button></div>
+    ${rec&&rec.om?'<div class="cue warn">🔁 <b>Otra máquina hoy:</b> estas series cuentan para el resumen semanal, pero no para la gráfica, los récords ni los pesos recomendados. Pulsa otra vez para quitarlo.</div>':''}
     ${recRow}
     <div class="cue${it.warn?' warn':''}">${it.cue}</div></div>`;
 }
@@ -1273,6 +1281,7 @@ function bindEntreno(){
     card.querySelector('[data-act="add"]').addEventListener('click',()=>{readCard(card);ensureRec(activeDate,current,card.dataset.id).sets.push({});queueSave();renderEntreno();});
     card.querySelector('[data-act="del"]').addEventListener('click',()=>{readCard(card);const r=ensureRec(activeDate,current,card.dataset.id);if(r.sets.length>1)r.sets.pop();queueSave();renderEntreno();});
     card.querySelector('[data-act="hide"]').addEventListener('click',()=>{data.hidden[current+'|'+card.dataset.id]=true;queueSave();renderEntreno();});
+    const omb=card.querySelector('[data-act="om"]');if(omb)omb.addEventListener('click',()=>{readCard(card);const r=ensureRec(activeDate,current,card.dataset.id);if(r.om)delete r.om;else r.om=1;flush();renderEntreno();});
     const rt=card.querySelector('.rest-tag');if(rt)rt.addEventListener('click',()=>startRest(parseInt(rt.dataset.rest,10)));
   });
   viewEl.querySelectorAll('.set input').forEach(i=>i.classList.toggle('filled',!!i.value));
@@ -1349,7 +1358,7 @@ function renderPost(){
 /* ===== RESUMEN / EXPORTAR ===== */
 function lastAndBest(sid,id,type){const ds=homeDays().sort();let last=null,legacy=null,best=0,lastSid=null,lastDate=null;
   const pool=HIST_POOL.includes(sid)?HIST_POOL:[sid];
-  ds.forEach(dt=>{let cand=null;ALLS.forEach(k=>{const r=((data.days[dt]||{})[k]||{})[id];if(workFilled(r)){if(pool.includes(k)){if(!cand||k===sid)cand=k;}else if(LEGACY[k])legacy=r;if(type==='weight')workSets(r).forEach(s=>{const v=parseFloat(s.a)||0;if(v>best)best=v;});}});
+  ds.forEach(dt=>{let cand=null;ALLS.forEach(k=>{const r=hrec(dt,k,id);if(workFilled(r)){if(pool.includes(k)){if(!cand||k===sid)cand=k;}else if(LEGACY[k])legacy=r;if(type==='weight')workSets(r).forEach(s=>{const v=parseFloat(s.a)||0;if(v>best)best=v;});}});
     if(cand){last=data.days[dt][cand][id];lastSid=cand;lastDate=dt;}});
   return{last:last||legacy,fromLegacy:!last&&!!legacy,best,lastSid,lastDate};}
 function planSummaryHTML(){const st=planStatus();const n=st.today.length?st.done:st.done+1;const ph=phaseOf(n);const stale=staleInfo();
@@ -1513,7 +1522,7 @@ function buildReport(from){
       const sn=PLAN.includes(sid)?sessNumber(dt,sid):null;
       out+=sessName(sid)+(sn?' — sesión '+sn+' del plan':(PLAN.includes(sid)?' — sin finalizar':''))+(mb.length?' ('+mb.join(' · ')+')':'')+'\n';
       Object.keys(d[sid]||{}).forEach(id=>{const r=d[sid][id];if(!workFilled(r))return;const def=EX[id]||{name:id};
-        out+='  - '+def.name+(def.star?' [principal]':'')+(def.base?' (solo discos; la máquina suma '+String(def.base).replace('.',',')+' kg)':'')+(def.total?' (peso total: suma de las dos mancuernas)':'')+': '+fmtWork(r,def.type||'weight',true,id)+'\n';});
+        out+='  - '+def.name+(def.star?' [principal]':'')+(def.base?' (solo discos; la máquina suma '+String(def.base).replace('.',',')+' kg)':'')+(def.total?' (peso total: suma de las dos mancuernas)':'')+(r.om?' (OTRA MÁQUINA ese día: no comparable)':'')+': '+fmtWork(r,def.type||'weight',true,id)+'\n';});
     });
     if(d.post)out+='Recuperación / estiramientos: hecho\n';
     if(stepsOf(dt))out+='Pasos (reloj): '+fmtInt(stepsOf(dt))+'\n';
@@ -1526,14 +1535,14 @@ function buildReport(from){
 /* ===== RESUMEN VISUAL ===== */
 const RS_KS=['A','B','C','D','ABS','GRIP','PUSH','PULL','LEGS'];
 const RS_DOT={A:'A',B:'B',C:'C',D:'D',ABS:'Ab',GRIP:'🏠',POOL:'🏊',PADEL:'🎾',RUN:'🏃',WALK:'🚶',BIKE:'🚴',PUSH:'E',PULL:'T',LEGS:'P'};
-const RS_MUS={chestpress:'Pecho',incline:'Pecho',smithincline:'Pecho',skullcrusher:'Tríceps',dbfly:'Pecho',seatedrow:'Espalda',pulldown:'Espalda',neutralpulldown:'Espalda',row:'Espalda',shoulderpress:'Hombro anterior',latraise:'Hombro lateral',facepull:'Hombro posterior',barbellcurl:'Bíceps',hammercurl:'Bíceps',pushdown:'Tríceps',ohtriceps:'Tríceps',squat:'Cuádriceps',legext:'Cuádriceps',legpress:'Cuádriceps',lunge:'Cuádriceps',rdl:'Isquios',legcurl:'Isquios',hipthrust:'Glúteo',shrug:'Trapecio',adductor:'Aductores',abductor:'Glúteo medio',preachercurl:'Bíceps',wristcurl:'Antebrazo',reversecurl:'Antebrazo',calf:'Gemelos',seatedcalf:'Sóleo',tibialis:'Tibial',backext:'Lumbar',extrot:'Rotadores',serratuspunch:'Serrato',benchrevcrunch:'Abdomen',woodchop:'Oblicuos',pallof:'Oblicuos',sideplank:'Oblicuos',bicycle:'Oblicuos',heeltouch:'Oblicuos',plank:'Abdomen',deadbug:'Abdomen',deadhang:'Antebrazo',pecdeck:'Pecho',cablefly:'Pecho',dips:'Tríceps',pullover:'Espalda',cablecrunch:'Abdomen',crunch:'Abdomen',declinecrunch:'Abdomen',polcrunch:'Abdomen',wcrunch:'Abdomen',hangknee:'Abdomen',legraise:'Abdomen',revcrunch:'Abdomen'};
+const RS_MUS={chestpress:'Pecho',incline:'Pecho',smithincline:'Pecho',skullcrusher:'Tríceps',dbfly:'Pecho',seatedrow:'Espalda',pulldown:'Espalda',neutralpulldown:'Espalda',row:'Espalda',shoulderpress:'Hombro anterior',latraise:'Hombro lateral',facepull:'Hombro posterior',facepullaj:'Hombro posterior',barbellcurl:'Bíceps',hammercurl:'Bíceps',pushdown:'Tríceps',pushdownaj:'Tríceps',ohtriceps:'Tríceps',squat:'Cuádriceps',legext:'Cuádriceps',legpress:'Cuádriceps',lunge:'Cuádriceps',rdl:'Isquios',legcurl:'Isquios',hipthrust:'Glúteo',shrug:'Trapecio',adductor:'Aductores',abductor:'Glúteo medio',preachercurl:'Bíceps',wristcurl:'Antebrazo',reversecurl:'Antebrazo',calf:'Gemelos',seatedcalf:'Sóleo',tibialis:'Tibial',backext:'Lumbar',extrot:'Rotadores',serratuspunch:'Serrato',benchrevcrunch:'Abdomen',woodchop:'Oblicuos',pallof:'Oblicuos',sideplank:'Oblicuos',bicycle:'Oblicuos',heeltouch:'Oblicuos',plank:'Abdomen',deadbug:'Abdomen',deadhang:'Antebrazo',pecdeck:'Pecho',cablefly:'Pecho',dips:'Tríceps',pullover:'Espalda',cablecrunch:'Abdomen',crunch:'Abdomen',declinecrunch:'Abdomen',polcrunch:'Abdomen',wcrunch:'Abdomen',hangknee:'Abdomen',legraise:'Abdomen',revcrunch:'Abdomen'};
 const RS_GOAL=[['Pecho',10,1],['Espalda',12,1],['Hombro lateral',8,1],['Hombro anterior',4,0],['Hombro posterior',4,0],['Rotadores',4,0],['Serrato',4,0],['Bíceps',8,1],['Tríceps',8,1],['Antebrazo',12,0],['Trapecio',4,0],['Lumbar',2,0],['Cuádriceps',11,0],['Isquios',9,0],['Glúteo',4,0],['Glúteo medio',4,0],['Aductores',4,0],['Gemelos',6,0],['Sóleo',5,0],['Tibial',4,0],['Abdomen',9,1],['Oblicuos',6,0]];
 function rsDD(d){const x=new Date(d+'T12:00');return x.getDate()+'/'+(x.getMonth()+1);}
 function rsFmt(v){return String(Math.round(v*10)/10).replace('.',',');}
 function rsAdd(d,n){const x=new Date(d+'T12:00');x.setDate(x.getDate()+n);return `${x.getFullYear()}-${pad(x.getMonth()+1)}-${pad(x.getDate())}`;}
 function rsSN(k){return LEGACY[k]?'antiguo':(SNAME[k]||k);}
 /* todas las veces que se hizo un ejercicio (cualquier sesión), solo series de trabajo */
-function rsExpo(id,type){const out=[];homeDays().sort().forEach(dt=>{for(const k of RS_KS){const r=((data.days[dt]||{})[k]||{})[id];if(!r||!r.sets)continue;
+function rsExpo(id,type){const out=[];homeDays().sort().forEach(dt=>{for(const k of RS_KS){const r=hrec(dt,k,id);if(!r||!r.sets)continue;
   const s=r.sets.filter(x=>!x.w&&x.a!==undefined&&x.a!=='').map(x=>{const rr=(x.r===undefined||x.r==='')?null:parseInt(x.r,10);
     if(type==='time')return{t:parseInt(x.a,10)||0,r:rr};if(type==='reps')return{w:0,n:parseInt(x.a,10)||0,r:rr};return{w:parseFloat(String(x.a).replace(',','.'))||0,n:parseInt(x.b,10)||0,r:rr};});
   if(s.length){out.push({dt,k,s});break;}}});return out;}
