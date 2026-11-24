@@ -1419,6 +1419,8 @@ function planSummaryHTML(){const st=planStatus();const n=st.today.length?st.done
 const MEAS=[
  {k:'brazo_d',l:'Brazo dcho (contraído)',g:'brazo',h:'Brazo doblado y el bíceps apretado. Parte más ancha del bíceps.'},
  {k:'brazo_i',l:'Brazo izdo (contraído)',g:'brazo',h:'Igual que el derecho.'},
+ {k:'brazorel_d',l:'Brazo dcho (relajado)',g:'brazorel',h:'Brazo colgando relajado junto al cuerpo. En la mitad entre el hombro y el codo (como lo mide INDYA).'},
+ {k:'brazorel_i',l:'Brazo izdo (relajado)',g:'brazorel',h:'Igual que el derecho.'},
  {k:'antebrazo_d',l:'Antebrazo dcho',g:'antebrazo',h:'Brazo estirado y mano relajada. Parte más ancha, justo bajo el codo.'},
  {k:'antebrazo_i',l:'Antebrazo izdo',g:'antebrazo',h:'Igual que el derecho.'},
  {k:'pecho',l:'Pecho',h:'A la altura de los pezones, cinta horizontal, tras soltar el aire con normalidad.'},
@@ -1428,8 +1430,9 @@ const MEAS=[
  {k:'muslo_d',l:'Muslo dcho',g:'muslo',h:'De pie y con la pierna relajada. Parte más ancha, justo bajo el glúteo.'},
  {k:'muslo_i',l:'Muslo izdo',g:'muslo',h:'Igual que el derecho.'},
  {k:'gemelo_d',l:'Gemelo dcho',g:'gemelo',h:'De pie con el peso repartido. Parte más ancha de la pantorrilla.'},
- {k:'gemelo_i',l:'Gemelo izdo',g:'gemelo',h:'Igual que el derecho.'}];
-const MEAS_PAIRS=[{g:'brazo',l:'Brazos'},{g:'antebrazo',l:'Antebrazos'},{g:'muslo',l:'Muslos'},{g:'gemelo',l:'Gemelos'}];
+ {k:'gemelo_i',l:'Gemelo izdo',g:'gemelo',h:'Igual que el derecho.'},
+ {k:'cuello',l:'Cuello',h:'Justo por debajo de la nuez, cinta horizontal. Mirando al frente y con el cuello relajado, sin tensar.'}];
+const MEAS_PAIRS=[{g:'brazo',l:'Brazos'},{g:'brazorel',l:'Brazos relajados'},{g:'antebrazo',l:'Antebrazos'},{g:'muslo',l:'Muslos'},{g:'gemelo',l:'Gemelos'}];
 /* medidas antiguas de un solo lado -> derecho */
 function migrateMeasures(){let ch=false;Object.values(data.measures||{}).forEach(m=>{['brazo','antebrazo','muslo','gemelo'].forEach(k=>{if(m[k]!==undefined){if(m[k+'_d']===undefined)m[k+'_d']=m[k];delete m[k];ch=true;}});});return ch;}
 function fmtCm(v){return String(Math.round(v*10)/10).replace('.',',');}
