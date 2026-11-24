@@ -671,7 +671,7 @@ addEventListener('pagehide',flush);
 
 /* ===== HELPERS ===== */
 function recOf(dt,sid,id){const s=(data.days[dt]||{})[sid];return s?s[id]:undefined;}
-function defaultSets(it){const n=parseInt(it.scheme,10);return isNaN(n)?3:n;}
+function defaultSets(it){const m=String(it.scheme||'').match(/^\s*(\d+)(?:\s*-\s*(\d+))?/);return m?+(m[2]||m[1]):3;} /* rango 3-4: por defecto el máximo */
 function ensureRec(dt,sid,id){data.days[dt]=data.days[dt]||{};data.days[dt][sid]=data.days[dt][sid]||{};
   if(!data.days[dt][sid][id]){const it=EX[id]||{scheme:'3'};data.days[dt][sid][id]={sets:Array.from({length:defaultSets(it)},()=>({}))};}
   return data.days[dt][sid][id];}
@@ -1277,7 +1277,7 @@ function exHTML(it){
     <div class="wwarn cue warn${mixed?'':' hide'}">⚠ Has utilizado pesos diferentes entre series. Comprueba que no sea un ajuste accidental.</div>
     <div class="sets">${head}${rows}</div>
     <div class="advice">${adviceList(it,type,rec,prev).map(x=>`<div>${x}</div>`).join('')}</div>
-    <div class="setctl"><button data-act="del">− Serie</button><button data-act="add">＋ Serie</button><button data-act="hide">Ocultar</button><button data-act="om" class="${rec&&rec.om?'om-on':''}">${rec&&rec.om?'✓ Otra máquina':'Otra máquina'}</button></div>
+    <div class="setctl"><button data-act="del">− Serie</button><button data-act="add">＋ Serie</button><button data-act="om" class="${rec&&rec.om?'om-on':''}">${rec&&rec.om?'✓ Otra máquina':'Otra máquina'}</button></div>
     ${rec&&rec.om?'<div class="cue warn">🔁 <b>Otra máquina hoy:</b> estas series cuentan para el resumen semanal, pero no para la gráfica, los récords ni los pesos recomendados. Pulsa otra vez para quitarlo.</div>':''}
     ${recRow}
     <div class="cue${it.warn?' warn':''}">${it.cue}</div></div>`;
@@ -1324,7 +1324,7 @@ function bindEntreno(){
     card.querySelectorAll('[data-warm]').forEach(btn=>btn.addEventListener('click',()=>{const row=btn.closest('.set');row.dataset.w=row.dataset.w==='1'?'0':'1';readCard(card);renderEntreno();}));
     card.querySelector('[data-act="add"]').addEventListener('click',()=>{readCard(card);ensureRec(activeDate,current,card.dataset.id).sets.push({});queueSave();renderEntreno();});
     card.querySelector('[data-act="del"]').addEventListener('click',()=>{readCard(card);const r=ensureRec(activeDate,current,card.dataset.id);if(r.sets.length>1)r.sets.pop();queueSave();renderEntreno();});
-    card.querySelector('[data-act="hide"]').addEventListener('click',()=>{data.hidden[current+'|'+card.dataset.id]=true;queueSave();renderEntreno();});
+    
     const omb=card.querySelector('[data-act="om"]');if(omb)omb.addEventListener('click',()=>{readCard(card);const r=ensureRec(activeDate,current,card.dataset.id);if(r.om)delete r.om;else r.om=1;flush();renderEntreno();});
     const rt=card.querySelector('.rest-tag');if(rt)rt.addEventListener('click',()=>startRest(parseInt(rt.dataset.rest,10)));
   });
